@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <title>Formulario Unificado</title>
+    <link rel="stylesheet" href="style.css?v=1.0">
+    <!-- PIXI.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.12/pixi.min.js"></script>
+    <!-- Live2D Cubism Core -->
+    <script src="libs/Core/live2dcubismcore.min.js"></script>
+    <!-- pixi-live2d-display con soporte Cubism 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
+  </head>
+  <body>
+    <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
+    Jefe de Servicio: Francisco Escabias García.
+    Diseñador: Valentín Jiménez Extremera.
+    Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
+    Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés, Beatriz Girela Muñoz.
+    Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE. -->
+    <!-----botones ir a inicio y ayuda--->
+    <div id="botonera">
+      <div id="inicio" class="nacionalidad-card">
+        <button class="btn-small" onclick="volverInicio(); confirmarBorrado();">Inicio</button>
+      </div>
+      <div id="ayuda" class="nacionalidad-card">
+        <button class="btn-small" onclick="ayuda();">Ayuda</button>
+      </div>
+    </div>
+    
+  <div id="pagina_inicial">
+      <div id="titulo">
+        <h1>Ayuda para el registro en SILA de una persona migrante</h2>
+        
+        <!-------------------------Esto es temporal hasta elegir la voz para el avatar--------------------------------------------------------------->
+        <label for="vozSelector">Elige la voz del avatar:</label>
+        <select id="vozSelector"></select>
+        <button id="btnEscucharMuestra">🔊 Escuchar muestra</button>      
+        
+      </div>
+      <!-- Página de nacionalidad (ORIGEN) -->
+      <div id="nacionalidad-page" class="nacionalidad-card">
+        <h2>Selecciona el Origen de la persona usuaria</h2>
+        <div class="botones-nacionalidad">
+          <div class="btn-wrapper">
+            <button class="btn" onclick="mostrarFormularioComunitario()">Comunitario/a</button>
+            <span class="tooltip-container">
+              <span class="help-icon">?</span>
+              <div class="tooltip-text">
+                <strong>Países comunitarios:</strong><br>
+                  Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
+                  Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
+                  Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
+                  Islandia, Liechtenstein, Noruega, Suiza.
+              </div>
+            </span>
+          </div>
+          <button class="btn" onclick="mostrarFormularioNoComunitario()">No Comunitario/a</button>
+        </div>
+      </div>
+    </div>  <!-- fin pagina inicial -->
+    
+    <!-- Documentación Necesaria para Comunitario -->
+    <div id="Doc_Necesaria_Comunitario" class="hidden">
+      <h2>Documentación Necesaria para Inscribir a una persona Comunitaria</h2>
+      <br>
+      Documento acreditativo de identidad
+      <br>
+      Certificado de inscripción .....
+      <br>
+      Tarjeta Verde...
+      <br>
+      <br>
+      <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
+    </div>
+
+    <!-- Formulario No Comunitario -->
+    <div id="formulario_No_Comunitario" class="hidden">
+      <h2>¿Que documentación aporta la persona No Comunitaria?</h2>
+      <div class="document-list">
+        <label class="document-item">
+          <input type="radio" name="documento" value="TIE" onclick="gestionarSeleccion(this)">
+          TIE
+        </label>
+        <div id="subopciones-TIE" class="sub-options">
+          <label><input type="radio" name="estado-TIE" value="En Vigor"> En Vigor</label>
+          <label><input type="radio" name="estado-TIE" value="Caducado"> Caducada</label>
+        </div>
+
+        <label class="document-item">
+          <input type="radio" name="documento" value="Tarjeta Roja" onclick="gestionarSeleccion(this)">
+          Tarjeta Roja
+        </label>
+        <div id="subopciones-Tarjeta Roja" class="sub-options">
+          <label><input type="radio" name="estado-Tarjeta" value="En Vigor"> En Vigor</label>
+          <label><input type="radio" name="estado-Tarjeta" value="Caducado"> Caducada</label>
+        </div>
+
+        <label class="document-item">
+          <input type="radio" name="documento" value="Resolución" onclick="gestionarSeleccion(this)">
+          Resolución
+        </label>
+        <div id="subopciones-Resolución" class="sub-options">
+          <label><input type="radio" name="estado-Resolución" value="En Vigor"> En Vigor</label>
+          <label><input type="radio" name="estado-Resolución" value="Caducado"> Caducada</label>
+        </div>
+
+        <label class="document-item">
+          <input type="radio" name="documento" value="Solicitud" onclick="gestionarSeleccion(this)">
+          Solicitudes y/o Resguardos
+        </label>
+        <!-- <div id="subopciones-Resolución" class="sub-options">
+          <label><input type="radio" name="estado-Resolución" value="En Vigor"> En Vigor</label>
+          <label><input type="radio" name="estado-Resolución" value="Caducado"> Caducada</label>
+        </div>-->
+
+        <label class="document-item">
+          <input type="radio" name="documento" value="NIE" onclick="gestionarSeleccion(this)">
+          NIE (Asignación de Número de NIE sin foto)
+        </label>
+            <!-- <div id="subopciones-NIE" class="sub-options">
+          <label><input type="radio" name="estado-NIE" value="Aporta Solicitud"> Aporta Solicitud</label>
+          <label><input type="radio" name="estado-NIE" value="No aporta"> No aporta Solicitud</label>
+        </div> -->
+
+        <label class="document-item">
+          <input type="radio" name="documento" value="TASA" onclick="gestionarSeleccion(this)">
+          TASA (Se necesita aportar solicitud)
+        </label>
+            <!-- <div id="subopciones-NIE" class="sub-options">
+          <label><input type="radio" name="estado-NIE" value="Aporta Solicitud"> Aporta Solicitud</label>
+          <label><input type="radio" name="estado-NIE" value="No aporta"> No aporta Solicitud</label>
+        </div> -->
+      </div>
+      <button class="btn" onclick="evaluarDocumento()">Continuar</button>   <br>   
+      <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
+    </div>
+
+    <!-- Imagen del manual -->
+    <div id="manual" class="hidden">
+      <h2>Consulta el manual</h2>
+
+      <div id="avatarFlotante" class="hidden">
+        <canvas id="live2dCanvas" style="position:absolute; width:100%; height:100%; z-index:10;"></canvas>
+        <div id="textoAvatar"></div>
+      </div>     
+      <img id="manualImg" src="" alt="Manual">
+      <br>
+      <button class="btn" onclick="mostrarFormulario()">Continuar</button> <br>
+      <button class="btn-small" onclick="volverNoComunitario()">← Volver</button>
+    </div>
+
+    <!-- Mensaje aclaratorio -->
+    <div id="mensaje-aclaratorio" class="hidden">
+      <h2>Aclaración</h2>
+      <p id="contenido-aclaratorio">Aquí aparecerá el contenido según la selección.</p>
+      <button class="btn-small" onclick="volverNoComunitario()">← Volver</button>
+    </div>
+
+    <!-- Formulario completo -->
+    <div id="formulario" class="hidden">
+      <div class="card">
+        <!-- Campo de búsqueda -->
+        <div class="search-container">
+          <textarea id="search-box" placeholder="Copia aquí los conceptos clave..." rows="4" onfocus="preguntarBorrado(event)" spellcheck="true" lang="es"></textarea> 
+        </div>
+
+        <!-- Botón de buscar -->
+        <div class="button-container">
+          <button id="buscarBtn" onclick="ocultar_resultado();">Buscar</button>
+        </div>
+        <div id="loader" style="display:none; text-align:center; margin:10px;">
+          <span>🔄 Buscando... por favor, espera</span>
+        </div>
+
+        <div id="resultado" class="hidden"></div>
+
+        <div id="sugerenciasPanel" class="panel-sugerencias hidden">
+          <h3 style="text-align:center;">Selecciona uno o más conceptos clave:</h3>
+          <form id="sugerenciasForm" class="sugerencias-grid"></form>
+          <div style="text-align: center;">
+            <button class="btn" onclick="buscarDesdeSugerencias()">Buscar con selección</button>
+            <button class="btn-small" onclick="ocultarSugerencias()">← Ocultar</button>
+          </div>
+        </div>
+
+        <!-- Botón de volver -->
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn-small" onclick="volverInicioDesdeFormulario(); confirmarBorrado();">← Volver</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal personalizado ALERTA-->
+    <div id="mi-modal" class="hidden modal">
+      <div class="modal-content">
+        <p id="modal-texto"></p>
+        <button class="btn" onclick="cerrarModal()">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Modal para confirmar borrado -->
+    <div id="modal-borrar" class="hidden modal">
+      <div class="modal-content">
+        <p>¿Deseas borrar el contenido actual?</p>
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn" onclick="confirmarBorrado()">Sí, borrar</button>
+          <button class="btn-small" onclick="cerrarModalBorrar()">No, modificar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie de página fijo -->
+    <footer>
+      <div class="footer-logo">
+        <div class="logo-text">Dirección Provincial de Granada</div>
+        <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía" />
+      </div>
+      <div class="footer-datos">
+        <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
+        <hr>
+        Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
+        José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
+      </div>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
+
+<!--      const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxigLGGauWCphFL95VD5R0mWm5mM65_wuq5KhwWxyZmM8I8h5pJQ-nKzJ5u6DqpNJTvaw/exec"; -->
