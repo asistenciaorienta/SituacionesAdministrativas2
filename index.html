@@ -75,88 +75,6 @@
       <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
     </div>
 
-    <!-- Formulario No Comunitario -->
-    <div id="formulario_No_Comunitario" class="hidden">
-      <h2>¿Que documentación aporta la persona No Comunitaria?</h2>
-      <div class="document-list">
-        <label class="document-item">
-          <input type="radio" name="documento" value="TIE" onclick="gestionarSeleccion(this)">
-          TIE
-        </label>
-        <div id="subopciones-TIE" class="sub-options">
-          <label><input type="radio" name="estado-TIE" value="En Vigor"> En Vigor</label>
-          <label><input type="radio" name="estado-TIE" value="Caducado"> Caducada</label>
-        </div>
-
-        <label class="document-item">
-          <input type="radio" name="documento" value="Tarjeta Roja" onclick="gestionarSeleccion(this)">
-          Tarjeta Roja
-        </label>
-        <div id="subopciones-Tarjeta Roja" class="sub-options">
-          <label><input type="radio" name="estado-Tarjeta" value="En Vigor"> En Vigor</label>
-          <label><input type="radio" name="estado-Tarjeta" value="Caducado"> Caducada</label>
-        </div>
-
-        <label class="document-item">
-          <input type="radio" name="documento" value="Resolución" onclick="gestionarSeleccion(this)">
-          Resolución
-        </label>
-        <div id="subopciones-Resolución" class="sub-options">
-          <label><input type="radio" name="estado-Resolución" value="En Vigor"> En Vigor</label>
-          <label><input type="radio" name="estado-Resolución" value="Caducado"> Caducada</label>
-        </div>
-
-        <label class="document-item">
-          <input type="radio" name="documento" value="Solicitud" onclick="gestionarSeleccion(this)">
-          Solicitudes y/o Resguardos
-        </label>
-        <!-- <div id="subopciones-Resolución" class="sub-options">
-          <label><input type="radio" name="estado-Resolución" value="En Vigor"> En Vigor</label>
-          <label><input type="radio" name="estado-Resolución" value="Caducado"> Caducada</label>
-        </div>-->
-
-        <label class="document-item">
-          <input type="radio" name="documento" value="NIE" onclick="gestionarSeleccion(this)">
-          NIE (Asignación de Número de NIE sin foto)
-        </label>
-            <!-- <div id="subopciones-NIE" class="sub-options">
-          <label><input type="radio" name="estado-NIE" value="Aporta Solicitud"> Aporta Solicitud</label>
-          <label><input type="radio" name="estado-NIE" value="No aporta"> No aporta Solicitud</label>
-        </div> -->
-
-        <label class="document-item">
-          <input type="radio" name="documento" value="TASA" onclick="gestionarSeleccion(this)">
-          TASA (Se necesita aportar solicitud)
-        </label>
-            <!-- <div id="subopciones-NIE" class="sub-options">
-          <label><input type="radio" name="estado-NIE" value="Aporta Solicitud"> Aporta Solicitud</label>
-          <label><input type="radio" name="estado-NIE" value="No aporta"> No aporta Solicitud</label>
-        </div> -->
-      </div>
-      <button class="btn" onclick="evaluarDocumento()">Continuar</button>   <br>   
-      <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
-    </div>
-
-    <!-- Imagen del manual -->
-    <div id="manual" class="hidden">
-      <h2>Consulta el manual</h2>
-
-      <div id="avatarFlotante" class="hidden">
-        <canvas id="live2dCanvas" style="position:absolute; width:100%; height:100%; z-index:10;"></canvas>
-        <div id="textoAvatar"></div>
-      </div>     
-      <img id="manualImg" src="" alt="Manual">
-      <br>
-      <button class="btn" onclick="mostrarFormulario()">Continuar</button> <br>
-      <button class="btn-small" onclick="volverNoComunitario()">← Volver</button>
-    </div>
-
-    <!-- Mensaje aclaratorio -->
-    <div id="mensaje-aclaratorio" class="hidden">
-      <h2>Aclaración</h2>
-      <p id="contenido-aclaratorio">Aquí aparecerá el contenido según la selección.</p>
-      <button class="btn-small" onclick="volverNoComunitario()">← Volver</button>
-    </div>
 
     <!-- Formulario completo -->
     <div id="formulario" class="hidden">
@@ -188,25 +106,6 @@
         <!-- Botón de volver -->
         <div style="text-align: center; margin-top: 20px;">
           <button class="btn-small" onclick="volverInicioDesdeFormulario(); confirmarBorrado();">← Volver</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal personalizado ALERTA-->
-    <div id="mi-modal" class="hidden modal">
-      <div class="modal-content">
-        <p id="modal-texto"></p>
-        <button class="btn" onclick="cerrarModal()">Cerrar</button>
-      </div>
-    </div>
-
-    <!-- Modal para confirmar borrado -->
-    <div id="modal-borrar" class="hidden modal">
-      <div class="modal-content">
-        <p>¿Deseas borrar el contenido actual?</p>
-        <div style="text-align: center; margin-top: 20px;">
-          <button class="btn" onclick="confirmarBorrado()">Sí, borrar</button>
-          <button class="btn-small" onclick="cerrarModalBorrar()">No, modificar</button>
         </div>
       </div>
     </div>
