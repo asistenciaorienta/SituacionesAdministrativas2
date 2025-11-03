@@ -1,12 +1,8 @@
-window.onload = function() {
-  alert("Versión 3.00");
-};
-
 // Obtener la voz deseada
 let vozElegida = null;
 window.speechSynthesis.onvoiceschanged = () => {
   const voces = speechSynthesis.getVoices();
-  vozElegida = voces.find(v => v.name.includes("Pablo") && v.lang === "es-ES");
+  vozElegida = voces.find(v => v.name.includes("Pablo") && v.lang.includes === "ES");
 };
 let vozSeleccionada = null;
 
