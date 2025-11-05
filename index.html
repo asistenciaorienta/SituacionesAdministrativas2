@@ -11,6 +11,559 @@
     <script src="libs/Core/live2dcubismcore.min.js"></script>
     <!-- pixi-live2d-display con soporte Cubism 4 -->
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
+<style>
+/* Hace que el body ocupe toda la altura de la ventana */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: Arial, sans-serif;
+  /*text-align: center;*/
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center; /* centrado horizontal */
+  align-items: center;     /* centrado vertical */ 
+}
+
+#nacionalidad-page {
+  max-width: 870px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 30px 20px 0px;
+  margin: auto  auto 40px;
+}
+
+h1 {
+  color: #007A33;
+  margin-bottom: 24px;
+}
+
+h2 {
+  color: #007A33;
+  margin-bottom: 24px;
+}
+
+h3 {
+  color: #007A33;
+  margin-bottom: 24px;
+}
+.btn {
+  background-color: #007A33;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  margin: 12px 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,122,51,0.4);
+}
+
+.btn:hover {
+  background-color: #005e29;
+  box-shadow: 0 4px 8px rgba(0,94,41,0.6);
+}
+
+.btn-primary {
+  background-color: #007A33;
+  color: white;
+  border: none;
+  padding: 16px 36px;
+  margin: 12px 14px;
+  font-size: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,122,51,0.5);
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background-color: #005e29;
+  box-shadow: 0 6px 12px rgba(0,94,41,0.7);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  margin: 12px 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(74,85,104,0.4);
+}
+
+.btn-secondary:hover {
+  background-color: #2d3748;
+  box-shadow: 0 4px 8px rgba(45,55,72,0.6);
+}
+
+img {
+  max-width: 90%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Estilos del formulario */
+.card {
+  width: 870px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  overflow: hidden;
+  padding: 12px 16px;
+  margin: auto;
+  text-align: left;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 0 0 2px #007A33;
+  margin-bottom: 0px;
+}
+
+#search-box {
+  width: 100%;
+  padding: 10px;
+  border: 0px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.button-container {
+  text-align: center;
+  padding: 12px 0;
+  border-top: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+#buscarBtn {
+  background-color: #007A33;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-small {
+  background-color: #ccc;
+  color: #333;
+  border: none;
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: none;
+  margin-top: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-small:hover {
+  background-color: #bbb;
+  padding: 10px 20px;
+}
+
+.nacionalidad-card {
+  text-align: center;
+  padding: 0;
+}
+
+.botones-nacionalidad {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-container {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+}
+
+.help-icon {
+  background-color: #FFFFFF;
+  color: #007A33;
+  border-radius: 30%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 340px;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  top: 50px;
+  left: -100px;
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  line-height: 1.5; /* Interlineado, 1.5 veces la altura de la fuente */  
+  text-align: justify;    /* justifica el texto */
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+}
+
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* max-width: 800px;*/
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 30px 20px 40px;
+  margin: auto  auto 40px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+}
+
+.document-item input[type="radio"] {
+  appearance: none;
+  border: 2px solid #007A33;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  position: relative;
+  margin: 0;
+}
+
+.document-item input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  background: #007A33;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  top: 3px;
+  left: 3px;
+}
+
+.sub-options {
+  margin-left: 48px;
+  margin-top: -5px;
+  margin-bottom: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sub-options label {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.sub-options input[type="radio"] {
+  appearance: none;
+  border: 2px solid #007A33;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  margin: 0;
+}
+
+.sub-options input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  background: #007A33;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  top: 3px;
+  left: 3px;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex; /* Para centrar el contenido */
+  justify-content: center; /* Centrado horizontal */
+  align-items: center; /* Centrado vertical */
+  z-index: 1000;
+}
+
+.modal-content {  
+  text-align: center; /* centra el texto y botones dentro */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 80%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+#resultado table {
+  width: 100%;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin-top: 1rem;
+  border: 1px solid #ccc;  
+  border-collapse: collapse;        
+}
+
+#resultado td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #eee;
+  background-color: #ffffff;
+}
+#resultado th {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #eee;
+  background-color: #f5f5f5;
+}
+
+#resultado.hidden {
+  display: none;
+}
+
+.resultado-centrado {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none;
+}
+
+.panel-sugerencias {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.6s ease;
+  background-color: #f5f5f5;
+}
+
+.panel-sugerencias.visible {
+  max-height: 700px; /* suficiente para mostrar todo */
+}
+
+.sugerencias-grid {
+  display: flex;
+  gap: 0px;
+  max-width: 900px;
+  margin: 0 auto 30px;
+}
+
+.sugerencias-grid label input[type="checkbox"]:disabled + span,
+.sugerencias-grid label input[type="checkbox"]:disabled {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+.sugerencias-grid label.disabled {
+  color: #999999;
+  cursor: not-allowed;
+}
+
+.columna-izq {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.columna-der {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-logo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.footer-logo .logo-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: #007A33;
+  left: 0;
+}
+
+.footer-logo img {
+  height: 70px;
+}
+
+.footer-datos {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background-color: #f5f5f5;
+  color: #007A33;
+  font-size: 14px;
+  text-align: right;
+  padding: 10px 15px;
+  border-top-left-radius: 8px;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+#botonera {
+  position: absolute;/* position: fixed; */
+  top: 10px;
+  right: 10px;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+#inicio {  
+  top: 10px;
+  right: 10px;
+}
+#ayuda {
+  top: 70px;
+  right: 10px;
+}
+
+/* Nuevos estilos para la página de consulta SILA */
+.sila-consulta {
+  text-align: center;
+  padding: 30px;
+}
+
+.sila-consulta h2 {
+  margin-bottom: 30px;
+}
+
+.sila-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* Estilos para la visualización de detalles del registro */
+.detalle-registro {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.detalle-registro h3 {
+  color: #007A33;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.campo-detalle {
+  margin-bottom: 15px;
+}
+
+.campo-detalle label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.campo-detalle .valor {
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border-left: 3px solid #007A33;
+}
+
+/* Estilos para los resultados de búsqueda */
+.resultado-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.resultado-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-color: #007A33;
+}
+
+.resultado-item input[type="radio"] {
+  margin-right: 15px;
+  margin-top: 5px;
+}
+
+.resultado-contenido {
+  flex: 1;
+}
+
+.resultado-titulo {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #007A33;
+}
+
+.resultado-descripcion {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+</style>
   </head>
   <body>
     <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
@@ -43,7 +596,7 @@
         <h2>Selecciona el Origen de la persona usuaria</h2>
         <div class="botones-nacionalidad">
           <div class="btn-wrapper">
-            <button class="btn" onclick="mostrarFormularioComunitario()">Comunitario/a</button>
+            <button class="btn-secondary" onclick="mostrarFormularioComunitario()">Comunitario/a</button>
             <span class="tooltip-container">
               <span class="help-icon">?</span>
               <div class="tooltip-text">
@@ -55,7 +608,7 @@
               </div>
             </span>
           </div>
-          <button class="btn" onclick="mostrarFormularioNoComunitario()">No Comunitario/a</button>
+          <button class="btn-primary" onclick="mostrarFormularioNoComunitario()">No Comunitario/a</button>
         </div>
       </div>
     </div>  <!-- fin pagina inicial -->
@@ -74,6 +627,20 @@
       <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
     </div>
 
+    <!-- Página de consulta SILA para No Comunitario -->
+    <div id="sila-consulta-page" class="hidden">
+      <div class="card sila-consulta">
+        <h2>Consulta SILA</h2>
+        <p>¿La persona usuaria está inscrita actualmente en SILA?</p>
+        <div class="sila-buttons">
+          <button class="btn-primary" onclick="guardarRespuestaSila(true)">Sí</button>
+          <button class="btn-secondary" onclick="guardarRespuestaSila(false)">No</button>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Formulario completo -->
     <div id="formulario" class="hidden">
@@ -85,7 +652,7 @@
 
         <!-- Botón de buscar -->
         <div class="button-container">
-          <button id="buscarBtn" onclick="ocultar_resultado();">Buscar</button>
+          <button id="buscarBtn" onclick="ocultar_resultado(); buscarRegistros();">Buscar</button>
         </div>
         <div id="loader" style="display:none; text-align:center; margin:10px;">
           <span>🔄 Buscando... por favor, espera</span>
@@ -109,6 +676,18 @@
       </div>
     </div>
 
+    <!-- Detalle del registro seleccionado -->
+    <div id="detalle-registro" class="hidden">
+      <div class="detalle-registro">
+        <h3>Detalle del registro seleccionado</h3>
+        <div id="detalle-contenido"></div>
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn-small" onclick="volverResultados()">← Volver a resultados</button>
+          <button class="btn-small" onclick="volverInicio()">← Volver al inicio</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Pie de página fijo -->
     <footer>
       <div class="footer-logo">
@@ -123,8 +702,223 @@
         José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
       </div>
     </footer>
-    <script src="script.js"></script>
+    <script>
+      // Variables globales
+      let respuestaSila = null;
+      let registros = [];
+      let registroSeleccionado = null;
+
+      // Función para mostrar el formulario para no comunitarios
+      function mostrarFormularioNoComunitario() {
+        document.getElementById('pagina_inicial').classList.add('hidden');
+        document.getElementById('sila-consulta-page').classList.remove('hidden');
+      }
+
+      // Función para mostrar el formulario para comunitarios
+      function mostrarFormularioComunitario() {
+        document.getElementById('pagina_inicial').classList.add('hidden');
+        document.getElementById('Doc_Necesaria_Comunitario').classList.remove('hidden');
+      }
+
+      // Función para guardar la respuesta de la consulta SILA
+      function guardarRespuestaSila(inscrito) {
+        respuestaSila = inscrito;
+        document.getElementById('sila-consulta-page').classList.add('hidden');
+        document.getElementById('formulario').classList.remove('hidden');
+      }
+
+      // Función para volver a la página de nacionalidad
+      function volverNacionalidad() {
+        document.getElementById('Doc_Necesaria_Comunitario').classList.add('hidden');
+        document.getElementById('sila-consulta-page').classList.add('hidden');
+        document.getElementById('formulario').classList.add('hidden');
+        document.getElementById('pagina_inicial').classList.remove('hidden');
+      }
+
+      // Función para volver al inicio
+      function volverInicio() {
+        document.getElementById('Doc_Necesaria_Comunitario').classList.add('hidden');
+        document.getElementById('sila-consulta-page').classList.add('hidden');
+        document.getElementById('formulario').classList.add('hidden');
+        document.getElementById('detalle-registro').classList.add('hidden');
+        document.getElementById('pagina_inicial').classList.remove('hidden');
+        respuestaSila = null;
+        registroSeleccionado = null;
+      }
+
+      // Función para volver al inicio desde el formulario
+      function volverInicioDesdeFormulario() {
+        document.getElementById('formulario').classList.add('hidden');
+        document.getElementById('pagina_inicial').classList.remove('hidden');
+        respuestaSila = null;
+        registroSeleccionado = null;
+      }
+
+      // Función para volver a los resultados desde el detalle
+      function volverResultados() {
+        document.getElementById('detalle-registro').classList.add('hidden');
+        document.getElementById('resultado').classList.remove('hidden');
+      }
+
+      // Función para mostrar ayuda
+      function ayuda() {
+        alert("Ayuda: Esta aplicación ayuda al personal técnico en el registro de personas extranjeras en SILA. Seleccione el origen de la persona usuaria y siga las instrucciones.");
+      }
+
+      // Función para confirmar borrado
+      function confirmarBorrado() {
+        // Esta función podría mostrar un modal de confirmación
+        console.log("Borrado confirmado");
+      }
+
+      // Función para preguntar borrado
+      function preguntarBorrado(event) {
+        // Esta función podría mostrar un mensaje cuando se enfoca el campo de búsqueda
+        console.log("Campo de búsqueda enfocado");
+      }
+
+      // Función para ocultar resultado
+      function ocultar_resultado() {
+        document.getElementById('resultado').classList.add('hidden');
+      }
+
+      // Función para ocultar sugerencias
+      function ocultarSugerencias() {
+        document.getElementById('sugerenciasPanel').classList.add('hidden');
+      }
+
+      // Función para buscar desde sugerencias
+      function buscarDesdeSugerencias() {
+        // Implementar lógica para buscar desde sugerencias
+        console.log("Buscando desde sugerencias");
+      }
+
+      // Función para buscar registros
+      function buscarRegistros() {
+        const textoBusqueda = document.getElementById('search-box').value.trim();
+        
+        if (!textoBusqueda) {
+          alert("Por favor, ingrese términos de búsqueda");
+          return;
+        }
+
+        // Mostrar loader
+        document.getElementById('loader').style.display = 'block';
+        
+        // Simular búsqueda con datos de ejemplo
+        setTimeout(() => {
+          // Datos de ejemplo
+          registros = [
+            {
+              id: 1,
+              anverso: "Persona con permiso de residencia y trabajo",
+              reverso: "Documentación: Pasaporte, TIE, Empadronamiento",
+              inscripcionSila: "Sí",
+              autorizaTrabajar: "Sí",
+              tipoDemanda: "Ordinaria",
+              observaciones: "Vigencia del permiso: 2 años",
+              documentacion: "Pasaporte, TIE, Empadronamiento"
+            },
+            {
+              id: 2,
+              anverso: "Persona en situación irregular",
+              reverso: "No tiene documentación en regla",
+              inscripcionSila: "No",
+              autorizaTrabajar: "No",
+              tipoDemanda: "No procede",
+              observaciones: "Derivar a servicios sociales",
+              documentacion: "No presenta"
+            },
+            {
+              id: 3,
+              anverso: "Persona con autorización de estancia por estudios",
+              reverso: "Permite trabajar a tiempo parcial con autorización",
+              inscripcionSila: "Sí",
+              autorizaTrabajar: "Con restricciones",
+              tipoDemanda: "Ordinaria",
+              observaciones: "Máximo 20 horas semanales",
+              documentacion: "Pasaporte, visado de estudios, matrícula"
+            }
+          ];
+
+          mostrarResultados(registros);
+          document.getElementById('loader').style.display = 'none';
+        }, 1000);
+      }
+
+      // Función para mostrar resultados de búsqueda
+      function mostrarResultados(resultados) {
+        const resultadoDiv = document.getElementById('resultado');
+        resultadoDiv.innerHTML = '';
+        
+        if (resultados.length === 0) {
+          resultadoDiv.innerHTML = '<p>No se encontraron registros que coincidan con la búsqueda.</p>';
+        } else {
+          resultados.forEach(registro => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'resultado-item';
+            
+            itemDiv.innerHTML = `
+              <input type="radio" name="registro" value="${registro.id}" onchange="seleccionarRegistro(${registro.id})">
+              <div class="resultado-contenido">
+                <div class="resultado-titulo">${registro.anverso}</div>
+                <div class="resultado-descripcion">${registro.reverso}</div>
+              </div>
+            `;
+            
+            resultadoDiv.appendChild(itemDiv);
+          });
+        }
+        
+        resultadoDiv.classList.remove('hidden');
+      }
+
+      // Función para seleccionar un registro
+      function seleccionarRegistro(id) {
+        registroSeleccionado = registros.find(r => r.id === id);
+        mostrarDetalleRegistro(registroSeleccionado);
+      }
+
+      // Función para mostrar el detalle del registro seleccionado
+      function mostrarDetalleRegistro(registro) {
+        document.getElementById('resultado').classList.add('hidden');
+        document.getElementById('detalle-registro').classList.remove('hidden');
+        
+        const detalleContenido = document.getElementById('detalle-contenido');
+        detalleContenido.innerHTML = `
+          <div class="campo-detalle">
+            <label>Inscripción en SILA:</label>
+            <div class="valor">${registro.inscripcionSila}</div>
+          </div>
+          <div class="campo-detalle">
+            <label>¿Autoriza a Trabajar?:</label>
+            <div class="valor">${registro.autorizaTrabajar}</div>
+          </div>
+          <div class="campo-detalle">
+            <label>Tipo de Demanda:</label>
+            <div class="valor">${registro.tipoDemanda}</div>
+          </div>
+          <div class="campo-detalle">
+            <label>Observaciones:</label>
+            <div class="valor">${registro.observaciones}</div>
+          </div>
+          <div class="campo-detalle">
+            <label>Documentación:</label>
+            <div class="valor">${registro.documentacion}</div>
+          </div>
+        `;
+      }
+
+      // Inicialización cuando se carga la página
+      document.addEventListener('DOMContentLoaded', function() {
+        // Aquí podrías cargar los datos del archivo JSON
+        // fetch('SituacionesAdministrativas.json')
+        //   .then(response => response.json())
+        //   .then(data => {
+        //     // Procesar datos
+        //   })
+        //   .catch(error => console.error('Error cargando datos:', error));
+      });
+    </script>
   </body>
 </html>
-
-<!--      const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxigLGGauWCphFL95VD5R0mWm5mM65_wuq5KhwWxyZmM8I8h5pJQ-nKzJ5u6DqpNJTvaw/exec"; -->
