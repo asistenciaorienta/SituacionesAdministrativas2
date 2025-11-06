@@ -266,11 +266,6 @@ function mostrarFormularioComunitario() {
   document.getElementById("Doc_Necesaria_Comunitario").classList.remove("hidden");
 }      
 
-function mostrarFormularioNoComunitario() {
-  document.getElementById("pagina_inicial").classList.add("hidden");
-  document.getElementById("formulario_No_Comunitario").classList.remove("hidden");
-}
-
 async function mostrarManual(tipo) {
   localStorage.setItem("tipoDocumento", tipo);         
   //Si el usuario dice que necesita ayuda entonces:
@@ -842,3 +837,21 @@ function restaurarAvatar() {
   
   document.getElementById("textoAvatar").classList.remove("ocultoDeslizado");
 }
+let estadoInscrito = "";  // se usará luego en el filtro
+
+function mostrarFormularioNoComunitario() {
+  document.getElementById("modalInscrito").classList.remove("hidden");
+}
+
+function guardarEstado(valor) {
+  estadoInscrito = valor;          // guarda si o no
+  document.getElementById("modalInscrito").classList.add("hidden");
+  mostrarFormularioBusqueda();     // y ahora abrimos buscador
+}
+
+// esta función ya la tendrás… solo asegúrate que existe
+function mostrarFormularioBusqueda() {
+  document.getElementById("pagina_inicial").classList.add("hidden");
+  document.getElementById("formulario").classList.remove("hidden");
+}
+
