@@ -1,974 +1,187 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <title>Formulario Unificado</title>
-    <link rel="stylesheet" href="style.css?v=1.0">
-    <!-- PIXI.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.12/pixi.min.js"></script>
-    <!-- Live2D Cubism Core -->
-    <script src="libs/Core/live2dcubismcore.min.js"></script>
-    <!-- pixi-live2d-display con soporte Cubism 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Situaciones Administrativas — Buscador</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
-      /* Hace que el body ocupe toda la altura de la ventana */
-      html, body {
-        height: 100%;
-        margin: 0;
-      }
-      body {
-        font-family: Arial, sans-serif;
-        /*text-align: center;*/
-        background: #f5f5f5;
-        display: flex;
-        justify-content: center; /* centrado horizontal */
-        align-items: center;     /* centrado vertical */ 
-      }
-      
-      #nacionalidad-page {
-        max-width: 870px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        padding: 30px 20px 0px;
-        margin: auto  auto 40px;
-      }
-      
-      h1 {
-        color: #007A33;
-        margin-bottom: 24px;
-      }
-      
-      h2 {
-        color: #007A33;
-        margin-bottom: 24px;
-      }
-      
-      h3 {
-        color: #007A33;
-        margin-bottom: 24px;
-      }
-      .btn {
-        background-color: #007A33;
-        color: white;
-        border: none;
-        padding: 14px 32px;
-        margin: 12px 14px;
-        font-size: 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,122,51,0.4);
-      }
-      
-      .btn:hover {
-        background-color: #005e29;
-        box-shadow: 0 4px 8px rgba(0,94,41,0.6);
-      }
-      
-      img {
-        max-width: 90%;
-        max-height: 70vh;
-        object-fit: contain;
-        border-radius: 12px;
-        margin: 20px 0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      }
-      
-      /* Estilos del formulario */
-      .card {
-        width: 870px;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        overflow: hidden;
-        padding: 12px 16px;
-        margin: auto;
-        text-align: left;
-      }
-      
-      .search-container {
-        display: flex;
-        align-items: center;
-        border-radius: 12px;
-        overflow: hidden;
-        background-color: white;
-        box-shadow: 0 0 0 2px #007A33;
-        margin-bottom: 0px;
-      }
-      
-      #search-box {
-        width: 100%;
-        padding: 10px;
-        border: 0px solid #ccc;
-        border-radius: 8px;
-        font-size: 16px;
-        resize: none;
-        box-sizing: border-box;
-      }
-      
-      .button-container {
-        text-align: center;
-        padding: 12px 0;
-        border-top: 1px solid #ddd;
-        margin-top: 10px;
-      }
-      
-      #buscarBtn {
-        background-color: #007A33;
-        color: white;
-        border: none;
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      
-      .btn-small {
-        background-color: #ccc;
-        color: #333;
-        border: none;
-        padding: 6px 16px;
-        font-size: 14px;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: none;
-        margin-top: 12px;
-        transition: background-color 0.3s ease;
-      }
-      
-      .btn-small:hover {
-        background-color: #bbb;
-        padding: 10px 20px;
-      }
-      
-      .nacionalidad-card {
-        text-align: center;
-        padding: 0;
-      }
-      
-      .botones-nacionalidad {
-        display: flex;
-        justify-content: center;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-        flex-direction:column;
-        align-items:center;
-        gap:30px;       
-      }
-      
-      .btn-wrapper {
-        position: relative;
-        display: inline-block;
-      }
-      
-      .tooltip-container {
-        position: absolute;
-        top: 15px;
-        left: 18px;
-      }
-      
-      .help-icon {
-        background-color: #FFFFFF;
-        color: #007A33;
-        border-radius: 30%;
-        width: 20px;
-        height: 20px;
-        font-size: 14px;
-        font-weight: bold;
-        text-align: center;
-        line-height: 20px;
-        cursor: pointer;
-        z-index: 2;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-      }
-      
-      .tooltip-text {
-        visibility: hidden;
-        width: 340px;
-        background-color: white;
-        color: #333;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        padding: 10px;
-        position: absolute;
-        top: 50px;
-        left: -100px;
-        z-index: 5;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        line-height: 1.5; /* Interlineado, 1.5 veces la altura de la fuente */  
-        text-align: justify;    /* justifica el texto */
-      }
-      
-      .tooltip-container:hover .tooltip-text {
-        visibility: visible;
-      }
-      
-      .document-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        /* max-width: 800px;*/
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        padding: 30px 20px 40px;
-        margin: auto  auto 40px;
-      }
-      
-      .document-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 16px;
-        color: #000;
-        cursor: pointer;
-      }
-      
-      .document-item input[type="radio"] {
-        appearance: none;
-        border: 2px solid #007A33;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        position: relative;
-        margin: 0;
-      }
-      
-      .document-item input[type="radio"]:checked::before {
-        content: "";
-        position: absolute;
-        background: #007A33;
-        border-radius: 50%;
-        width: 10px;
-        height: 10px;
-        top: 3px;
-        left: 3px;
-      }
-      
-      .sub-options {
-        margin-left: 48px;
-        margin-top: -5px;
-        margin-bottom: 10px;
-        display: none;
-        flex-direction: column;
-        gap: 8px;
-      }
-      
-      .sub-options label {
-        font-size: 15px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-      }
-      
-      .sub-options input[type="radio"] {
-        appearance: none;
-        border: 2px solid #007A33;
-        border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        position: relative;
-        margin: 0;
-      }
-      
-      .sub-options input[type="radio"]:checked::before {
-        content: "";
-        position: absolute;
-        background: #007A33;
-        border-radius: 50%;
-        width: 8px;
-        height: 8px;
-        top: 3px;
-        left: 3px;
-      }
-      
-      .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        display: flex; /* Para centrar el contenido */
-        justify-content: center; /* Centrado horizontal */
-        align-items: center; /* Centrado vertical */
-        z-index: 1000;
-      }
-      
-      .modal-content {  
-        text-align: center; /* centra el texto y botones dentro */
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 400px;
-        width: 80%;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      }
-      
-      #resultado table {
-        width: 100%;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        margin-top: 1rem;
-        border: 1px solid #ccc;  
-        border-collapse: collapse;        
-      }
-      
-      #resultado td {
-        padding: 8px 10px;
-        text-align: left;
-        vertical-align: top;
-        border-bottom: 1px solid #eee;
-        background-color: #ffffff;
-      }
-      #resultado th {
-        padding: 8px 10px;
-        text-align: left;
-        vertical-align: top;
-        border-bottom: 1px solid #eee;
-        background-color: #f5f5f5;
-      }
-      
-      #resultado.hidden {
-        display: none;
-      }
-      
-      .resultado-centrado {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-      }
-      
-      .hidden {
-        display: none;
-      }
-      
-      .panel-sugerencias {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.6s ease;
-        background-color: #f5f5f5;
-      }
-      
-      .panel-sugerencias.visible {
-        max-height: 700px; /* suficiente para mostrar todo */
-      }
-      
-      .sugerencias-grid {
-        display: flex;
-        gap: 0px;
-        max-width: 900px;
-        margin: 0 auto 30px;
-      }
-      
-      .sugerencias-grid label input[type="checkbox"]:disabled + span,
-      .sugerencias-grid label input[type="checkbox"]:disabled {
-        filter: grayscale(100%);
-        cursor: not-allowed;
-      }
-      
-      .sugerencias-grid label.disabled {
-        color: #999999;
-        cursor: not-allowed;
-      }
-      
-      .columna-izq {
-        flex: 1.5;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      
-      .columna-der {
-        flex: 1.2;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      
-      .footer-logo {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px 15px;
-      }
-      
-      .footer-logo .logo-text {
-        font-size: 14px;
-        font-weight: bold;
-        color: #007A33;
-        left: 0;
-      }
-      
-      .footer-logo img {
-        height: 70px;
-      }
-      
-      .footer-datos {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        background-color: #f5f5f5;
-        color: #007A33;
-        font-size: 14px;
-        text-align: right;
-        padding: 10px 15px;
-        border-top-left-radius: 8px;
-        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-      }
-      #botonera {
-        position: absolute;/* position: fixed; */
-        top: 10px;
-        right: 10px;
-        z-index: 1000; /* Asegura que esté por encima de otros elementos */
-      }
-      #inicio {  
-        top: 10px;
-        right: 10px;
-      }
-      #ayuda {
-        top: 70px;
-        right: 10px;
-      }
-      #avatarFlotante {
-        background: transparent !important;  
-        position: absolute;   /* relativo al contenedor (o body si no hay otro posicionado) */
-        top: 100px;             /* centrado vertical, antes top: 100px;*/
-        left: 50px;           /* pegado al borde izquierdo, antes 50px*/
-        width: 300px;
-        height: 400px;
-        overflow: visible;
-        z-index: 10;  
-        transform-origin: top left;
-        /*transition: transform 0.6s ease;*/
-        /* AÑADIR transiciones para top y left aquí  */
-        transition:
-          top    0.6s ease-out,
-          left   0.6s ease-out,
-          transform 0.5s ease-out;
-        /* Hint de rendimiento para GPU */
-        will-change: top, left, transform;
-      }
-      canvas {
-        background: transparent !important;
-      }
-      #live2dCanvas {
-        width: 100% !important;
-        height: 100% !important;
-        background: transparent !important;
-        display: block;
-      }
-      #textoAvatar {
-        position: absolute;
-        top: 275px; /* justo debajo del canvas (400px de alto + margen) */
-        left: 0px;
-        background-color: #DFE8DF; /* Fondo claro */
-        color: #000;            /* Texto negro */
-        padding: 10px;
-        border-radius: 10px;
-        font-size: 1em;
-        max-width: 300px;
-        z-index: 10;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Sombra para profundidad */
-        display: block;
-        visibility: visible;
-        max-height: 400px; /* o el alto que uses normalmente */
-        transition: max-height 0.5s ease, opacity 0.5s ease; 
-      }
-      #textoAvatar::after {
-        content: "|";
-        animation: blink 1s infinite;
-      }
-      
-      @keyframes blink {
-        0%, 50% { opacity: 1; }
-        51%, 100% { opacity: 0; }
-      }
-      @keyframes entradaAvatar {
-        0% {
-          opacity: 0;
-          transform: translateY(30px) scale(0.75);/* 0.95 */
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-      .avatar-animado {
-        animation: entradaAvatar 0.6s ease-out;
-      }
-      @keyframes entradaRebote {
-        0% {
-          opacity: 0;
-          transform: scale(0.3);
-        }
-        60% {
-          opacity: 1;
-          transform: scale(1.1);
-        }
-        80% {
-          transform: scale(0.85);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-      
-      .avatar-rebote {
-        animation: entradaRebote 0.6s ease-out;
-      }
-      .botonRespuesta {
-        margin: 10px 5px;
-        padding: 8px 16px;
-        font-size: 1em;
-        border: none;
-        border-radius: 8px;
-        background-color: #0078D4;
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      
-      .botonRespuesta:hover {
-        background-color: #005a9e;
-      }
-      .burbujaRespuesta {
-        position: absolute;
-        padding: 12px 20px;
-        border-radius: 30px;
-        background-color: #007A33;
-        color: white;
-        font-size: 1em;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        animation: flotarBurbuja 0.6s ease-out;
-        transition: transform 0.3s, background-color 0.3s;
-        z-index: 10;
-      }
-      
-      .burbujaRespuesta:hover {
-        background-color: #005e29;
-        transform: scale(1.05);
-      }
-      
-      @keyframes flotarBurbuja {
-        0% {
-          opacity: 0;
-          transform: scale(0.5) translateY(20px);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-      }
-      
-      #formulario_No_Comunitario {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      
-      #pagina_inicial {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      
-      #Doc_Necesaria_Comunitario {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      
-      #mensaje-aclaratorio {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      
-      #manual {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      
-      #formulario {
-        text-align: center; /* centra el texto y botones dentro */
-        background: #f9f9f9;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
-      .ocultoSuave {
-        opacity: 0;
-        transform: scale(0.95);
-        transition: opacity 0.4s ease, transform 0.4s ease;
-        pointer-events: none;
-        height: 0;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      .ocultoDeslizado {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease, opacity 0.5s ease;
-      }
-      
-      /* 1) Define la animación de pulso */
-      @keyframes pulsoAvatar {
-        0%, 100% {
-          transform: scale(0.27);
-        }
-        50% {
-          transform: scale(0.32);
-        }
-      }
-      /* 2) Ajusta el origen de la transformación al centro */
-      #avatarFlotante.avatar-minimizado {
-        transform-origin: top left; /* ← esto es clave para posicionar bien */
-        transform: scale(0.30);        /* 300×0.2 = 60px, 400×0.2 = 80px */
-        animation: pulsoAvatar 3.6s ease-in-out infinite;
-      }
-      
-      .btn-principal {
-        background-color:#007A33;
-        color:white;
-        font-size: 22px;
-        padding: 18px 42px;
-        width: 100%;
-        max-width: 500px;
-      }
-      
-      .btn-secundario {
-        background-color:#007A33;
-        font-size: 16px;
-        padding: 12px 26px;
-      }
-      #modalInscrito h3 {
-        margin-bottom: 20px;
-        color:#007A33;
-        line-height:1.3;
-        font-size:20px;
-      }
-      
+      /* ---- Reset básico y layout ---- */
+      html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;color:#111}
+      .container{max-width:980px;margin:28px auto;padding:20px}
+      h1,h2,h3{color:#007A33;margin:0 0 14px 0}
+      /* ---- Card ---- */
+      .card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);padding:20px;margin-bottom:18px}
+      /* ---- Botones ---- */
+      .btn{background:#007A33;color:#fff;border:0;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:16px}
+      .btn:hover{background:#005e29}
+      .btn-small{background:#ccc;color:#222;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:14px}
+      .btn-small:hover{background:#bbb}
+      .btn-principal{background:#007A33;color:#fff;font-size:20px;padding:16px 24px;border-radius:10px;width:100%;max-width:520px}
+      .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+      .center{text-align:center}
+      /* ---- Area inicial ---- */
+      #pagina_inicial{padding:30px 20px}
+      .botones-nacionalidad{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:16px}
+      .tooltip-container{position:relative;display:inline-block}
+      .help-icon{background:#fff;color:#007A33;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;border:1px solid #ddd}
+      .tooltip-text{visibility:hidden;position:absolute;left:50%;transform:translateX(-50%);top:36px;background:#fff;border:1px solid #ddd;padding:10px;border-radius:8px;max-width:340px;box-shadow:0 6px 18px rgba(0,0,0,0.08);text-align:left;z-index:30}
+      .tooltip-container:hover .tooltip-text{visibility:visible}
+      /* ---- Búsqueda ---- */
+      .search-container{border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 0 0 2px #007A33;padding:10px}
+      textarea#search-box{width:100%;min-height:84px;border:0;padding:10px;border-radius:8px;font-size:15px;resize:vertical;box-sizing:border-box}
+      .button-container{margin-top:12px;text-align:center}
+      /* ---- Resultados tabla ---- */
+      #resultado table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+      #resultado th,#resultado td{padding:10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+      #resultado th{background:#f7f7f7}
+      .radio-cell{width:40px;text-align:center}
+      .res-row:hover{background:#fbfffb}
+      .titulo-principal{font-weight:700;color:#004d2e}
+      /* ---- Panel sugerencias (oculto por defecto) ---- */
+      .panel-sugerencias{max-height:0;overflow:hidden;transition:max-height .45s ease;background:#f5f5f5;border-radius:12px;padding:0 18px;margin-top:16px}
+      .panel-sugerencias.visible{max-height:700px;padding:18px}
+      .sugerencias-grid{display:flex;gap:18px;max-width:900px;margin:0 auto;flex-wrap:wrap}
+      .columna-izq,.columna-der{flex:1;min-width:220px}
+      .sugerencias-grid label{display:block;margin-bottom:8px;cursor:pointer}
+      .sugerencias-grid label.disabled{color:#999;cursor:not-allowed}
+      /* ---- Detalle final ---- */
+      #detalleFinal{display:none;background:#fff;border-radius:10px;padding:16px;margin-top:16px;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
+      #detalleFinal table{width:100%;border-collapse:collapse}
+      #detalleFinal th{width:220px;text-align:left;padding:8px;vertical-align:top;background:#f6f6f6}
+      #detalleFinal td{padding:8px;vertical-align:top}
+      /* ---- Modales ---- */
+      .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}
+      .modal-content{background:#fff;padding:18px;border-radius:10px;max-width:480px;box-shadow:0 6px 20px rgba(0,0,0,0.12);text-align:center}
+      .hidden{display:none}
+      /* ---- Footer info ---- */
+      footer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 0;font-size:13px;color:#007A33}
+      footer img{height:60px}
+      /* Responsivo */
+      @media (max-width:720px){.columna-izq,.columna-der{min-width:100%}.btn-principal{font-size:18px}}
     </style>
   </head>
   <body>
-    <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
-    Jefe de Servicio: Francisco Escabias García.
-    Diseñador: Valentín Jiménez Extremera.
-    Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
-    Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés.
-    Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE. -->
-    <!-----botones ir a inicio y ayuda--->
-    <div id="botonera">
-      <div id="inicio" class="nacionalidad-card">
-        <button class="btn-small" onclick="volverInicio(); confirmarBorrado();">Inicio</button>
-      </div>
-      <div id="ayuda" class="nacionalidad-card">
-        <button class="btn-small" onclick="ayuda();">Ayuda</button>
-      </div>
-    </div>
-    
-  <div id="pagina_inicial">
-      <div id="titulo">
-        <h1>Ayuda para el registro en SILA de una persona extranjera</h2>
-        
-        <!-------------------------Esto es temporal hasta elegir la voz para el avatar--------------------------------------------------------------->
-        <label for="vozSelector">Elige la voz del avatar:</label>
-        <select id="vozSelector"></select>
-        <button id="btnEscucharMuestra">🔊 Escuchar muestra</button>      
-        
-      </div>
-      <!-- Página de nacionalidad (ORIGEN) -->
-      <div id="nacionalidad-page" class="nacionalidad-card">
-        <h2>Selecciona el Origen de la persona usuaria</h2>
-        <div class="botones-nacionalidad">
-          <div class="btn-wrapper">
-            <button class="btn btn-secundario" onclick="mostrarFormularioComunitario()">Comunitario/a</button>
-            <span class="tooltip-container">
-              <span class="help-icon">?</span>
-              <div class="tooltip-text">
-                <strong>Países comunitarios:</strong><br>
+    <div class="container">
+      <header class="card center" id="pagina_inicial">
+        <h1>Ayuda para el registro en SILA de una persona extranjera</h1>
+        <p style="max-width:720px;margin:10px auto 0">Selecciona el origen de la persona usuaria y continúa el flujo. Esta herramienta usa el fichero <code>SituacionesAdministrativas.json</code> (misma carpeta).</p>
+
+        <div class="card" style="margin-top:18px">
+          <h2>Selecciona el origen</h2>
+          <div class="botones-nacionalidad">
+            <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+              <button class="btn-secundario btn-small" onclick="mostrarFormularioComunitario()">Comunitario/a</button>
+              <div class="tooltip-container" aria-hidden="true">
+                <span class="help-icon">?</span>
+                <div class="tooltip-text">
+                  <strong>Países comunitarios:</strong><br>
                   Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
                   Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
                   Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
                   Islandia, Liechtenstein, Noruega, Suiza.
+                </div>
               </div>
-            </span>
+            </div>
+
+            <button class="btn-principal" onclick="mostrarFormularioNoComunitario()">No Comunitario/a</button>
           </div>
-          
-          <button class="btn btn-principal" onclick="mostrarFormularioNoComunitario()">No Comunitario/a</button>
-        
         </div>
-      </div>
-    </div>  <!-- fin pagina inicial -->
-    
-    <!-- Documentación Necesaria para Comunitario -->
-    <div id="Doc_Necesaria_Comunitario" class="hidden">
-      <h2>Documentación Necesaria para Inscribir a una persona Comunitaria</h2>
-      <br>
-      Documento acreditativo de identidad
-      <br>
-      Certificado de inscripción .....
-      <br>
-      Tarjeta Verde...
-      <br>
-      <br>
-      <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
-    </div>
+      </header>
 
-    <!-- Formulario completo -->
-    <div id="formulario" class="hidden">
-      <div class="card">
-        <!-- Campo de búsqueda -->
-        <div class="search-container">
-          <textarea id="search-box" placeholder="Copia aquí los conceptos clave..." rows="4" onfocus="preguntarBorrado(event)" spellcheck="true" lang="es"></textarea> 
+      <!-- Documentación Comunitario -->
+      <section id="Doc_Necesaria_Comunitario" class="card hidden" aria-hidden="true">
+        <h2>Documentación necesaria - Comunitario/a</h2>
+        <p>Documento acreditativo de identidad, certificado de inscripción, tarjeta verde, etc.</p>
+        <div style="text-align:center;margin-top:12px">
+          <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
+        </div>
+      </section>
+
+      <!-- Formulario / Buscador -->
+      <section id="formulario" class="card hidden" aria-hidden="true">
+        <h2>Búsqueda en Situaciones Administrativas</h2>
+
+        <div class="search-container" role="search">
+          <textarea id="search-box" placeholder="Copia aquí los conceptos clave..." onfocus="preguntarBorrado(event)"></textarea>
         </div>
 
-        <!-- Botón de buscar -->
         <div class="button-container">
-          <button id="buscarBtn" onclick="ocultar_resultado();">Buscar</button>
-        </div>
-        <div id="loader" style="display:none; text-align:center; margin:10px;">
-          <span>🔄 Buscando... por favor, espera</span>
+          <button id="buscarBtn" class="btn" title="Buscar">Buscar</button>
+          <button class="btn-small" onclick="confirmarBorrado()">Borrar búsqueda</button>
         </div>
 
-        <div id="resultado" class="hidden"></div>
+        <div id="loader" style="display:none;text-align:center;margin-top:10px">🔄 Buscando...</div>
 
-        <div id="sugerenciasPanel" class="panel-sugerencias hidden">
-          <h3 style="text-align:center;">Selecciona uno o más conceptos clave:</h3>
-          <form id="sugerenciasForm" class="sugerencias-grid"></form>
-          <div style="text-align: center;">
+        <div id="resultado" class="hidden" aria-live="polite" style="margin-top:12px"></div>
+
+        <!-- Panel Sugerencias (ABAJO) -->
+        <div id="sugerenciasPanel" class="panel-sugerencias" aria-hidden="true">
+          <h3 style="text-align:center">Selecciona uno o más conceptos clave</h3>
+          <form id="sugerenciasForm" class="sugerencias-grid" aria-label="Sugerencias"></form>
+          <div style="text-align:center;margin-top:12px">
             <button class="btn" onclick="buscarDesdeSugerencias()">Buscar con selección</button>
             <button class="btn-small" onclick="ocultarSugerencias()">← Ocultar</button>
           </div>
         </div>
 
-        <!-- Botón de volver -->
-        <div style="text-align: center; margin-top: 20px;">
-          <button class="btn-small" onclick="volverInicioDesdeFormulario(); confirmarBorrado();">← Volver</button>
+        <div style="text-align:center;margin-top:14px">
+          <button class="btn-small" onclick="volverInicioDesdeFormulario()">← Volver</button>
+        </div>
+
+        <!-- Detalle final (al seleccionar un registro) -->
+        <div id="detalleFinal" aria-hidden="true">
+          <h3>Ficha del registro seleccionado</h3>
+          <div id="fichaTitulo" style="margin-bottom:10px;font-weight:700;color:#004d2e"></div>
+          <table id="tablaFinal"></table>
+          <div style="text-align:center;margin-top:12px">
+            <button class="btn-small" onclick="volverBuscar()">← Volver a resultados</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal borrar (confirma limpiar) -->
+      <div id="modal-borrar" class="modal hidden" aria-hidden="true">
+        <div class="modal-content">
+          <p>¿Deseas borrar el contenido actual?</p>
+          <div style="margin-top:12px;display:flex;gap:12px;justify-content:center">
+            <button class="btn" onclick="limpiarBusquedaConfirmada()">Sí, borrar</button>
+            <button class="btn-small" onclick="cerrarModalBorrar()">No, modificar</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Modal personalizado ALERTA-->
-    <div id="mi-modal" class="hidden modal">
-      <div class="modal-content">
-        <p id="modal-texto"></p>
-        <button class="btn" onclick="cerrarModal()">Cerrar</button>
-      </div>
-    </div>
-
-    <!-- Modal para confirmar borrado -->
-    <div id="modal-borrar" class="hidden modal">
-      <div class="modal-content">
-        <p>¿Deseas borrar el contenido actual?</p>
-        <div style="text-align: center; margin-top: 20px;">
-          <button class="btn" onclick="confirmarBorrado()">Sí, borrar</button>
-          <button class="btn-small" onclick="cerrarModalBorrar()">No, modificar</button>
+      <!-- Modal Inscrito (SI / NO) -->
+      <div id="modalInscrito" class="modal hidden" aria-hidden="true">
+        <div class="modal-content">
+          <h3>Tras consultar SILA<br>¿está actualmente inscrita esta persona?</h3>
+          <div style="margin-top:12px;display:flex;gap:12px;flex-direction:column">
+            <button class="btn" onclick="guardarEstado('SI')">Sí</button>
+            <button class="btn" onclick="guardarEstado('NO')">No</button>
+            <button class="btn-small" onclick="cerrarModalInscrito()">Cancelar</button>
+          </div>
         </div>
       </div>
+
+      <footer>
+        <div style="display:flex;align-items:center;gap:10px">
+          <strong>Dirección Provincial de Granada</strong>
+          <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta" />
+        </div>
+        <div style="text-align:right">
+          <strong>Soporte testeo</strong><br>
+          Versión 4.0 — Elisabeth Huertas &amp; José Manuel Robles
+        </div>
+      </footer>
     </div>
 
-    <!-- MODAL PREGUNTA INSCRITO -->
-    <div id="modalInscrito" class="modal hidden">
-      <div class="modal-content">
-        <h3>Tras consultar SILA<br>¿está actualmente inscrita esta persona?</h3>
-        <button class="btn" style="width:100%; margin-top:14px;" onclick="guardarEstado('SI')">Sí</button>
-        <button class="btn" style="width:100%; margin-top:14px;" onclick="guardarEstado('NO')">No</button>
-      </div>
-    </div>
-    
-    <!-- Pie de página fijo -->
-    <footer>
-      <div class="footer-logo">
-        <div class="logo-text">Dirección Provincial de Granada</div>
-        <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía" />
-      </div>
-      <div class="footer-datos">
-        <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
-        <hr>
-        Versión 4.0<br>
-        Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
-        José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
-      </div>
-    </footer>
     <script>
-      // Obtener la voz deseada
-      let vozElegida = null;
-      window.speechSynthesis.onvoiceschanged = () => {
-        const voces = speechSynthesis.getVoices();
-        vozElegida = voces.find(v => v.name.includes("Pablo") && v.lang.includes === "ES");
-      };
-      let vozSeleccionada = null;
-      
-      function cargarVoces() {
-        const selector = document.getElementById("vozSelector");
-        selector.innerHTML = ""; // Limpiar opciones previas
-      
-        const voces = speechSynthesis.getVoices().filter(v => v.lang === "es-ES");
-      
-        voces.forEach(voz => {
-          const opcion = document.createElement("option");
-          opcion.value = voz.name;
-          opcion.textContent = voz.name;
-          selector.appendChild(opcion);
-        });
-      
-        // Si hay una voz guardada en localStorage, seleccionarla
-        const guardada = localStorage.getItem("vozAvatar");
-        if (guardada) {
-          selector.value = guardada;
-          vozSeleccionada = voces.find(v => v.name === guardada);
-        } else {
-          vozSeleccionada = voces[3]; // Por defecto, la primera
-        }
-      
-        selector.addEventListener("change", () => {
-          vozSeleccionada = voces.find(v => v.name === selector.value);
-          localStorage.setItem("vozAvatar", selector.value);
-        });
-      }
-      
-      // Esperar a que las voces estén disponibles
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = cargarVoces;
-      }
-      document.getElementById("btnEscucharMuestra").addEventListener("click", () => {
-        const muestra = new SpeechSynthesisUtterance("Hola, soy tu guía virtual. ¿Me escuchas bien?. ¡Perfecto!.");
-        muestra.lang = "es-ES";
-      
-        if (vozSeleccionada) {
-          muestra.voice = vozSeleccionada;
-        }
-      
-        window.speechSynthesis.speak(muestra);
-      });
-      document.addEventListener("DOMContentLoaded", () => {
-        cargarVoces(); // ✅ Ejecutar directamente al cargar
-      });
-      const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxigLGGauWCphFL95VD5R0mWm5mM65_wuq5KhwWxyZmM8I8h5pJQ-nKzJ5u6DqpNJTvaw/exec";
-      function ayuda() {
-        detenerHablaAvatar(); // ✅ detener habla al pulsar
-        window.open("https://www.tupagina.com", "_blank");
-      }
-      
-      function actualizarDisponibles() {
-        const checkboxes = Array.from(document.querySelectorAll('#sugerenciasForm input[type="checkbox"]'));
-        const labels = Array.from(document.querySelectorAll('#sugerenciasForm label'));
-      
-        // Seleccionados actualmente (checkbox checked)
-        const seleccionados = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
-      
-        // Si no hay seleccionados, activar todo y quitar clase disabled
-        if (seleccionados.length === 0) {
-          checkboxes.forEach(cb => {
-            cb.disabled = false;
-          });
-          labels.forEach(label => {
-            label.classList.remove('disabled');
-          });
-          return;
-        }
-      
-        // Función para comprobar si una combinación válida contiene TODOS los seleccionados + candidato
-        // Queremos que al marcar otro, la combinación sea una superconjunto de los seleccionados actuales + ese candidato
-        function esCompatible(candidato) {
-          // Por cada combinación válida
-          return combinacionesValidas.some(comb => {
-            // La combinación debe contener al candidato
-            if (!comb.includes(candidato)) return false;
-      
-            // Y debe contener todos los seleccionados
-            return seleccionados.every(sel => comb.includes(sel));
-          });
-        }
-      
-        // Recorremos todos checkboxes y deshabilitamos si no es compatible
-        checkboxes.forEach(cb => {
-          if (seleccionados.includes(cb.value)) {
-            // Checkbox seleccionado: siempre habilitado
-            cb.disabled = false;
-            cb.parentElement.classList.remove('disabled');
-          } else {
-            // No seleccionado: habilitar solo si es compatible con la selección
-            if (esCompatible(cb.value)) {
-              cb.disabled = false;
-              cb.parentElement.classList.remove('disabled');
-            } else {
-              cb.disabled = true;
-              cb.parentElement.classList.add('disabled');
-            }
-          }
-        });
-      }
-      
-      // Añadir evento a cada checkbox para actualizar al cambiar
-      function anadirEventosCheck() {
-        const checkboxes = document.querySelectorAll('#sugerenciasForm input[type="checkbox"]');
-        checkboxes.forEach(cb => {
-          cb.addEventListener('change', actualizarDisponibles);
-        });
-      }
-      
-      // En tu función mostrarSugerencias, tras crear el formulario, llama a añadirEventosCheck()
-      
-      function ocultar_resultado(){
-        document.getElementById('resultado').classList.add('hidden');
-      }
-      
-      function preguntarBorrado() {
-        const textarea = document.getElementById('search-box');
-      
-        // Si el modal ya está abierto, no hacer nada
-        const modalVisible = !document.getElementById('modal-borrar').classList.contains('hidden');
-        if (modalVisible) return;
-      
-        // Si hay texto, mostrar el modal
-        if (textarea.value.trim() !== '') {
-          textarea.blur(); // Para evitar escribir mientras responde
-          document.getElementById('modal-borrar').classList.remove('hidden');
-        }
-      }
-      function confirmarBorrado() {
-        const textarea = document.getElementById('search-box');
-        textarea.value = '';
-        cerrarModalBorrar();
-      }
-      
-      function cerrarModalBorrar() {
-        document.getElementById('search-box').focus();
-        document.getElementById('modal-borrar').classList.add('hidden');
-        document.getElementById('resultado').classList.add('hidden');
-      }
-      
-      const urls = {
-        "TIE": "/SituacionesAdministrativas/images/TIE.png",
-        "Documento": "/SituacionesAdministrativas/images/resolucion.png",
-        "Tarjeta Roja": "/SituacionesAdministrativas/images/Tarjeta_roja.png"
-      };
-      
+      /* ==========================
+         Variables globales y configuración
+         ========================== */
+      const JSON_PATH = './SituacionesAdministrativas.json'; // mismo directorio
+      let estadoInscrito = ""; // 'SI', 'NO' o "" (vacío)
+      let registros = [];       // contenido del JSON
+      let ultimosResultados = []; // resultados actuales (array)
       const conceptosClave = [
         "Art 50 TUE. Retirada Reino Unido",
         "Asilo / Apátrida / Desplazados o protección internacional",
@@ -985,258 +198,406 @@
         "Visado búsqueda empleo",
         "Prestación sin autorización laboral"
       ];
-      
       const combinacionesValidas = [
         ["Asilo / Apátrida / Desplazados o protección internacional", "Residencia temporal que Autoriza a trabajar"],
         ["Asilo / Apátrida / Desplazados o protección internacional", "Residencia temporal que No Autoriza a trabajar"],
         ["Permiso de Residencia y Trabajo", "Residencia temporal que Autoriza a trabajar"],
-        ["Permiso de Residencia y Trabajo", "Residencia temporal que No Autoriza a trabajar"],        
+        ["Permiso de Residencia y Trabajo", "Residencia temporal que No Autoriza a trabajar"],
         ["Residencia Larga Duración", "Permiso de Residencia y Trabajo"],
         ["Asilo / Apátrida / Desplazados o protección internacional", "Residencia Larga Duración", "Permiso de Residencia y Trabajo"]
       ];
-            
-      function mostrarModal(mensaje) {
-        document.getElementById("modal-texto").textContent = mensaje;
-        document.getElementById("mi-modal").classList.remove("hidden");
+
+      /* ==========================
+         Utilidades: mostrar/ocultar
+         ========================== */
+      const $ = id => document.getElementById(id);
+      function show(el){ if(el) el.classList.remove('hidden'); }
+      function hide(el){ if(el) el.classList.add('hidden'); }
+
+      /* ==========================
+         Carga inicial: JSON y eventos
+         ========================== */
+      document.addEventListener('DOMContentLoaded', () => {
+        // cargar datos JSON
+        fetch(JSON_PATH)
+          .then(r => {
+            if(!r.ok) throw new Error('No se pudo cargar el JSON: ' + r.status);
+            return r.json();
+          })
+          .then(data => {
+            registros = Array.isArray(data) ? data : [];
+          })
+          .catch(err => {
+            console.error(err);
+            mostrarModalSimple('No se pudo leer SituacionesAdministrativas.json. Comprueba que está en la misma carpeta.');
+          });
+
+        // eventos
+        $('buscarBtn').addEventListener('click', () => { ocultar_resultado(); buscar(); });
+      });
+
+      /* ==========================
+         UI: navegación entre pantallas
+         ========================== */
+      function mostrarFormularioComunitario(){
+        hide($('pagina_inicial'));
+        show($('Doc_Necesaria_Comunitario'));
       }
-      
-      function cerrarModal() {
-        document.getElementById("mi-modal").classList.add("hidden");
+      function mostrarFormularioNoComunitario(){
+        // abrir modal inscripción (SI/NO)
+        show($('modalInscrito'));
       }
-      
-      function mostrarFormularioComunitario() {
-        document.getElementById("pagina_inicial").classList.add("hidden");
-        document.getElementById("Doc_Necesaria_Comunitario").classList.remove("hidden");
-      }      
-      
-      function mostrarFormulario() {
-        detenerHablaAvatar(); // ✅ detener habla al pulsar
-        document.getElementById("manual").classList.add("hidden");
-        document.getElementById("formulario").classList.remove("hidden");
+      function cerrarModalInscrito(){ hide($('modalInscrito')); }
+      function guardarEstado(valor){
+        estadoInscrito = (valor||'').toString().toUpperCase();
+        hide($('modalInscrito'));
+        mostrarFormularioBusqueda();
       }
-      function volverInicioDesdeFormulario() {
-        document.getElementById("search-box").value = "";
-        document.getElementById("formulario").classList.add("hidden");
-        document.getElementById("manual").classList.remove("hidden");
-        document.getElementById("buscarBtn").classList.remove("hidden");
+      function mostrarFormularioBusqueda(){
+        hide($('pagina_inicial'));
+        hide($('Doc_Necesaria_Comunitario'));
+        show($('formulario'));
+        // al abrir buscador, ocultar panel sugerencias y detalle
+        hide($('sugerenciasPanel'));
+        hide($('detalleFinal'));
+        $('search-box').focus();
       }
-      function volverInicio() {
-        detenerHablaAvatar(); // ✅ detener habla al pulsar
-        document.getElementById("pagina_inicial").classList.remove("hidden");
-        document.getElementById("formulario").classList.add("hidden");
-        document.getElementById("manual").classList.add("hidden");
-        document.getElementById("Doc_Necesaria_Comunitario").classList.add("hidden");
-        document.getElementById("formulario_No_Comunitario").classList.add("hidden");
-        document.getElementById("manual").classList.add("hidden");  
-        document.getElementById("mensaje-aclaratorio").classList.add("hidden");  
+      function volverNacionalidad(){
+        hide($('Doc_Necesaria_Comunitario'));
+        hide($('formulario'));
+        show($('pagina_inicial'));
       }
-      function volverNacionalidad() {
-        document.getElementById("Doc_Necesaria_Comunitario").classList.add("hidden");
-        document.getElementById("formulario_No_Comunitario").classList.add("hidden");
-        document.getElementById("pagina_inicial").classList.remove("hidden");
+      function volverInicioDesdeFormulario(){
+        limpiarChecksSugerencias();
+        hide($('formulario'));
+        show($('pagina_inicial'));
       }
-      
-      function volverNoComunitario() {
-        detenerHablaAvatar(); // ✅ detener habla al pulsar
-        document.getElementById("manual").classList.add("hidden");  
-        document.getElementById("mensaje-aclaratorio").classList.add("hidden");
-        document.getElementById("formulario_No_Comunitario").classList.remove("hidden");
-        document.getElementById("avatarFlotante").classList.add("hidden");
+
+      /* ==========================
+         Borrar / limpiar búsquedas
+         ========================== */
+      function preguntarBorrado(evt){
+        const ta = $('search-box');
+        if(ta && ta.value.trim() !== ''){
+          // abrir modal borrar (confirmación)
+          show($('modal-borrar'));
+        }
       }
-      
-      function mostrarResultado(data) {
-        const contenedor = document.getElementById("resultado");
-        contenedor.innerHTML = ""; // Limpiar resultados anteriores
-      
-        if (!data || data.length === 0) {
-          const ayuda = document.createElement("p");
-          ayuda.innerHTML = `
-            <p style="text-align: center;">No se encontró nada. Si necesitas ayuda, puedes clicar en: 
-            <button class="btn-small" onclick="mostrarSugerencias()">Mostrar sugerencias</button></p>
-          `;
-          contenedor.appendChild(ayuda);
+      function cerrarModalBorrar(){ hide($('modal-borrar')); $('search-box').focus(); }
+      function confirmarBorrado(){
+        // atajos: eliminar texto y ocultar resultados
+        $('search-box').value = '';
+        limpiarBusquedaConfirmada();
+      }
+      function limpiarBusquedaConfirmada(){
+        // limpia caja de búsqueda, oculta resultados/sugerencias y limpia checks
+        $('search-box').value = '';
+        hide($('resultado'));
+        hide($('sugerenciasPanel'));
+        limpiarChecksSugerencias();
+        cerrarModalBorrar();
+      }
+
+      /* ==========================
+         Sugerencias: render, lógica combinatoria
+         ========================== */
+      function mostrarSugerencias(){
+        const panel = $('sugerenciasPanel');
+        const form = $('sugerenciasForm');
+        // render
+        const primera = conceptosClave.slice(0,7);
+        const segunda = conceptosClave.slice(7);
+        const col1 = primera.map(c => `<label><input type="checkbox" value="${escapeHtml(c)}"> ${escapeHtml(c)}</label>`).join('');
+        const col2 = segunda.map(c => `<label><input type="checkbox" value="${escapeHtml(c)}"> ${escapeHtml(c)}</label>`).join('');
+        form.innerHTML = `<div class="columna-izq">${col1}</div><div class="columna-der">${col2}</div>`;
+        anadirEventosCheck();
+        actualizarDisponibles();
+        // abrir panel
+        panel.classList.add('visible');
+        panel.classList.remove('hidden');
+        panel.setAttribute('aria-hidden','false');
+      }
+
+      function ocultarSugerencias(){
+        const panel = $('sugerenciasPanel');
+        panel.classList.remove('visible');
+        setTimeout(()=>{ panel.classList.add('hidden'); panel.setAttribute('aria-hidden','true'); }, 450);
+      }
+
+      function anadirEventosCheck(){
+        const checks = document.querySelectorAll('#sugerenciasForm input[type="checkbox"]');
+        checks.forEach(cb => cb.addEventListener('change', actualizarDisponibles));
+      }
+
+      function actualizarDisponibles(){
+        const checkboxes = Array.from(document.querySelectorAll('#sugerenciasForm input[type="checkbox"]'));
+        const labels = Array.from(document.querySelectorAll('#sugerenciasForm label'));
+        const seleccionados = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
+        if(seleccionados.length === 0){
+          checkboxes.forEach(cb => cb.disabled = false);
+          labels.forEach(l => l.classList.remove('disabled'));
           return;
         }
-      
-        // Crear tabla
-        const tabla = document.createElement("table");
-      
-        // Cabecera
-        tabla.innerHTML = `
+        function esCompatible(candidato){
+          return combinacionesValidas.some(comb => {
+            if(!comb.includes(candidato)) return false;
+            return seleccionados.every(sel => comb.includes(sel));
+          });
+        }
+        checkboxes.forEach(cb => {
+          const label = cb.closest('label');
+          if(seleccionados.includes(cb.value)){
+            cb.disabled = false;
+            label && label.classList.remove('disabled');
+          } else {
+            if(esCompatible(cb.value)){
+              cb.disabled = false;
+              label && label.classList.remove('disabled');
+            } else {
+              cb.disabled = true;
+              label && label.classList.add('disabled');
+            }
+          }
+        });
+      }
+
+      function limpiarChecksSugerencias(){
+        const all = document.querySelectorAll('#sugerenciasForm input[type="checkbox"]');
+        all.forEach(c => c.checked = false);
+        // quitar clases disabled si las hubiera
+        const labels = document.querySelectorAll('#sugerenciasForm label');
+        labels.forEach(l => l.classList.remove('disabled'));
+      }
+
+      /* ==========================
+         Buscar: lógica principal (ANVERSO + REVERSO + OBSERVACIONES)
+         ========================== */
+      function escapeHtml(str){
+        return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      async function buscar(palabrasDesdeSugerencias = null){
+        const textoRaw = (palabrasDesdeSugerencias && palabrasDesdeSugerencias.length>0)
+          ? palabrasDesdeSugerencias.join(' ')
+          : document.getElementById('search-box').value.trim();
+
+        const texto = (textoRaw || '').toUpperCase().trim();
+        if(!texto){
+          mostrarModalSimple('Por favor, introduce un texto para buscar o usa las sugerencias.');
+          return;
+        }
+
+        // preparar array de palabras (AND)
+        const palabras = texto.split(/\s+/).filter(Boolean).map(p => p.replace(/[^\wÀ-ÿ-]/g,'').toUpperCase());
+
+        $('loader').style.display='block';
+        hide($('resultado'));
+        hide($('detalleFinal'));
+
+        // filtrar registros en memoria (registros)
+        const resultados = registros.filter(reg=>{
+          // 1) filtro por '¿Inscrito anteriormente?' según estadoInscrito
+          const campoInscrito = ((reg["¿Inscrito anteriormente?"]||'') + '').trim().toUpperCase();
+          if(campoInscrito === 'SI' && estadoInscrito !== 'SI') return false;
+          if(campoInscrito === 'NO' && estadoInscrito !== 'NO') return false;
+          // 2) comprobación de palabras en ANVERSO, REVERSO, OBSERVACIONES
+          const anverso = (reg.ANVERSO || '').toString().toUpperCase();
+          const reverso = (reg.REVERSO || '').toString().toUpperCase();
+          const obs = (reg.OBSERVACIONES || reg.Observaciones || '').toString().toUpperCase();
+          return palabras.every(p => (anverso.includes(p) || reverso.includes(p) || obs.includes(p)));
+        });
+
+        ultimosResultados = resultados; // guardar
+        renderResultados(resultados);
+
+        // reglas: si no hay resultados → mostrar sugerencias
+        if(resultados.length === 0){
+          // mostrar panel sugerencias
+          showSugerenciasPanel();
+        } else {
+          hideSugerenciasPanel();
+        }
+
+        $('loader').style.display='none';
+      }
+
+      function showSugerenciasPanel(){
+        // render and show panel
+        mostrarSugerencias();
+      }
+      function hideSugerenciasPanel(){
+        hide($('sugerenciasPanel'));
+        $('sugerenciasPanel').classList.remove('visible');
+        limpiarChecksSugerencias();
+      }
+
+      /* ==========================
+         Render tabla de resultados
+         ========================== */
+      function renderResultados(data){
+        const cont = $('resultado');
+        cont.innerHTML = ''; // limpiar
+        if(!data || data.length === 0){
+          cont.innerHTML = `<p style="text-align:center;margin:12px 0">No se encontró nada. Prueba con otras palabras o usa <button class="btn-small" onclick="mostrarSugerencias()">Mostrar sugerencias</button>.</p>`;
+          show(cont);
+          return;
+        }
+
+        // crear tabla con la cabecera solicitada
+        const table = document.createElement('table');
+        table.innerHTML = `
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Autorización</th>
-              <th>Modalidad</th>
-              <th>Observaciones</th>
+              <th class="radio-cell"></th>
+              <th>ANVERSO – REVERSO</th>
+              <th>INSCRIPCIÓN EN SILA</th>
+              <th>¿Autoriza a Trabajar?</th>
+              <th>Tipo de Demanda</th>
+              <th>OBSERVACIONES</th>
               <th>Documentación</th>
             </tr>
           </thead>
           <tbody></tbody>
         `;
-      
-        const cuerpo = tabla.querySelector("tbody");
-      
-        // Filas
-        data.forEach(item => {
-          const fila = document.createElement("tr");
+        const tbody = table.querySelector('tbody');
+
+        data.forEach((item, idx) => {
+          const titleLine = `${escapeHtml(item.ANVERSO || '')} — ${escapeHtml(item.REVERSO || '')}`;
+          const fila = document.createElement('tr');
+          fila.className = 'res-row';
           fila.innerHTML = `
-            <td>${item.codigo || ""}</td>
-            <td>${(item.autoriza || "").replace(/\n/g, "<br>")}</td>
-            <td>${(item.modalidad || "").replace(/\n/g, "<br>")}</td>
-            <td>${(item.observaciones || "").replace(/\n/g, "<br>")}</td>
-            <td> ${item.documento
-                ? `<a href="${item.documento}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
-                : "No disponible"}
+            <td class="radio-cell">
+              <input type="radio" name="seleccion" id="sel_${idx}" data-index="${idx}">
             </td>
-      
+            <td><div class="titulo-principal">${titleLine}</div></td>
+            <td>${escapeHtml(item["INSCRIPCIÓN EN SILA"] || item["Inscripción en SILA"] || '')}</td>
+            <td>${escapeHtml(item["¿Autoriza a Trabajar?"] || item["Autoriza"] || '')}</td>
+            <td>${escapeHtml(item["Tipo de Demanda"] || '')}</td>
+            <td>${escapeHtml(item["OBSERVACIONES"] || item["Observaciones"] || '')}</td>
+            <td>${formatDocumentoCell(item["Documentación"] || item["documentación"] || '')}</td>
           `;
-          cuerpo.appendChild(fila);
+          tbody.appendChild(fila);
+
+          // evento selección
+          const radio = fila.querySelector('input[type="radio"]');
+          radio.addEventListener('change', () => {
+            mostrarRegistroFinal(item, titleLine);
+          });
         });
-      
-        contenedor.appendChild(tabla);
+
+        cont.appendChild(table);
+        show(cont);
       }
-      
-      
-      function mostrarSugerencias() {
-        const panel = document.getElementById("sugerenciasPanel");
-        const form = document.getElementById("sugerenciasForm");
-      
-        // Mostrar el panel con animación (quita clase hidden y añade visible con delay)
-        panel.classList.remove("hidden");
-        setTimeout(() => panel.classList.add("visible"), 100);
-      
-        // Dividir conceptos en dos columnas de 7 elementos
-        const primeraColumna = conceptosClave.slice(0, 7);
-        const segundaColumna = conceptosClave.slice(7, 14);
-      
-        // Crear contenido HTML para ambas columnas dentro del formulario
-        const col1HTML = primeraColumna.map(c =>
-          `<label><input type="checkbox" name="concepto" value="${c}"> ${c}</label>`
-        ).join("");
-      
-        const col2HTML = segundaColumna.map(c =>
-          `<label><input type="checkbox" name="concepto" value="${c}"> ${c}</label>`
-        ).join("");
-      
-        // Insertar el contenido en el formulario (sugerenciasForm)
-        form.innerHTML = `
-          <div class="columna-izq">${col1HTML}</div>
-          <div class="columna-der">${col2HTML}</div>
-        `;
-        anadirEventosCheck();
-        actualizarDisponibles();  
+
+      function formatDocumentoCell(valor){
+        if(!valor) return 'No disponible';
+        // si es URL simple, mostrar enlace; si contiene texto largo, mostrarlo truncado
+        const s = (valor||'').toString();
+        if(s.startsWith('http') || s.endsWith('.pdf')) return `<a href="${s}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`;
+        return escapeHtml(s);
       }
-      
-      function ocultarSugerencias() {
-        const panel = document.getElementById("sugerenciasPanel");
-        panel.classList.remove("visible");
-        setTimeout(() => panel.classList.add("hidden"), 600);
-      }
-      
-      function mostrarAyudaConceptos() {
-        const container = document.getElementById("resultado");
-        const lista = conceptosClave.map(c => `<li>${c}</li>`).join("");
-        container.innerHTML = `
-          <h3 style="color: #007A33;">Conceptos que puedes utilizar:</h3>
-          <ul style="text-align: left; max-width: 700px; margin: 20px auto; font-size: 16px; line-height: 1.6;">
-            ${lista}
-          </ul>
-          <div style="text-align: center; margin-top: 20px;">
-            <button class="btn-small" onclick="document.getElementById('resultado').classList.add('hidden');">← Ocultar ayuda</button>
-          </div>`;
-      }
-      
-      
-      // 🔎 Nueva función buscar()
-      async function buscar() {
-      const searchText = document.getElementById("search-box").value.trim();
-      const opcionesMarcadas = []; // si usas checkboxes en sugerencias, aquí se pasan
-      
-      if (!searchText) {
-        mostrarModal("Por favor, introduce un texto para buscar.");
-        return;
-      }
-      
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("resultado").classList.add("hidden");
-      
-      try {
-        const response = await fetch(WEBAPP_URL, {
-          method: "POST",
-          body: JSON.stringify({ searchText, opcionesMarcadas })
+
+      /* ==========================
+         Al seleccionar un resultado -> mostrar ficha completa
+         ========================== */
+      function mostrarRegistroFinal(reg, titulo){
+        // rellenar ficha
+        $('fichaTitulo').innerHTML = titulo || (escapeHtml(reg.ANVERSO||'') + ' — ' + escapeHtml(reg.REVERSO||''));
+        const campos = [
+          {k: 'INSCRIPCIÓN EN SILA', label: 'Inscripción en SILA'},
+          {k: '¿Autoriza a Trabajar?', label: '¿Autoriza a Trabajar?'},
+          {k: 'Tipo de Demanda', label: 'Tipo de Demanda'},
+          {k: 'OBSERVACIONES', label: 'Observaciones'},
+          {k: 'Documentación', label: 'Documentación'}
+        ];
+
+        let html = '';
+        campos.forEach(c => {
+          const valor = reg[c.k] || reg[c.k.toLowerCase()] || reg[c.k.charAt(0)+c.k.slice(1).toLowerCase()] || '';
+          const v = (c.label === 'Documentación') ? formatDocumentoCell(valor) : escapeHtml(valor);
+          html += `<tr><th>${escapeHtml(c.label)}</th><td>${v}</td></tr>`;
         });
-      
-        if (!response.ok) throw new Error("Error en la petición");
-      
-        const data = await response.json();
-        mostrarResultado(data);
-      
-      } catch (err) {
-        console.error(err);
-        mostrarModal("Error al conectar con el servidor.");
-      } finally {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("resultado").classList.remove("hidden");
+
+        $('tablaFinal').innerHTML = html;
+        // mostrar detalle
+        show($('detalleFinal'));
+        $('detalleFinal').setAttribute('aria-hidden','false');
+        // opcional: ocultar resultados para foco en ficha (si prefieres mantener tabla visible, comenta la siguiente línea)
+        hide($('resultado'));
+        // siempre ocultar panel sugerencias
+        hideSugerenciasPanel();
+        // scroll a detalle
+        setTimeout(()=> { document.getElementById('detalleFinal').scrollIntoView({behavior:'smooth'}); }, 80);
       }
+
+      function volverBuscar(){
+        hide($('detalleFinal'));
+        show($('resultado'));
+        $('resultado').scrollIntoView({behavior:'smooth'});
       }
-      
-      // Reemplazamos onclick del botón Buscar
-      document.getElementById("buscarBtn").onclick = () => {
-      ocultar_resultado();
-      buscar();
-      };
-      
-      // Modificamos buscarDesdeSugerencias()
-      function buscarDesdeSugerencias() {
-      const checkboxes = document.querySelectorAll('#sugerenciasForm input[type="checkbox"]:checked');
-      const seleccionados = Array.from(checkboxes).map(cb => cb.value);
-      
-      if (seleccionados.length === 0) {
-        alert("Debes seleccionar al menos un concepto.");
-        return;
-      }
-      
-      let conceptoBusqueda = null;
-      
-      if (seleccionados.length === 1) {
-        conceptoBusqueda = seleccionados[0];
-      } else {
-        for (const combinacion of combinacionesValidas) {
-          const esSubconjunto = seleccionados.every(sel => combinacion.includes(sel));
-          if (esSubconjunto) {
-            conceptoBusqueda = combinacion[0];
-            break;
-          }
-        }
-        if (!conceptoBusqueda) {
-          alert("La combinación seleccionada no es válida.");
+
+      /* ==========================
+         Buscar desde Sugerencias
+         ========================== */
+      function buscarDesdeSugerencias(){
+        const checks = document.querySelectorAll('#sugerenciasForm input[type="checkbox"]:checked');
+        const seleccionados = Array.from(checks).map(cb => cb.value);
+        if(seleccionados.length === 0){
+          alert('Debes seleccionar al menos un concepto.');
           return;
         }
+        // lógica de combinaciones: si 1 => se usa esa; si varias => buscar combinación válida
+        let conceptoBusqueda = null;
+        if(seleccionados.length === 1) conceptoBusqueda = seleccionados[0];
+        else {
+          for(const comb of combinacionesValidas){
+            const esSub = seleccionados.every(s => comb.includes(s));
+            if(esSub){ conceptoBusqueda = comb[0]; break; }
+          }
+          if(!conceptoBusqueda){
+            alert('La combinación seleccionada no es válida.');
+            return;
+          }
+        }
+        // lanzar búsqueda con palabras (convertir en array de palabras)
+        const palabras = conceptoBusqueda.toUpperCase().split(/\s+/).filter(Boolean);
+        buscar(palabras);
+
+        // ocultar panel y limpiar checks
+        hideSugerenciasPanel();
+        limpiarChecksSugerencias();
       }
-      
-      document.getElementById("search-box").value = conceptoBusqueda;
-      buscar();
-      ocultarSugerencias();
+
+      /* ==========================
+         Helpers UI modal simple
+         ========================== */
+      function mostrarModalSimple(texto){
+        // usa modal-borrar temporalmente para mostrar texto simple
+        // creamos un modal pequeño temporal
+        const tmp = document.createElement('div');
+        tmp.className = 'modal';
+        tmp.innerHTML = `<div class="modal-content"><p>${escapeHtml(texto)}</p><div style="margin-top:12px"><button class="btn" id="tmpCerrar">Cerrar</button></div></div>`;
+        document.body.appendChild(tmp);
+        document.getElementById('tmpCerrar').addEventListener('click', ()=> { tmp.remove(); });
       }
-      
-      let estadoInscrito = "";  // se usará luego en el filtro
-      
-      function mostrarFormularioNoComunitario() {
-        document.getElementById("modalInscrito").classList.remove("hidden");
+
+      /* ==========================
+         Pequeñas utilidades adicionales
+         ========================== */
+      function ocultar_resultado(){ hide($('resultado')); }
+      // limpiar checks al volver a inicio (botón)
+      // También se ha integrado en volverInicioDesdeFormulario
+
+      // proteger contra errores de elementos inexistentes al usar show/hide
+      function hideSugerenciasPanel(){ hide($('sugerenciasPanel')); $('sugerenciasPanel').classList.remove('visible'); $('sugerenciasPanel').setAttribute('aria-hidden','true'); }
+      function limpiarChecksSugerenciasOnExit(){
+        limpiarChecksSugerencias();
+        hideSugerenciasPanel();
       }
-      
-      function guardarEstado(valor) {
-        estadoInscrito = valor;          // guarda si o no
-        document.getElementById("modalInscrito").classList.add("hidden");
-        mostrarFormularioBusqueda();     // y ahora abrimos buscador
-      }
-      
-      // esta función ya la tendrás… solo asegúrate que existe
-      function mostrarFormularioBusqueda() {
-        document.getElementById("pagina_inicial").classList.add("hidden");
-        document.getElementById("formulario").classList.remove("hidden");
-      }      
+
+      // cerrar modal borrar (NO borrar)
+      function cerrarModalBorrar(){ hide($('modal-borrar')); }
     </script>
   </body>
 </html>
+
