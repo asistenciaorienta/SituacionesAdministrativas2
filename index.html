@@ -12,6 +12,644 @@
     <!-- pixi-live2d-display con soporte Cubism 4 -->
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
     <style>
+      /* Hace que el body ocupe toda la altura de la ventana */
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        /*text-align: center;*/
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center; /* centrado horizontal */
+        align-items: center;     /* centrado vertical */ 
+      }
+      
+      #nacionalidad-page {
+        max-width: 870px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        padding: 30px 20px 0px;
+        margin: auto  auto 40px;
+      }
+      
+      h1 {
+        color: #007A33;
+        margin-bottom: 24px;
+      }
+      
+      h2 {
+        color: #007A33;
+        margin-bottom: 24px;
+      }
+      
+      h3 {
+        color: #007A33;
+        margin-bottom: 24px;
+      }
+      .btn {
+        background-color: #007A33;
+        color: white;
+        border: none;
+        padding: 14px 32px;
+        margin: 12px 14px;
+        font-size: 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,122,51,0.4);
+      }
+      
+      .btn:hover {
+        background-color: #005e29;
+        box-shadow: 0 4px 8px rgba(0,94,41,0.6);
+      }
+      
+      img {
+        max-width: 90%;
+        max-height: 70vh;
+        object-fit: contain;
+        border-radius: 12px;
+        margin: 20px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      
+      /* Estilos del formulario */
+      .card {
+        width: 870px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        overflow: hidden;
+        padding: 12px 16px;
+        margin: auto;
+        text-align: left;
+      }
+      
+      .search-container {
+        display: flex;
+        align-items: center;
+        border-radius: 12px;
+        overflow: hidden;
+        background-color: white;
+        box-shadow: 0 0 0 2px #007A33;
+        margin-bottom: 0px;
+      }
+      
+      #search-box {
+        width: 100%;
+        padding: 10px;
+        border: 0px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        resize: none;
+        box-sizing: border-box;
+      }
+      
+      .button-container {
+        text-align: center;
+        padding: 12px 0;
+        border-top: 1px solid #ddd;
+        margin-top: 10px;
+      }
+      
+      #buscarBtn {
+        background-color: #007A33;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      
+      .btn-small {
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 6px 16px;
+        font-size: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: none;
+        margin-top: 12px;
+        transition: background-color 0.3s ease;
+      }
+      
+      .btn-small:hover {
+        background-color: #bbb;
+        padding: 10px 20px;
+      }
+      
+      .nacionalidad-card {
+        text-align: center;
+        padding: 0;
+      }
+      
+      .botones-nacionalidad {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        flex-direction:column;
+        align-items:center;
+        gap:30px;       
+      }
+      
+      .btn-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+      
+      .tooltip-container {
+        position: absolute;
+        top: 15px;
+        left: 18px;
+      }
+      
+      .help-icon {
+        background-color: #FFFFFF;
+        color: #007A33;
+        border-radius: 30%;
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        z-index: 2;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
+      
+      .tooltip-text {
+        visibility: hidden;
+        width: 340px;
+        background-color: white;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        position: absolute;
+        top: 50px;
+        left: -100px;
+        z-index: 5;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        line-height: 1.5; /* Interlineado, 1.5 veces la altura de la fuente */  
+        text-align: justify;    /* justifica el texto */
+      }
+      
+      .tooltip-container:hover .tooltip-text {
+        visibility: visible;
+      }
+      
+      .document-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        /* max-width: 800px;*/
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        padding: 30px 20px 40px;
+        margin: auto  auto 40px;
+      }
+      
+      .document-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        color: #000;
+        cursor: pointer;
+      }
+      
+      .document-item input[type="radio"] {
+        appearance: none;
+        border: 2px solid #007A33;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        position: relative;
+        margin: 0;
+      }
+      
+      .document-item input[type="radio"]:checked::before {
+        content: "";
+        position: absolute;
+        background: #007A33;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        top: 3px;
+        left: 3px;
+      }
+      
+      .sub-options {
+        margin-left: 48px;
+        margin-top: -5px;
+        margin-bottom: 10px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .sub-options label {
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      
+      .sub-options input[type="radio"] {
+        appearance: none;
+        border: 2px solid #007A33;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        position: relative;
+        margin: 0;
+      }
+      
+      .sub-options input[type="radio"]:checked::before {
+        content: "";
+        position: absolute;
+        background: #007A33;
+        border-radius: 50%;
+        width: 8px;
+        height: 8px;
+        top: 3px;
+        left: 3px;
+      }
+      
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex; /* Para centrar el contenido */
+        justify-content: center; /* Centrado horizontal */
+        align-items: center; /* Centrado vertical */
+        z-index: 1000;
+      }
+      
+      .modal-content {  
+        text-align: center; /* centra el texto y botones dentro */
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 80%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      
+      #resultado table {
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin-top: 1rem;
+        border: 1px solid #ccc;  
+        border-collapse: collapse;        
+      }
+      
+      #resultado td {
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #eee;
+        background-color: #ffffff;
+      }
+      #resultado th {
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #eee;
+        background-color: #f5f5f5;
+      }
+      
+      #resultado.hidden {
+        display: none;
+      }
+      
+      .resultado-centrado {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      
+      .hidden {
+        display: none;
+      }
+      
+      .panel-sugerencias {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.6s ease;
+        background-color: #f5f5f5;
+      }
+      
+      .panel-sugerencias.visible {
+        max-height: 700px; /* suficiente para mostrar todo */
+      }
+      
+      .sugerencias-grid {
+        display: flex;
+        gap: 0px;
+        max-width: 900px;
+        margin: 0 auto 30px;
+      }
+      
+      .sugerencias-grid label input[type="checkbox"]:disabled + span,
+      .sugerencias-grid label input[type="checkbox"]:disabled {
+        filter: grayscale(100%);
+        cursor: not-allowed;
+      }
+      
+      .sugerencias-grid label.disabled {
+        color: #999999;
+        cursor: not-allowed;
+      }
+      
+      .columna-izq {
+        flex: 1.5;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      
+      .columna-der {
+        flex: 1.2;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      
+      .footer-logo {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 15px;
+      }
+      
+      .footer-logo .logo-text {
+        font-size: 14px;
+        font-weight: bold;
+        color: #007A33;
+        left: 0;
+      }
+      
+      .footer-logo img {
+        height: 70px;
+      }
+      
+      .footer-datos {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background-color: #f5f5f5;
+        color: #007A33;
+        font-size: 14px;
+        text-align: right;
+        padding: 10px 15px;
+        border-top-left-radius: 8px;
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+      }
+      #botonera {
+        position: absolute;/* position: fixed; */
+        top: 10px;
+        right: 10px;
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+      }
+      #inicio {  
+        top: 10px;
+        right: 10px;
+      }
+      #ayuda {
+        top: 70px;
+        right: 10px;
+      }
+      #avatarFlotante {
+        background: transparent !important;  
+        position: absolute;   /* relativo al contenedor (o body si no hay otro posicionado) */
+        top: 100px;             /* centrado vertical, antes top: 100px;*/
+        left: 50px;           /* pegado al borde izquierdo, antes 50px*/
+        width: 300px;
+        height: 400px;
+        overflow: visible;
+        z-index: 10;  
+        transform-origin: top left;
+        /*transition: transform 0.6s ease;*/
+        /* AÑADIR transiciones para top y left aquí  */
+        transition:
+          top    0.6s ease-out,
+          left   0.6s ease-out,
+          transform 0.5s ease-out;
+        /* Hint de rendimiento para GPU */
+        will-change: top, left, transform;
+      }
+      canvas {
+        background: transparent !important;
+      }
+      #live2dCanvas {
+        width: 100% !important;
+        height: 100% !important;
+        background: transparent !important;
+        display: block;
+      }
+      #textoAvatar {
+        position: absolute;
+        top: 275px; /* justo debajo del canvas (400px de alto + margen) */
+        left: 0px;
+        background-color: #DFE8DF; /* Fondo claro */
+        color: #000;            /* Texto negro */
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 1em;
+        max-width: 300px;
+        z-index: 10;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Sombra para profundidad */
+        display: block;
+        visibility: visible;
+        max-height: 400px; /* o el alto que uses normalmente */
+        transition: max-height 0.5s ease, opacity 0.5s ease; 
+      }
+      #textoAvatar::after {
+        content: "|";
+        animation: blink 1s infinite;
+      }
+      
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+      }
+      @keyframes entradaAvatar {
+        0% {
+          opacity: 0;
+          transform: translateY(30px) scale(0.75);/* 0.95 */
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .avatar-animado {
+        animation: entradaAvatar 0.6s ease-out;
+      }
+      @keyframes entradaRebote {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        60% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+        80% {
+          transform: scale(0.85);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      
+      .avatar-rebote {
+        animation: entradaRebote 0.6s ease-out;
+      }
+      .botonRespuesta {
+        margin: 10px 5px;
+        padding: 8px 16px;
+        font-size: 1em;
+        border: none;
+        border-radius: 8px;
+        background-color: #0078D4;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      
+      .botonRespuesta:hover {
+        background-color: #005a9e;
+      }
+      .burbujaRespuesta {
+        position: absolute;
+        padding: 12px 20px;
+        border-radius: 30px;
+        background-color: #007A33;
+        color: white;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: flotarBurbuja 0.6s ease-out;
+        transition: transform 0.3s, background-color 0.3s;
+        z-index: 10;
+      }
+      
+      .burbujaRespuesta:hover {
+        background-color: #005e29;
+        transform: scale(1.05);
+      }
+      
+      @keyframes flotarBurbuja {
+        0% {
+          opacity: 0;
+          transform: scale(0.5) translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      
+      #formulario_No_Comunitario {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      
+      #pagina_inicial {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      
+      #Doc_Necesaria_Comunitario {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      
+      #mensaje-aclaratorio {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      
+      #manual {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      
+      #formulario {
+        text-align: center; /* centra el texto y botones dentro */
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      .ocultoSuave {
+        opacity: 0;
+        transform: scale(0.95);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        pointer-events: none;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .ocultoDeslizado {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease, opacity 0.5s ease;
+      }
+      
+      /* 1) Define la animación de pulso */
+      @keyframes pulsoAvatar {
+        0%, 100% {
+          transform: scale(0.27);
+        }
+        50% {
+          transform: scale(0.32);
+        }
+      }
+      /* 2) Ajusta el origen de la transformación al centro */
+      #avatarFlotante.avatar-minimizado {
+        transform-origin: top left; /* ← esto es clave para posicionar bien */
+        transform: scale(0.30);        /* 300×0.2 = 60px, 400×0.2 = 80px */
+        animation: pulsoAvatar 3.6s ease-in-out infinite;
+      }
+      
       .btn-principal {
         background-color:#007A33;
         color:white;
@@ -25,6 +663,12 @@
         background-color:#007A33;
         font-size: 16px;
         padding: 12px 26px;
+      }
+      #modalInscrito h3 {
+        margin-bottom: 20px;
+        color:#007A33;
+        line-height:1.3;
+        font-size:20px;
       }
       
     </style>
