@@ -196,70 +196,106 @@
       }
     }
 
-    // Búsqueda
+    // Búsqueda — versión mejorada para evitar falsas negativas
     btnSearch.addEventListener('click', doSearch);
     searchInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') doSearch(); });
 
-    function normalize(s){ if(s==null) return ''; return String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase(); }
-
+    function normalize(s){
+      if(s==null) return '';
+      return String(s)
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu,'')         // quita tildes
+        .replace(/[^\p{L}\p{N}]+/gu,' ')       // reemplaza todo lo que no sea letra/dígito por espacio
+        .toLowerCase()
+        .trim();
+    }
+    // lista corta de stopwords comunes en búsquedas que no aportan (artículos, preposiciones)
+    const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
+    
     function doSearch(){
       resultsEl.innerHTML = '';
       detailCard.style.display='none';
       selectedIndex = null;
-
+    
       const q = searchInput.value.trim();
       if(!q){ resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
-
-      const words = q.split(/\s+/).map(w=>normalize(w)).filter(Boolean);
-      if(words.length===0){ resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
-
+    
+      const tokens = tokenizeQuery(q);
+      if(tokens.length===0){ resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
+    
+      const fullQueryNormalized = normalize(q);
+    
       const matches = [];
-
+    
       db.forEach((rec, idx)=>{
-        // conform to the rules: consider record if '¿Inscrito anteriormente?' is blank OR equals the stored answer
+        // aplicar filtro de '¿Inscrito anteriormente?' (campo puede tener variantes de nombre)
         const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?', 'Inscrito anteriormente', 'INSCRITO ANTERIORMENTE', 'inscrito anteriormente']);
         const valInscritoAnteriorNormalized = valInscritoAnterior==null ? '' : String(valInscritoAnterior).trim().toUpperCase();
-        // include record if blank OR equals the user answer
         const includeByInscrito = (valInscritoAnteriorNormalized === '') || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
-        if(!includeByInscrito) return; // skip
-
-        // combine ANVERSO and REVERSO
-        const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso']) || '');
-        const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso']) || '');
+        if(!includeByInscrito) return;
+    
+        // combinar ANVERSO y REVERSO (normalizados)
+        const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+        const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+        const anverso = normalize(anversoRaw);
+        const reverso = normalize(reversoRaw);
         const combined = `${anverso} ${reverso}`.trim();
-
-        // all words must be present across the two fields combined
-        const allPresent = words.every(w => combined.includes(w));
-        if(allPresent) matches.push({rec, idx});
+    
+        // 1) si la query normalizada completa aparece como substring -> match
+        if(fullQueryNormalized && combined.includes(fullQueryNormalized)){
+          matches.push({rec, idx});
+          return;
+        }
+    
+        // 2) comprobar que todos los tokens relevantes estén presentes (pueden distribuirse entre anverso y reverso)
+        const allPresent = tokens.every(tok => (anverso.includes(tok) || reverso.includes(tok) || combined.includes(tok)));
+        if(allPresent) { matches.push({rec, idx}); return; }
+    
+        // 3) fallback: si está al menos el 75% de tokens -> match (tolerancia)
+        let presentCount = 0;
+        tokens.forEach(tok=>{ if(anverso.includes(tok) || reverso.includes(tok) || combined.includes(tok)) presentCount++; });
+        if(tokens.length>0 && (presentCount / tokens.length) >= 0.75){ matches.push({rec, idx}); return; }
+    
+        // si no cumple ninguna, no coincide
       });
-
+    
       if(matches.length===0){ resultsEl.innerHTML = '<div class="small">No se han encontrado registros que contengan todas las palabras en ANVERSO/REVERSO con el filtro aplicado.</div>'; countResults.textContent='0'; return; }
-
+    
       // render matches
       countResults.textContent = String(matches.length);
-      matches.forEach((m, i)=>{
+      matches.forEach((m)=>{
         const rec = m.rec;
         const wrapper = document.createElement('div'); wrapper.className='result-item';
         const chkWrap = document.createElement('div'); chkWrap.className='check';
-
-        // Use a checkbox but enforce single selection via JS
+    
         const chk = document.createElement('input'); chk.type='checkbox'; chk.name='selectRec'; chk.dataset.index = m.idx;
         chk.addEventListener('change', onSelectRecord);
         chkWrap.appendChild(chk);
-
+    
         const content = document.createElement('div'); content.style.flex='1';
         const title = document.createElement('h3');
-        const anversoVal = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+        const anversoVal = anversoPreview(rec) || '';
         const reversoVal = getField(rec, ['REVERSO','Reverso','reverso']) || '';
         title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0,80) : 'Registro sin ANVERSO/REVERSO');
         const p = document.createElement('p'); p.textContent = (reversoVal ? reversoVal : '').substring(0,220);
         content.appendChild(title); content.appendChild(p);
-
+    
         wrapper.appendChild(chkWrap); wrapper.appendChild(content);
         resultsEl.appendChild(wrapper);
       });
     }
-
+    function tokenizeQuery(q){
+      const norm = normalize(q);
+      if(!norm) return [];
+      const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+      const filtered = toks.filter(t=>!STOPWORDS.has(t));
+      return filtered.length>0 ? filtered : toks;
+    }    
+    function anversoPreview(rec){
+      const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+      return av.split('\\n')[0].substring(0,120);
+    }
+    
     function onSelectRecord(e){
       // uncheck others
       const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
