@@ -22,6 +22,7 @@ body{
   font-family: Arial, sans-serif;
   background:#f5f5f5;
   min-height:100vh;
+  display:block; 
 }
 
 /* centrado solo del bloque inicial */
@@ -89,7 +90,23 @@ h2{
     /* Modal */
     
     .modal-backdrop{   text-align: center; /* centra el texto y botones dentro */   background: #f9f9f9;   padding: 40px;   border-radius: 12px;   box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-    .modal{background:var(--card-bg);border-radius:12px;max-width:720px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.15);padding:18px}
+    .modal {
+      background: var(--card-bg);
+      border-radius: 12px;
+      max-width: 720px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      padding: 18px;
+    
+      opacity: 0;
+      transform: scale(.92);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    
+    .modal.show {
+      opacity: 1;
+      transform: scale(1);
+    }    
     .modal h2{margin:0 0 8px}
     .modal .muted{color:var(--muted);font-size:14px}
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
@@ -233,7 +250,18 @@ h2{
 .btn-comunitario-wrapper .help-icon:hover + .tooltip-text{
   display:block;
 }
-    
+#modalComunitarioBackdrop,
+#modalNoComunitarioBackdrop {
+  display:none;   /* ocultos desde inicio */
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  inset:0;
+  background: rgba(0,122,51,0.35); /* verde SAE con transparencia */
+  backdrop-filter: blur(3px);
+}    
   </style>
 </head>
 <body>
@@ -379,8 +407,8 @@ h2{
     let selectedIndex = null;
 
     // Abrir modal comunitario
-    btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; modalComunitarioBackdrop.style.display='flex'; });
-    closeComunitario.addEventListener('click',()=>{ modalComunitarioBackdrop.style.display='none'; });
+    btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; openModal('modalComunitario'); });
+    closeComunitario.addEventListener('click',()=>{ closeModal('modalComunitario'); });
     modalComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalComunitarioBackdrop) modalComunitarioBackdrop.style.display='none'; });
 
     // No comunitario flow
@@ -561,9 +589,32 @@ h2{
     function escapeHtml(unsafe) {
       return unsafe.replace(/[&<"'>]/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m];});
     }
+    
+function openModal(modalBackdropId){
+  const bd = document.getElementById(modalBackdropId);
+  if(!bd) return;
+  bd.style.display='flex';
 
-    // Para facilitar pruebas: si quieres precargar búsqueda, puedes poner texto aquí
-    // searchInput.value = 'moraleda zafayona';
+  const mdl = bd.querySelector('.modal');
+  if(mdl){
+    // necesario para que el transition se ejecute
+    requestAnimationFrame(()=> mdl.classList.add('show'));
+  }
+}
+
+function closeModal(modalBackdropId){
+  const bd = document.getElementById(modalBackdropId);
+  if(!bd) return;
+
+  const mdl = bd.querySelector('.modal');
+  if(mdl){
+    mdl.classList.remove('show');
+    setTimeout(()=>{ bd.style.display='none'; }, 200);
+  } else {
+    bd.style.display='none';
+  }
+}
+
 
   </script>
 </body>
