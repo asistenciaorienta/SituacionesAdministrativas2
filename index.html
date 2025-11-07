@@ -41,7 +41,7 @@ header{
 
 /* logo más pequeño */
 header img{
-  width:68px;
+  width:auto;
   height:auto;
   object-fit:contain;
 }
@@ -76,9 +76,6 @@ header h1{
       color: #007A33;
       margin-bottom: 24px;
     }
-    .container{max-width:980px;margin:28px auto;padding:20px}
-    header{display:flex;align-items:center;gap:16px}
-    .logo{width:72px;height:72px;object-fit:contain;border-radius:8px}
     p.lead{margin:6px 0 0;color:var(--muted)}
 
     /* Botones principales */
@@ -176,6 +173,50 @@ header h1{
   z-index: 2;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }    
+.btn-comunitario-wrapper{
+  position:relative;
+  padding-right:34px; /* espacio para el ? dentro */
+}
+
+.btn-comunitario-wrapper .help-icon{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  background:white;
+  color:var(--sae-green);
+  border-radius:50%;
+  width:20px;
+  height:20px;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  line-height:20px;
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* tooltip */
+.btn-comunitario-wrapper .tooltip-text{
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  background:white;
+  border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  padding:10px 14px;
+  width:260px;
+  font-size:13px;
+  color:var(--muted);
+  display:none;
+  z-index:5;
+}
+
+/* solo se activa al pasar por el ? */
+.btn-comunitario-wrapper .help-icon:hover + .tooltip-text{
+  display:block;
+}
+    
   </style>
 </head>
 <body>
@@ -199,17 +240,17 @@ header h1{
           <h2>Selecciona el Origen de la persona usuaria</h2>
           <div class="botones-nacionalidad">
             <div class="btn-wrapper">
-              <button id="btnComunitario" class="btn btn-comunitario">Comunitario</button>
-              <span class="tooltip-container">
+              <button id="btnComunitario" class="btn btn-comunitario btn-comunitario-wrapper">
+                Comunitario
                 <span class="help-icon">?</span>
-                <div class="tooltip-text">
+                <span class="tooltip-text">
                   <strong>Países comunitarios:</strong><br>
-                    Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
-                    Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
-                    Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
-                    Islandia, Liechtenstein, Noruega, Suiza.
-                </div>
-              </span>
+                  Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
+                  Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
+                  Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
+                  Islandia, Liechtenstein, Noruega, Suiza.
+                </span>
+              </button>
             </div>
             <button id="btnNoComunitario" class="btn btn-nocomunitario">No comunitario</button>
           </div>
