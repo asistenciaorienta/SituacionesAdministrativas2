@@ -21,12 +21,18 @@
 body{
   font-family: Arial, sans-serif;
   background:#f5f5f5;
+  min-height:100vh;
+}
+
+/* centrado solo del bloque inicial */
+#pagina_inicial{
+  width:100%;
+  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
-  padding-top:90px; /* deja espacio para el header */
 }
+
 /* --- HEADER NUEVO --- */
 header{
   width:100%;
@@ -59,12 +65,7 @@ header h1{
   margin-top:2rem;
   color: #007A33;
 }
-#pagina_inicial{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}    
+
 #nacionalidad-page{
   max-width:870px;
   background:white;
@@ -94,7 +95,22 @@ h2{
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
 
     /* Search UI */
-    .search-area{display:none;margin-top:18px;background:var(--glass);padding:16px;border-radius:10px}
+.search-area{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  margin:auto;
+  width:100%;
+  max-width:960px;
+  display:none;
+  background:white;
+  padding:24px;
+  overflow:auto;
+  border-radius:0;
+}
+    
     .search-row{display:flex;gap:10px;align-items:center}
     input[type=text]{flex:1;padding:10px;border-radius:8px;border:1px solid #dfeee0}
     .small{font-size:13px;color:var(--muted)}
@@ -310,7 +326,6 @@ h2{
       </div>
     </div>
 
-    <!-- Pie de página fijo -->
     <footer>
       <div class="footer-logo">
         <div class="logo-text">Dirección Provincial de Granada</div>
@@ -344,7 +359,7 @@ h2{
     const modalComunitarioBackdrop = document.getElementById('modalComunitarioBackdrop');
     const closeComunitario = document.getElementById('closeComunitario');
 
-    const btnNoComunitario = document.getElementById('btnNoComunitario');
+    const o = document.getElementById('btnNoComunitario');
     const modalNoComunitarioBackdrop = document.getElementById('modalNoComunitarioBackdrop');
     const closeNoComunitario = document.getElementById('closeNoComunitario');
     const inscritoSi = document.getElementById('inscritoSi');
@@ -364,7 +379,7 @@ h2{
     let selectedIndex = null;
 
     // Abrir modal comunitario
-    btnComunitario.addEventListener('click',()=>{ modalComunitarioBackdrop.style.display='flex'; });
+    btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; modalComunitarioBackdrop.style.display='flex'; });
     closeComunitario.addEventListener('click',()=>{ modalComunitarioBackdrop.style.display='none'; });
     modalComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalComunitarioBackdrop) modalComunitarioBackdrop.style.display='none'; });
 
@@ -373,8 +388,13 @@ h2{
     closeNoComunitario.addEventListener('click',()=>{ modalNoComunitarioBackdrop.style.display='none'; });
     modalNoComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalNoComunitarioBackdrop) modalNoComunitarioBackdrop.style.display='none'; });
 
-    inscritoSi.addEventListener('click',()=>{ setInscritoAnswer('SI'); modalNoComunitarioBackdrop.style.display='none'; openSearchArea(); });
-    inscritoNo.addEventListener('click',()=>{ setInscritoAnswer('NO'); modalNoComunitarioBackdrop.style.display='none'; openSearchArea(); });
+    inscritoSi.addEventListener('click',()=>{ 
+      setInscritoAnswer('SI');
+      modalNoComunitarioBackdrop.style.display='none'; 
+      document.getElementById('pagina_inicial').style.display='none'; // <- A
+      openSearchArea(); 
+    });
+    inscritoNo.addEventListener('click',()=>{ setInscritoAnswer('NO'); modalNoComunitarioBackdrop.style.display='none'; document.getElementById('pagina_inicial').style.display='none'; openSearchArea(); });
 
     function setInscritoAnswer(val){
       userInscritoAnswer = val;
@@ -383,7 +403,7 @@ h2{
     }
 
     function openSearchArea(){
-      searchArea.style.display = 'block';
+      searchArea.style.display="flex";
       // load data if not loaded
       if(db.length===0) loadJSON();
     }
