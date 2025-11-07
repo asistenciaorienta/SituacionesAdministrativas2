@@ -124,11 +124,12 @@
   <script>
     // --- Utilidades para leer campos con posibles variantes de nombre ---
     function getField(obj, possibleNames){
+      const keys = Object.keys(obj);
       for(const n of possibleNames){
-        if(n in obj) return obj[n];
-        // try trimmed / uppercase / lowercase variations
-        for(const key of Object.keys(obj)){
-          if(key.trim().toLowerCase() === n.trim().toLowerCase()) return obj[key];
+        // normalizamos el nombre buscado
+        const normN = n.trim().toLowerCase();
+        for(const key of keys){
+          if(key.trim().toLowerCase() === normN) return obj[key];
         }
       }
       return undefined;
@@ -236,7 +237,7 @@
     
         // combinar ANVERSO y REVERSO (normalizados)
         const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
-        const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+        const reversoRaw = getField(rec, ['REVERSO',' Reverso',' Reverso',' REVERSO','Reverso','reverso']) || '';
         const anverso = normalize(anversoRaw);
         const reverso = normalize(reversoRaw);
         const combined = `${anverso} ${reverso}`.trim();
