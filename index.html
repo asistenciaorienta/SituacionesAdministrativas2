@@ -42,8 +42,9 @@ header{
 /* logo más pequeño */
 header img{
   width:auto;
-  height:50px;
+  height:60px;
   object-fit:contain;
+  margin-left: 1rem;
 }
 
 /* título centrado arriba */
@@ -85,7 +86,8 @@ h2{
     .btn-nocomunitario{background:var(--sae-green);color:#fff;min-width:220px;font-size:18px}
 
     /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,18,10,0.45);display:none;align-items:center;justify-content:center;padding:20px}
+    
+    .modal-backdrop{   text-align: center; /* centra el texto y botones dentro */   background: #f9f9f9;   padding: 40px;   border-radius: 12px;   box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
     .modal{background:var(--card-bg);border-radius:12px;max-width:720px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.15);padding:18px}
     .modal h2{margin:0 0 8px}
     .modal .muted{color:var(--muted);font-size:14px}
@@ -256,6 +258,20 @@ h2{
         </div>
       </div>  <!-- fin pagina inicial -->
 
+    <!-- Documentación Necesaria para Comunitario -->
+    <div id="Doc_Necesaria_Comunitario" class="hidden">
+      <h2>Documentación Necesaria para Inscribir a una persona Comunitaria</h2>
+      <br>
+      Documento acreditativo de identidad
+      <br>
+      Certificado de inscripción .....
+      <br>
+      Tarjeta Verde...
+      <br>
+      <br>
+      <button class="btn-small" onclick="volverNacionalidad()">← Volver</button>
+    </div>
+    
     <!-- Modal Comunitario -->
     <div id="modalComunitarioBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal" role="document">
