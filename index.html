@@ -6,7 +6,7 @@
   <title>Apoyo SAE — Situaciones Administrativas</title>
   <style>
     :root{
-      --sae-green:#2e7d32; /* verde institucional (ajustable) */
+      --sae-green:#007A33; /* verde institucional (ajustable) */
       --sae-green-dark:#1b5e20;
       --muted:#6b6b6b;
       --card-bg:#fff;
@@ -59,25 +59,48 @@
   </style>
 </head>
 <body>
+  <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
+  Jefe de Servicio: Francisco Escabias García.
+  Diseñador: Valentín Jiménez Extremera.
+  Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
+  Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés, Beatriz Girela Muñoz.
+  Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE. -->  
   <div class="container">
     <header>
       <img class="logo" src="https://raw.githubusercontent.com/saempleo/assets/main/logo.png" alt="Logo SAE" onerror="this.style.display='none'">
       <div>
-        <h1>Apoyo — Situaciones Administrativas</h1>
-        <p class="lead">Herramienta auxiliar para personal técnico — busca en SituacionesAdministrativas.json</p>
+        <h1>Ayuda para el registro en SILA de una persona Extranjera</h1>
+        <p class="lead">Selecciona el Origen de la persona usuaria</p>
       </div>
     </header>
 
     <div class="cta-row">
       <button id="btnComunitario" class="btn btn-comunitario">Comunitario</button>
-      <button id="btnNoComunitario" class="btn btn-nocomunitario">No comunitario — Iniciar</button>
+      <span class="tooltip-container">
+        <span class="help-icon">?</span>
+        <div class="tooltip-text">
+          <strong>Países comunitarios:</strong><br>
+            Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
+            Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
+            Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
+            Islandia, Liechtenstein, Noruega, Suiza.
+        </div>
+      </span>      
+      <button id="btnNoComunitario" class="btn btn-nocomunitario">No comunitario</button>
     </div>
 
     <!-- Modal Comunitario -->
     <div id="modalComunitarioBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal" role="document">
         <h2>Comunitario</h2>
-        <p class="muted">texto de prueba, ya que todavía no está dedidido.</p>
+        <h2>Documentación Necesaria para Inscribir a una persona Comunitaria</h2>
+        <br>
+        Documento acreditativo de identidad
+        <br>
+        Certificado de inscripción .....
+        <br>
+        Tarjeta Verde...
+        <br>       
         <div class="actions">
           <button id="closeComunitario" class="btn btn-comunitario">Cerrar</button>
         </div>
