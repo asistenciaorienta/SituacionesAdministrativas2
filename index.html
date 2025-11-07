@@ -17,23 +17,60 @@
       height: 100%;
       margin: 0;
     }
-    body {
-      font-family: Arial, sans-serif;
-      /*text-align: center;*/
-      background: #f5f5f5;
-      display: flex;
-      justify-content: center; /* centrado horizontal */
-      align-items: center;     /* centrado vertical */ 
-    }
-    
-    #nacionalidad-page {
-      max-width: 870px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      padding: 30px 20px 0px;
-      margin: auto  auto 40px;
-    }
+/* CENTRADO PAGINA INICIAL */
+body{
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding-top:90px; /* deja espacio para el header */
+}
+/* --- HEADER NUEVO --- */
+header{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start; /* logo a la izquierda */
+  padding:6px 12px;
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+/* logo más pequeño */
+header img{
+  width:48px;
+  height:auto;
+  object-fit:contain;
+}
+
+/* título centrado arriba */
+header h1{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:22px;
+  text-align:center;
+  width:100%;
+  max-width:900px;
+  color:var(--sae-green);
+  margin:0;
+}
+#pagina_inicial{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}    
+#nacionalidad-page{
+  max-width:870px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  padding:30px 20px;
+}
     
     h1 {
       color: #007A33;
