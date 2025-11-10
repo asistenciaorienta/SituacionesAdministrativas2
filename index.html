@@ -634,23 +634,11 @@ function doSearch() {
     let matchesToken = true;
     for (const tok of tokens) {
       if (tok === 'autoriza') {
-        // "autoriza" válido solo si aparece y NO precedida por "no"
-        const combined = `${anverso} ${reverso}`;
-        if (!combined.includes('autoriza') || combined.includes('no autoriza')) {
-          matchesToken = false;
-          break;
-        }
+        if (containsPhrase(anversoWords, 'autoriza') || containsPhrase(reversoWords, 'autoriza')) presentCount++;
       } else if (tok === 'no autoriza') {
-        const combined = `${anverso} ${reverso}`;
-        if (!combined.includes('no autoriza')) {
-          matchesToken = false;
-          break;
-        }
+        if (containsPhrase(anversoWords, 'no autoriza') || containsPhrase(reversoWords, 'no autoriza')) presentCount++;
       } else {
-        if (!(anversoWords.includes(tok) || reversoWords.includes(tok))) {
-          matchesToken = false;
-          break;
-        }
+        if (anversoWords.includes(tok) || reversoWords.includes(tok)) presentCount++;
       }
     }
 
@@ -744,6 +732,22 @@ function containsTokenExact(recordText, token) {
   }
 }
 
+function containsPhrase(wordsArray, phrase) {
+  // wordsArray: array de palabras (anverso o reverso)
+  // phrase: string de palabras a buscar, separadas por espacios
+  const phraseWords = phrase.toLowerCase().split(/\s+/);
+  for (let i = 0; i <= wordsArray.length - phraseWords.length; i++) {
+    let match = true;
+    for (let j = 0; j < phraseWords.length; j++) {
+      if (wordsArray[i + j] !== phraseWords[j]) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return true;
+  }
+  return false;
+}
 
   
   function onSelectRecord(e){
