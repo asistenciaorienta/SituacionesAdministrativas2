@@ -408,7 +408,7 @@ h2{
 
     // Abrir modal comunitario
     btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; openModal('modalComunitarioBackdrop'); });
-    closeComunitario.addEventListener('click',()=>{ closeModal('modalComunitario'); });
+    closeComunitario.addEventListener('click',()=>{ closeModal('modalComunitarioBackdrop'); });
     modalComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalComunitarioBackdrop) modalComunitarioBackdrop.style.display='none'; });
 
     // No comunitario flow
