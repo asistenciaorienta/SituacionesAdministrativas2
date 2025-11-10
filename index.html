@@ -643,10 +643,11 @@ function doSearch() {
     // --- Reglas del 75% ---
     let presentCount = 0;
     tokens.forEach(tok => {
-      if (anversoWords.includes(tok) || reversoWords.includes(tok) || combinedWords.includes(tok)) {
+      if(containsTokenExact(anverso, tok) || containsTokenExact(reverso, tok) || containsTokenExact(combined, tok)){
         presentCount++;
       }
     });
+  );
 
     if (tokens.length > 0 && (presentCount / tokens.length) >= 0.75) {
       matches.push({ rec, idx });
@@ -692,7 +693,32 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+  
+function containsTokenExact(recordText, token) {
+  const words = recordText.split(/\s+/);
+  token = token.toLowerCase();
 
+  if(token === 'autoriza') {
+    // busca "autoriza" que **no esté precedida por "no"**
+    for(let i=0; i<words.length; i++){
+      if(words[i] === 'autoriza'){
+        if(i===0 || words[i-1] !== 'no') return true;
+      }
+    }
+    return false;
+  } else if(token === 'no autoriza') {
+    // busca exactamente "no autoriza" como secuencia
+    for(let i=0; i<words.length-1; i++){
+      if(words[i] === 'no' && words[i+1] === 'autoriza') return true;
+    }
+    return false;
+  } else {
+    // coincidencia exacta normal
+    return words.includes(token);
+  }
+}
+
+  
   function onSelectRecord(e){
     const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
     all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
