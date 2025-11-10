@@ -325,7 +325,7 @@ h2{
       <div class="modal">
         <h2>No comunitario</h2>
         <p class="muted">Antes de buscar dime si tras consultar SILA, ¿la persona está actualmente inscrita en SILA?</p>
-        <div style="display:flex;gap:10px;margin-top:12px">
+        <div style="display:flex; gap:20px; margin-top:12px; justify-content:center;">
           <button id="inscritoSi" class="btn" style="background:#fff;border:2px solid var(--sae-green);">Sí — Está inscrita</button>
           <button id="inscritoNo" class="btn" style="background:#fff;border:2px solid #c62828;color:#c62828">No — No está inscrita</button>
         </div>
@@ -612,7 +612,8 @@ h2{
         setTimeout(()=>{ bd.style.display='none'; }, 200);
       } else {
         bd.style.display='none';
-      }
+      }    
+      document.getElementById('pagina_inicial').style.display='block';
     }
 
 
