@@ -694,7 +694,8 @@ function doSearch() {
 }
   
 function containsTokenExact(recordText, token) {
-  const words = recordText.split(/\s+/);
+  const text = normalize(recordText); // normalizamos igual que antes
+  const words = text.split(/\s+/);
   token = token.toLowerCase();
 
   if(token === 'autoriza') {
@@ -716,6 +717,7 @@ function containsTokenExact(recordText, token) {
     return words.includes(token);
   }
 }
+
 
   
   function onSelectRecord(e){
