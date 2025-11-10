@@ -262,6 +262,72 @@ h2{
   background: rgba(0,122,51,0.35); /* verde SAE con transparencia */
   backdrop-filter: blur(3px);
 }    
+#searchArea{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:30px;
+  padding:25px;
+}
+
+.search-top{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  max-width:600px;
+  gap:14px;
+}
+
+.search-top input{
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #dfeee0;
+  font-size:17px;
+}
+
+.search-top button{
+  align-self:center;
+  padding:12px 24px;
+  font-size:18px;
+}
+
+.search-meta{
+  width:100%;
+  max-width:600px;
+  display:flex;
+  justify-content:space-between;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:14px;
+}
+.modal-detalle{
+  padding:0;
+  overflow:hidden;
+  max-width:680px;
+}
+
+.modal-header-sae{
+  background:var(--sae-green);
+  color:white;
+  padding:16px 22px;
+  border-top-left-radius:12px;
+  border-top-right-radius:12px;
+}
+
+.modal-header-sae h2{
+  margin:0;
+  font-size:20px;
+}
+
+.modal-body-sae{
+  padding:20px 22px;
+  color:#222;
+  max-height:60vh;
+  overflow-y:auto;
+  font-size:15px;
+  line-height:1.35;
+}
+    
   </style>
 </head>
 <body>
@@ -337,20 +403,33 @@ h2{
 
     <!-- Área de búsqueda -->
     <div id="searchArea" class="search-area" aria-live="polite">
-      <div class="search-row">
-        <input id="searchInput" type="text" placeholder="Busca por palabras (ej: moraleda de zafayona) — se buscan todas las palabras en ANVERSO y REVERSO">
+    
+      <div class="search-top">
+        <input id="searchInput" type="text" placeholder="Buscar por palabras…">
         <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
       </div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-        <div class="small">Filtro: respuesta a "¿Está inscrita actualmente en SILA?" — <span id="inscritoEstado" class="small no-data">no definido</span></div>
-        <div style="margin-left:auto" class="small">Resultados: <span id="countResults">0</span></div>
+    
+      <div class="search-meta">
+        <span class="small">Filtro SILA: <span id="inscritoEstado" class="small no-data">no definido</span></span>
+        <span class="small">Resultados: <span id="countResults">0</span></span>
       </div>
-
+    
       <div class="results" id="results"></div>
-
-      <div class="details" id="detailCard" style="display:none">
-        <h3>Detalles del registro seleccionado</h3>
-        <div id="detailFields"></div>
+    </div>
+    
+    <!-- MODAL DE DETALLES SELECCIONADO -->
+    <div id="modalDetalle" class="modal-backdrop" style="display:none;">
+      <div class="modal modal-detalle">
+        <div class="modal-header-sae">
+          <h2 id="modalDetalleTitulo">Detalles del registro seleccionado</h2>
+        </div>
+        <div class="modal-body-sae">
+          <div id="modalDetalleContent"></div>
+        </div>
+        <div class="actions" style="justify-content:center;margin-top:20px; gap:20px">
+          <button id="btnVolverDetalle" class="btn btn-comunitario" style="font-size:17px;padding:10px 26px">Volver</button>
+          <button id="btnCerrarDetalle" class="btn btn-nocomunitario" style="font-size:17px;padding:10px 26px">Cerrar</button>
+        </div>
       </div>
     </div>
 
@@ -553,10 +632,20 @@ h2{
       // uncheck others
       const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
       all.forEach(inp => { if(inp !== e.target) inp.checked = false; });
-
-      if(!e.target.checked){ selectedIndex = null; detailCard.style.display='none'; return; }
-      selectedIndex = Number(e.target.dataset.index);
-      showDetailsForIndex(selectedIndex);
+    
+      if(!e.target.checked){ selectedIndex = null; return; }
+    
+      const idx = Number(e.target.dataset.index);
+      const rec = db[idx];
+    
+      // abre modal detalle directo
+      openModalDetalle(`
+        <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
+        <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
+        <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
+        <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
+        <div class="field"><strong>Documentación:</strong> ${rec["Documentación"]?`<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>`:''}</div>
+      `);
     }
 
     function showDetailsForIndex(idx){
@@ -615,6 +704,24 @@ h2{
       }    
       document.getElementById('pagina_inicial').style.display='flex';
     }
+    
+    // abrir modal detalle
+    function openModalDetalle(htmlInner){
+      document.getElementById("modalDetalleContent").innerHTML = htmlInner;
+      document.getElementById("modalDetalle").style.display = "flex";
+    }
+    
+    // cerrar modal detalle
+    document.getElementById("btnVolverDetalle").addEventListener("click", ()=>{
+      document.getElementById("modalDetalle").style.display = "none";
+    });
+    document.getElementById("btnCerrarDetalle").addEventListener("click", ()=>{
+      document.getElementById("modalDetalle").style.display = "none";
+      // Vuelve a inicio
+      document.getElementById('searchArea').style.display='none';
+      document.getElementById('pagina_inicial').style.display='flex';
+    });
+
 
 
   </script>
