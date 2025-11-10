@@ -402,18 +402,15 @@ h2{
     </div>
 
     <!-- Área de búsqueda -->
-    <div id="searchArea" class="search-area" aria-live="polite">
-    
+    <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
       <div class="search-top">
         <input id="searchInput" type="text" placeholder="Buscar por palabras…">
         <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
       </div>
-    
       <div class="search-meta">
         <span class="small">Filtro SILA: <span id="inscritoEstado" class="small no-data">no definido</span></span>
         <span class="small">Resultados: <span id="countResults">0</span></span>
       </div>
-    
       <div class="results" id="results"></div>
     </div>
     
@@ -702,6 +699,9 @@ h2{
       } else {
         bd.style.display='none';
       }    
+      // Siempre ocultar búsqueda al cerrar cualquier modal
+      searchArea.style.display = 'none';
+      // Mostrar página inicial
       document.getElementById('pagina_inicial').style.display='flex';
     }
     
