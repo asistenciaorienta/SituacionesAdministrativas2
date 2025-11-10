@@ -613,7 +613,6 @@ function doSearch() {
     return;
   }
 
-  const fullQueryNormalized = normalize(q);
   const matches = [];
 
   db.forEach((rec, idx) => {
@@ -627,15 +626,35 @@ function doSearch() {
 
     const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
     const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
-    const combined = `${anverso} ${reverso}`.trim();
 
-    // Convertimos cada texto en array de palabras
     const anversoWords = anverso.split(/\s+/);
     const reversoWords = reverso.split(/\s+/);
-    const combinedWords = combined.split(/\s+/);
 
-    // --- Coincidencia exacta de toda la consulta ---
-    if (tokens.every(tok => combinedWords.includes(tok))) {
+    // --- Buscar tokens ---
+    let matchesToken = true;
+    for (const tok of tokens) {
+      if (tok === 'autoriza') {
+        // "autoriza" válido solo si aparece y NO precedida por "no"
+        const combined = `${anverso} ${reverso}`;
+        if (!combined.includes('autoriza') || combined.includes('no autoriza')) {
+          matchesToken = false;
+          break;
+        }
+      } else if (tok === 'no autoriza') {
+        const combined = `${anverso} ${reverso}`;
+        if (!combined.includes('no autoriza')) {
+          matchesToken = false;
+          break;
+        }
+      } else {
+        if (!(anversoWords.includes(tok) || reversoWords.includes(tok))) {
+          matchesToken = false;
+          break;
+        }
+      }
+    }
+
+    if (matchesToken) {
       matches.push({ rec, idx });
       return;
     }
@@ -643,8 +662,13 @@ function doSearch() {
     // --- Reglas del 75% ---
     let presentCount = 0;
     tokens.forEach(tok => {
-      if(containsTokenExact(anverso, tok) || containsTokenExact(reverso, tok) || containsTokenExact(combined, tok)){
-        presentCount++;
+      const combined = `${anverso} ${reverso}`;
+      if (tok === 'autoriza') {
+        if (combined.includes('autoriza') && !combined.includes('no autoriza')) presentCount++;
+      } else if (tok === 'no autoriza') {
+        if (combined.includes('no autoriza')) presentCount++;
+      } else {
+        if (anversoWords.includes(tok) || reversoWords.includes(tok)) presentCount++;
       }
     });
 
@@ -662,6 +686,7 @@ function doSearch() {
 
   countResults.textContent = String(matches.length);
 
+  // --- Renderizar resultados ---
   matches.forEach(m => {
     const rec = m.rec;
     const wrapper = document.createElement('div');
@@ -692,6 +717,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
   
 function containsTokenExact(recordText, token) {
   const text = normalize(recordText); // normalizamos igual que antes
