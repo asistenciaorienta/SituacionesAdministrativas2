@@ -679,18 +679,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openModalDetalle(html){
-    modalDetalleContent.innerHTML = html;
-    modalDetalle.style.display='flex';
+      modalDetalleContent.innerHTML = html;
+      modalDetalle.style.display = 'flex';
+      const mdl = modalDetalle.querySelector('.modal');
+      if(mdl) requestAnimationFrame(() => mdl.classList.add('show'));
+  }
+  function closeModalDetalle() {
+      const mdl = modalDetalle.querySelector('.modal');
+      if(mdl) {
+          mdl.classList.remove('show');
+          setTimeout(() => { modalDetalle.style.display='none'; }, 200);
+      } else {
+          modalDetalle.style.display='none';
+      }
   }
 
-  btnVolverDetalle.addEventListener('click', ()=>{
-    modalDetalle.style.display='none';
-  });
+  btnVolverDetalle.addEventListener('click', ()=>{ closeModalDetalle; });
 
-  btnCerrarDetalle.addEventListener('click', ()=>{
-    modalDetalle.style.display='none';
-    searchArea.style.display='none';
-    paginaInicial.style.display='flex';
+  btnCerrarDetalle.addEventListener('click', () => {
+      closeModalDetalle();
+      searchArea.style.display='none';
+      paginaInicial.style.display='flex';
   });
 
   // ocultar búsqueda al inicio
