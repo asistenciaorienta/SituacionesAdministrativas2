@@ -407,13 +407,20 @@ h2{
     let selectedIndex = null;
 
     // Abrir modal comunitario
-    btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; openModal('modalComunitario'); });
+    btnComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; openModal('modalComunitarioBackdrop'); });
     closeComunitario.addEventListener('click',()=>{ closeModal('modalComunitario'); });
     modalComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalComunitarioBackdrop) modalComunitarioBackdrop.style.display='none'; });
 
     // No comunitario flow
-    btnNoComunitario.addEventListener('click',()=>{ modalNoComunitarioBackdrop.style.display='flex'; });
-    closeNoComunitario.addEventListener('click',()=>{ modalNoComunitarioBackdrop.style.display='none'; });
+    btnNoComunitario.addEventListener('click',()=>{ 
+      document.getElementById('pagina_inicial').style.display='none';
+      openModal('modalNoComunitarioBackdrop'); 
+    });
+    
+    closeNoComunitario.addEventListener('click',()=>{ 
+      closeModal('modalNoComunitarioBackdrop'); 
+    });
+
     modalNoComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalNoComunitarioBackdrop) modalNoComunitarioBackdrop.style.display='none'; });
 
     inscritoSi.addEventListener('click',()=>{ 
