@@ -324,7 +324,7 @@ h2{
     <div id="modalNoComunitarioBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal">
         <h2>No comunitario</h2>
-        <p class="muted">Antes de buscar: tras consultar SILA, ¿la persona está actualmente inscrita en SILA?</p>
+        <p class="muted">Antes de buscar dime si tras consultar SILA, ¿la persona está actualmente inscrita en SILA?</p>
         <div style="display:flex;gap:10px;margin-top:12px">
           <button id="inscritoSi" class="btn" style="background:#fff;border:2px solid var(--sae-green);">Sí — Está inscrita</button>
           <button id="inscritoNo" class="btn" style="background:#fff;border:2px solid #c62828;color:#c62828">No — No está inscrita</button>
@@ -385,11 +385,11 @@ h2{
     // Elementos
     const btnComunitario = document.getElementById('btnComunitario');
     const modalComunitarioBackdrop = document.getElementById('modalComunitarioBackdrop');
-    const closeComunitario = document.getElementById('closeComunitarioBackdrop');
+    const closeComunitario = document.getElementById('closeComunitario');
 
     const btnNoComunitario = document.getElementById('btnNoComunitario');
     const modalNoComunitarioBackdrop = document.getElementById('modalNoComunitarioBackdrop');
-    const closeNoComunitario = document.getElementById('closeNoComunitarioBackdrop');
+    const closeNoComunitario = document.getElementById('closeNoComunitario');
     const inscritoSi = document.getElementById('inscritoSi');
     const inscritoNo = document.getElementById('inscritoNo');
 
@@ -412,15 +412,8 @@ h2{
     modalComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalComunitarioBackdrop) modalComunitarioBackdrop.style.display='none'; });
 
     // No comunitario flow
-    btnNoComunitario.addEventListener('click',()=>{ 
-      document.getElementById('pagina_inicial').style.display='none';
-      openModal('modalNoComunitarioBackdrop'); 
-    });
-    
-    closeNoComunitario.addEventListener('click',()=>{ 
-      closeModal('modalNoComunitarioBackdrop'); 
-    });
-
+    btnNoComunitario.addEventListener('click',()=>{ document.getElementById('pagina_inicial').style.display='none'; openModal('modalNoComunitarioBackdrop'); });
+    closeNoComunitario.addEventListener('click',()=>{ closeModal('modalNoComunitarioBackdrop'); });
     modalNoComunitarioBackdrop.addEventListener('click',(e)=>{ if(e.target===modalNoComunitarioBackdrop) modalNoComunitarioBackdrop.style.display='none'; });
 
     inscritoSi.addEventListener('click',()=>{ 
@@ -597,30 +590,30 @@ h2{
       return unsafe.replace(/[&<"'>]/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m];});
     }
     
-function openModal(modalBackdropId){
-  const bd = document.getElementById(modalBackdropId);
-  if(!bd) return;
-  bd.style.display='flex';
-
-  const mdl = bd.querySelector('.modal');
-  if(mdl){
-    // necesario para que el transition se ejecute
-    requestAnimationFrame(()=> mdl.classList.add('show'));
-  }
-}
-
-function closeModal(modalBackdropId){
-  const bd = document.getElementById(modalBackdropId);
-  if(!bd) return;
-
-  const mdl = bd.querySelector('.modal');
-  if(mdl){
-    mdl.classList.remove('show');
-    setTimeout(()=>{ bd.style.display='none'; }, 200);
-  } else {
-    bd.style.display='none';
-  }
-}
+    function openModal(modalBackdropId){
+      const bd = document.getElementById(modalBackdropId);
+      if(!bd) return;
+      bd.style.display='flex';
+    
+      const mdl = bd.querySelector('.modal');
+      if(mdl){
+        // necesario para que el transition se ejecute
+        requestAnimationFrame(()=> mdl.classList.add('show'));
+      }
+    }
+    
+    function closeModal(modalBackdropId){
+      const bd = document.getElementById(modalBackdropId);
+      if(!bd) return;
+    
+      const mdl = bd.querySelector('.modal');
+      if(mdl){
+        mdl.classList.remove('show');
+        setTimeout(()=>{ bd.style.display='none'; }, 200);
+      } else {
+        bd.style.display='none';
+      }
+    }
 
 
   </script>
