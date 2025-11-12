@@ -592,8 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Búsqueda ---
-  btnSearch.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+// --- Búsqueda --- 
+btnSearch.addEventListener('click', doSearch);
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
 function doSearch() {
   resultsEl.innerHTML = '';
@@ -620,54 +621,37 @@ function doSearch() {
       '¿Inscrito anteriormente?', 'Inscrito anteriormente',
       'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
     ]);
-    const valInscritoAnteriorNormalized = valInscritoAnterior
-      ? String(valInscritoAnterior).trim().toUpperCase()
-      : '';
-    const includeByInscrito =
-      valInscritoAnteriorNormalized === '' ||
-      (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
+    const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+    const includeByInscrito = valInscritoAnteriorNormalized === '' || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
     if (!includeByInscrito) return;
 
     const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
     const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
-    const combined = `${anverso} ${reverso}`.trim();
+    const combined = `${anverso} ${reverso}`;
 
-    const anversoWords = anverso.split(/\s+/);
-    const reversoWords = reverso.split(/\s+/);
-
-    // ---- CONTROL DE COINCIDENCIAS ----
     let presentCount = 0;
 
     tokens.forEach(tok => {
       if (tok === 'autoriza') {
-        // "autoriza" solo si NO está precedido por "no"
-        if (
-          containsTokenExact(anverso, 'autoriza') ||
-          containsTokenExact(reverso, 'autoriza')
-        ) {
+        // Solo si aparece "autoriza" sin que esté precedido por "no"
+        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) {
           presentCount++;
         }
       } else if (tok === 'no autoriza') {
-        // "no autoriza" debe ser secuencia exacta
-        if (
-          containsTokenExact(anverso, 'no autoriza') ||
-          containsTokenExact(reverso, 'no autoriza')
-        ) {
+        // Solo si aparece la secuencia exacta "no autoriza"
+        if (/\bno\s+autoriza\b/.test(combined)) {
           presentCount++;
         }
       } else {
-        if (anversoWords.includes(tok) || reversoWords.includes(tok)) presentCount++;
+        if (combined.includes(tok)) presentCount++;
       }
     });
 
-    // Si al menos el 75% de los tokens aparecen, cuenta como coincidencia
-    if (tokens.length > 0 && presentCount / tokens.length >= 0.75) {
+    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.75) {
       matches.push({ rec, idx });
-      return;
     }
   });
 
-  // ---- RENDERIZADO DE RESULTADOS ----
   if (matches.length === 0) {
     resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
     countResults.textContent = '0';
@@ -695,10 +679,9 @@ function doSearch() {
     const title = document.createElement('h3');
     const anversoVal = anversoPreview(rec) || '';
     const reversoVal = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
-    title.textContent =
-      anversoVal || reversoVal.substring(0, 80) || 'Registro sin ANVERSO/REVERSO';
+    title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0, 80) : 'Registro sin ANVERSO/REVERSO');
     const p = document.createElement('p');
-    p.textContent = (reversoVal || '').substring(0, 220);
+    p.textContent = (reversoVal ? reversoVal : '').substring(0, 220);
 
     content.appendChild(title);
     content.appendChild(p);
@@ -707,6 +690,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
 
   
