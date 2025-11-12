@@ -620,52 +620,54 @@ function doSearch() {
       '¿Inscrito anteriormente?', 'Inscrito anteriormente',
       'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
     ]);
-    const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
-    const includeByInscrito = valInscritoAnteriorNormalized === '' || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
+    const valInscritoAnteriorNormalized = valInscritoAnterior
+      ? String(valInscritoAnterior).trim().toUpperCase()
+      : '';
+    const includeByInscrito =
+      valInscritoAnteriorNormalized === '' ||
+      (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
     if (!includeByInscrito) return;
 
     const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
     const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
+    const combined = `${anverso} ${reverso}`.trim();
 
     const anversoWords = anverso.split(/\s+/);
     const reversoWords = reverso.split(/\s+/);
 
-    // --- Buscar tokens ---
-    let matchesToken = true;
-    for (const tok of tokens) {
-      if (tok === 'autoriza') {
-        if (containsPhrase(anversoWords, 'autoriza') || containsPhrase(reversoWords, 'autoriza')) presentCount++;
-      } else if (tok === 'no autoriza') {
-        if (containsPhrase(anversoWords, 'no autoriza') || containsPhrase(reversoWords, 'no autoriza')) presentCount++;
-      } else {
-        if (anversoWords.includes(tok) || reversoWords.includes(tok)) presentCount++;
-      }
-    }
-
-    if (matchesToken) {
-      matches.push({ rec, idx });
-      return;
-    }
-
-    // --- Reglas del 75% ---
+    // ---- CONTROL DE COINCIDENCIAS ----
     let presentCount = 0;
+
     tokens.forEach(tok => {
-      const combined = `${anverso} ${reverso}`;
       if (tok === 'autoriza') {
-        if (combined.includes('autoriza') && !combined.includes('no autoriza')) presentCount++;
+        // "autoriza" solo si NO está precedido por "no"
+        if (
+          containsTokenExact(anverso, 'autoriza') ||
+          containsTokenExact(reverso, 'autoriza')
+        ) {
+          presentCount++;
+        }
       } else if (tok === 'no autoriza') {
-        if (combined.includes('no autoriza')) presentCount++;
+        // "no autoriza" debe ser secuencia exacta
+        if (
+          containsTokenExact(anverso, 'no autoriza') ||
+          containsTokenExact(reverso, 'no autoriza')
+        ) {
+          presentCount++;
+        }
       } else {
         if (anversoWords.includes(tok) || reversoWords.includes(tok)) presentCount++;
       }
     });
 
-    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.75) {
+    // Si al menos el 75% de los tokens aparecen, cuenta como coincidencia
+    if (tokens.length > 0 && presentCount / tokens.length >= 0.75) {
       matches.push({ rec, idx });
       return;
     }
   });
 
+  // ---- RENDERIZADO DE RESULTADOS ----
   if (matches.length === 0) {
     resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
     countResults.textContent = '0';
@@ -674,12 +676,11 @@ function doSearch() {
 
   countResults.textContent = String(matches.length);
 
-  // --- Renderizar resultados ---
   matches.forEach(m => {
     const rec = m.rec;
     const wrapper = document.createElement('div');
     wrapper.className = 'result-item';
-    
+
     const chkWrap = document.createElement('div');
     chkWrap.className = 'check';
     const chk = document.createElement('input');
@@ -694,9 +695,10 @@ function doSearch() {
     const title = document.createElement('h3');
     const anversoVal = anversoPreview(rec) || '';
     const reversoVal = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
-    title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0, 80) : 'Registro sin ANVERSO/REVERSO');
+    title.textContent =
+      anversoVal || reversoVal.substring(0, 80) || 'Registro sin ANVERSO/REVERSO';
     const p = document.createElement('p');
-    p.textContent = (reversoVal ? reversoVal : '').substring(0, 220);
+    p.textContent = (reversoVal || '').substring(0, 220);
 
     content.appendChild(title);
     content.appendChild(p);
@@ -705,6 +707,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
   
 function containsTokenExact(recordText, token) {
