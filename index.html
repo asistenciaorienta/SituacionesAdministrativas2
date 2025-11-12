@@ -12,7 +12,11 @@
       font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
     }
     html,body{height:100%;margin:0;background:#f5f5f5}
-    .container{max-width:1100px;margin:0 auto;padding:20px}
+.tooltip-container {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+}
     header{display:flex;align-items:center;gap:12px;padding:8px 0}
     header img{height:60px}
     header h1{margin:0;color:var(--sae-green);font-size:20px}
@@ -60,6 +64,12 @@
   </style>
 </head>
 <body>
+  <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
+  Jefe de Servicio: Francisco Escabias García.
+  Diseñador: Valentín Jiménez Extremera.
+  Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
+  Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés, Beatriz Girela Muñoz.
+  Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE. -->  
   <div class="container">
     <header>
       <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo">
@@ -80,19 +90,16 @@
         <label><input type="checkbox" id="chkPrestacion"> Cobra prestación o subsidio</label>
         <label><input type="checkbox" id="chkNada"> Nada de lo anterior</label>
       </div>
-
       <!-- Área de búsqueda -->
-      <div id="searchArea" aria-live="polite">
+      <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
         <div class="search-top">
           <input id="searchInput" type="text" placeholder="Buscar por palabras…" aria-label="Buscar por palabras" disabled>
-          <button id="btnSearch" disabled>Buscar</button>
+          <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
         </div>
-
         <div class="search-meta">
-          <span class="small">Opciones marcadas: <span id="estadoChecks" class="small no-data">ninguna</span></span>
+          <span class="small">Filtro SILA: <span id="inscritoEstado" class="small no-data">no definido</span></span>
           <span class="small">Resultados: <span id="countResults">0</span></span>
         </div>
-
         <div class="results" id="results" aria-live="polite"></div>
       </div>
     </div>
