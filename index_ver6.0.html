@@ -659,7 +659,7 @@ function doSearch() {
       }
     });
 
-    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.25) {
+    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.95) {
       matches.push({ rec, idx });
     }
   });
