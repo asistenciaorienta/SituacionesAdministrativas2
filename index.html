@@ -493,13 +493,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
 
-  function tokenizeQuery(q){
-    const norm = normalize(q);
-    if(!norm) return [];
-    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
-    const filtered = toks.filter(t=>!STOPWORDS.has(t));
-    return filtered.length>0 ? filtered : toks;
-  }  
+function tokenizeQuery(q) {
+  const norm = normalize(q);
+  if (!norm) return [];
+  const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+  const filtered = toks.filter(t => !STOPWORDS.has(t));
+
+  // 🔸 Unir "no autoriza" en un solo token
+  const merged = [];
+  for (let i = 0; i < filtered.length; i++) {
+    if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+      merged.push('no autoriza');
+      i++; // saltamos la siguiente
+    } else {
+      merged.push(filtered[i]);
+    }
+  }
+  return merged.length > 0 ? merged : filtered;
+}
+
 
   function anversoPreview(rec){
     const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
