@@ -373,25 +373,20 @@ h2{
         <label><input type="checkbox" id="chkMunicipio" checked> Cobra prestación o subsidio</label>
         <label><input type="checkbox" id="chkColectivo" checked> Nada de lo anterior</label>
       </div>
-    
-      <!-- 🟩 Cuadro de búsqueda -->
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Escribe aquí para buscar...">
-        <button id="btnSearch">Buscar</button>
-      </div>
-    </div>
 
-    <!-- Área de búsqueda -->
-    <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
-      <div class="search-top">
-        <input id="searchInput" type="text" placeholder="Buscar por palabras…" disabled>
-        <button id="btnSearch" class="btn btn-nocomunitario" disabled>Buscar</button>
+      <!-- Área de búsqueda -->
+      <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
+        <div class="search-top">
+          <input id="searchInput" type="text" placeholder="Buscar por palabras…" disabled>
+          <button id="btnSearch" class="btn btn-nocomunitario" disabled>Buscar</button>
+        </div>
+        <div class="search-meta">
+          <span class="small">Opciones marcadas: <span id="estadoChecks" class="small no-data">ninguna</span></span>
+          <span class="small">Resultados: <span id="countResults">0</span></span>
+        </div>
+        <div class="results" id="results"></div>
       </div>
-      <div class="search-meta">
-        <span class="small">Opciones marcadas: <span id="estadoChecks" class="small no-data">ninguna</span></span>
-        <span class="small">Resultados: <span id="countResults">0</span></span>
-      </div>
-      <div class="results" id="results"></div>
+      
     </div>
     
     <!-- MODAL DE DETALLES SELECCIONADO -->
