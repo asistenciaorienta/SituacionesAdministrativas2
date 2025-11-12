@@ -6,432 +6,127 @@
   <title>ASIM-SAE — Aplicación de soporte para la inscripción de migrantes</title>
   <style>
     :root{
-      --sae-green:#007A33; /* verde institucional (ajustable) */
-      --sae-green-dark:#1b5e20;
+      --sae-green:#007A33;
       --muted:#6b6b6b;
       --card-bg:#fff;
-      --glass: rgba(255,255,255,0.9);
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
     }
-    html, body {
-      height: 100%;
-      margin: 0;
+    html,body{height:100%;margin:0;background:#f5f5f5}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    header{display:flex;align-items:center;gap:12px;padding:8px 0}
+    header img{height:60px}
+    header h1{margin:0;color:var(--sae-green);font-size:20px}
+    header h2{margin:0;font-size:14px;color:var(--muted)}
+
+    /* layout principal */
+    .search-container {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      margin: 30px auto;
+      width:100%;
+      max-width:820px;
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
     }
-/* CENTRADO PAGINA INICIAL */
-body{
-  font-family: Arial, sans-serif;
-  background:#f5f5f5;
-  min-height:100vh;
-  display:block; 
-}
+    .search-intro { text-align:left; width:100%; margin-bottom:12px; font-size:1rem; color:#222; }
+    .filters { display:flex; gap:18px; width:100%; justify-content:flex-start; flex-wrap:wrap; margin-bottom:14px; }
+    .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
+    .filters input[type="checkbox"]{ width:16px; height:16px; }
 
-/* centrado solo del bloque inicial */
-#pagina_inicial{
-  width:100%;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+    /* área búsqueda */
+    #searchArea{ width:100%; display:flex; flex-direction:column; gap:10px }
+    .search-top{ display:flex; gap:10px; align-items:center }
+    .search-top input{ flex:1; padding:12px 14px; border-radius:8px; border:1px solid #dfeee0; font-size:16px }
+    .search-top button{ padding:11px 18px; border-radius:8px; border:none; background:var(--sae-green); color:#fff; font-weight:600; cursor:pointer }
+    .search-top button[disabled]{ opacity:0.5; cursor:not-allowed }
+    .search-meta{ display:flex; justify-content:space-between; color:var(--muted); font-size:13px; }
+    .results{ margin-top:8px }
+    .result-item{ display:flex; gap:12px; padding:10px; border-radius:8px; border:1px solid #e6efe7; background:#fff; margin-bottom:8px; cursor:pointer }
+    .result-item h3{ margin:0;font-size:15px }
+    .result-item p{ margin:6px 0 0;color:var(--muted);font-size:13px }
 
-/* --- HEADER NUEVO --- */
-header{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:flex-start; /* logo a la izquierda */
-  padding:6px 12px;
-  position:absolute;
-  top:0;
-  left:0;
-}
+    /* modal detalle (simple) */
+    .modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); justify-content:center; align-items:center; z-index:9999 }
+    .modal{ background:var(--card-bg); border-radius:10px; padding:0; width:90%; max-width:720px; max-height:80vh; overflow:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25) }
+    .modal-header-sae{ background:var(--sae-green); color:#fff; padding:14px 18px; border-top-left-radius:10px; border-top-right-radius:10px }
+    .modal-body-sae{ padding:16px 18px }
+    .actions{ display:flex; gap:10px; justify-content:center; padding:12px }
 
-/* logo más pequeño */
-header img{
-  width:auto;
-  height:60px;
-  object-fit:contain;
-  margin-left: 1rem;
-}
-
-/* título centrado arriba */
-header h1{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:26px;
-  text-align:center;
-  width:100%;
-  max-width:900px;
-  margin-top:2rem;
-  color: #007A33;
-}
-
-#nacionalidad-page{
-  max-width:870px;
-  background:white;
-  border-radius:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  padding:30px 20px;
-}
-h2{
-  font-size:20px;
-  text-align:center;
-}
-    p.lead{margin:6px 0 0;color:var(--muted)}
-
-    /* Botones principales */
-    .cta-row{display:flex;gap:16px;margin:20px 0}
-    .btn{padding:12px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:600;box-shadow:0 6px 18px rgba(46,125,50,0.08)}
-    .btn:active{transform:translateY(1px)}
-    .btn-nocomunitario{background:var(--sae-green);color:#fff;min-width:220px;font-size:18px}
-
-    /* Modal */
-    
-    .modal-backdrop{   
-      text-align: center; /* centra el texto y botones dentro */   
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      position: fixed;      /* fijo en pantalla */
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5); /* fondo semi-transparente */
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;        /* muy alto para que esté por encima de todo */
-    }   
-    .modal {
-      background: var(--card-bg);
-      border-radius: 12px;
-      max-width: 720px;      
-      padding: 18px;
-      opacity: 0;
-      transform: scale(.92);
-      border-radius: 8px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80%;
-      overflow-y: auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-    
-    .modal.show {
-      opacity: 1;
-      transform: scale(1);
-    }    
-    .modal h2{margin:0 0 8px}
-    .modal .muted{color:var(--muted);font-size:14px}
-    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
-
-    /* Search UI */
-.search-area{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  margin:auto;
-  width:100%;
-  max-width:960px;
-  display:none;
-  background:white;
-  padding:24px;
-  overflow:auto;
-  border-radius:0;
-}
-    
-    .search-row{display:flex;gap:10px;align-items:center}
-    input[type=text]{flex:1;padding:10px;border-radius:8px;border:1px solid #dfeee0}
-    .small{font-size:13px;color:var(--muted)}
-
-    /* Results */
-    .results{margin-top:16px}
-    .result-item{display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #e6efe7;background:white;margin-bottom:8px}
-    .result-item .check{margin-top:2px}
-    .result-item h3{margin:0;font-size:15px}
-    .result-item p{margin:6px 0 0;color:var(--muted);font-size:13px}
-
-    .details{margin-top:12px;padding:12px;border-radius:8px;background:#fff;border:1px solid #e6efe7}
-    .field{display:flex;gap:8px;padding:6px 0}
-    .field .label{width:180px;font-weight:600;color:var(--sae-green-dark);font-size:13px}
-    .no-data{color:var(--muted);font-style:italic}
-
-    footer{margin-top:22px;color:var(--muted);font-size:13px}
-
-    /* Responsive */
-    @media (max-width:600px){.cta-row{flex-direction:column}.btn-nocomunitario{min-width:unset;width:100%}}
-
-.footer-logo {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 15px;
-}
-
-.footer-logo .logo-text {
-  font-size: 14px;
-  font-weight: bold;
-  color: #007A33;
-  left: 0;
-}
-
-.footer-logo img {
-  height: 70px;
-}
-
-.footer-datos {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  background-color: #f5f5f5;
-  color: #007A33;
-  font-size: 14px;
-  text-align: right;
-  padding: 10px 15px;
-  border-top-left-radius: 8px;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-}    
-.btn-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip-container {
-  position: absolute;
-  top: 15px;
-  left: 18px;
-}
-
-.help-icon {
-  background-color: #FFFFFF;
-  color: #007A33;
-  border-radius: 30%;
-  width: 20px;
-  height: 20px;
-  font-size: 14px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 20px;
-  cursor: pointer;
-  z-index: 2;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}    
-
-#modalNoComunitarioBackdrop {
-  display:none;   /* ocultos desde inicio */
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-  inset:0;
-  background: rgba(0,122,51,0.35); /* verde SAE con transparencia */
-  backdrop-filter: blur(3px);
-}    
-#searchArea{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  margin-top:30px;
-  padding:25px;
-}
-
-.search-top{
-  display:flex;
-  flex-direction:column;
-  width:100%;
-  max-width:600px;
-  gap:14px;
-}
-
-.search-top input{
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid #dfeee0;
-  font-size:17px;
-}
-
-.search-top button{
-  align-self:center;
-  padding:12px 24px;
-  font-size:18px;
-}
-
-.search-meta{
-  width:100%;
-  max-width:600px;
-  display:flex;
-  justify-content:space-between;
-  margin-top:12px;
-  color:var(--muted);
-  font-size:14px;
-}
-.modal-detalle{
-  padding:0;
-  overflow:hidden;
-  max-width:680px;
-}
-
-.modal-header-sae{
-  background:var(--sae-green);
-  color:white;
-  padding:16px 22px;
-  border-top-left-radius:12px;
-  border-top-right-radius:12px;
-}
-
-.modal-header-sae h2{
-  margin:0;
-  font-size:20px;
-}
-
-.modal-body-sae{
-  padding:20px 22px;
-  color:#222;
-  max-height:60vh;
-  overflow-y:auto;
-  font-size:15px;
-  line-height:1.35;
-}
-.search-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1em;
-}
-
-.search-intro {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 0.95em;
-  color: #333;
-}
-
-.filters {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.search-box {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.search-box input {
-  flex: 1;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.search-box button {
-  padding: 6px 12px;
-  border: none;
-  background-color: #007f4f;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.search-box button:hover {
-  background-color: #005e3a;
-}
-    
+    .no-data{ color:var(--muted); font-style:italic }
+    @media (max-width:600px){ .filters{flex-direction:column;align-items:flex-start} }
   </style>
-</head><body>
+</head>
+<body>
   <div class="container">
-    <header>      
-      <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía" />
+    <header>
+      <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo">
       <div>
         <h1>ASIM-SAE</h1>
         <h2>Aplicación de soporte para la inscripción de migrantes</h2>
       </div>
     </header>
 
-    <div class="search-container">
-      <!-- 🟩 Texto introductorio -->
-      <div class="search-intro">
-        <p>Consulta SILA y marca lo que corresponda:</p>
+    <div class="search-container" role="region" aria-labelledby="intro">
+      <div id="intro" class="search-intro">
+        <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
       </div>
-    
-      <!-- 🟩 Área de filtros -->
-      <div class="filters">
-        <label><input type="checkbox" id="chkEntidad" checked> Consta una inscripción previa en SILA</label>
-        <label><input type="checkbox" id="chkMunicipio" checked> Cobra prestación o subsidio</label>
-        <label><input type="checkbox" id="chkColectivo" checked> Nada de lo anterior</label>
+
+      <div class="filters" aria-label="Opciones SILA">
+        <!-- IDs y nombres que usa el script -->
+        <label><input type="checkbox" id="chkInscrito"> Consta una inscripción previa en SILA</label>
+        <label><input type="checkbox" id="chkPrestacion"> Cobra prestación o subsidio</label>
+        <label><input type="checkbox" id="chkNada"> Nada de lo anterior</label>
       </div>
 
       <!-- Área de búsqueda -->
-      <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
+      <div id="searchArea" aria-live="polite">
         <div class="search-top">
-          <input id="searchInput" type="text" placeholder="Buscar por palabras…" disabled>
-          <button id="btnSearch" class="btn btn-nocomunitario" disabled>Buscar</button>
+          <input id="searchInput" type="text" placeholder="Buscar por palabras…" aria-label="Buscar por palabras" disabled>
+          <button id="btnSearch" disabled>Buscar</button>
         </div>
+
         <div class="search-meta">
           <span class="small">Opciones marcadas: <span id="estadoChecks" class="small no-data">ninguna</span></span>
           <span class="small">Resultados: <span id="countResults">0</span></span>
         </div>
-        <div class="results" id="results"></div>
+
+        <div class="results" id="results" aria-live="polite"></div>
       </div>
-      
     </div>
-    
-    <!-- MODAL DE DETALLES SELECCIONADO -->
-    <div id="modalDetalle" class="modal-backdrop" style="display:none;">
-      <div class="modal modal-detalle">
-        <div class="modal-header-sae">
-          <h2 id="modalDetalleTitulo">Detalles del registro seleccionado</h2>
-        </div>
-        <div class="modal-body-sae">
-          <div id="modalDetalleContent"></div>
-        </div>
-        <div class="actions" style="justify-content:center;margin-top:20px; gap:20px">
-          <button id="btnVolverDetalle" class="btn btn-comunitario" style="font-size:17px;padding:10px 26px">Volver</button>
-          <button id="btnCerrarDetalle" class="btn btn-nocomunitario" style="font-size:17px;padding:10px 26px">Cerrar</button>
+
+    <!-- modal detalle -->
+    <div id="modalDetalle" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document">
+        <div class="modal-header-sae"><h3 id="modalDetalleTitulo">Detalles del registro</h3></div>
+        <div class="modal-body-sae" id="modalDetalleContent"></div>
+        <div class="actions">
+          <button id="btnVolverDetalle" class="btn">Volver</button>
+          <button id="btnCerrarDetalle" class="btn" style="background:#b71c1c;color:#fff">Cerrar</button>
         </div>
       </div>
     </div>
 
-    <footer>
-      <div class="footer-logo">
-        <div class="logo-text">Dirección Provincial de Granada</div>
-      </div>
-      <div class="footer-datos">
-        <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
-        <hr>
-        Versión 5.01<br>
-        Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
-        José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
-      </div>
+    <footer style="margin-top:18px;color:var(--muted);font-size:13px">
+      <div><b>Apoyo durante la fase de testeo:</b> Versión 5.01 — Dirección Provincial de Granada</div>
     </footer>
   </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // elements
   const chkInscrito = document.getElementById('chkInscrito');
   const chkPrestacion = document.getElementById('chkPrestacion');
   const chkNada = document.getElementById('chkNada');
   const estadoChecks = document.getElementById('estadoChecks');
 
-  const paginaInicial = document.getElementById('pagina_inicial');
-  const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('searchInput');
   const btnSearch = document.getElementById('btnSearch');
   const resultsEl = document.getElementById('results');
   const countResults = document.getElementById('countResults');
+
   const modalDetalle = document.getElementById('modalDetalle');
   const modalDetalleContent = document.getElementById('modalDetalleContent');
   const btnVolverDetalle = document.getElementById('btnVolverDetalle');
@@ -439,8 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let db = [];
 
-  // --- cuando se marca o desmarca un check ---
+  // comportamiento: si se marca 'Nada de lo anterior' se desmarcan los otros; si se marcan otros se desmarca 'Nada'
+  function syncNadaLogic(changed) {
+    if (changed === 'nada' && chkNada.checked) {
+      chkInscrito.checked = false;
+      chkPrestacion.checked = false;
+    }
+    if ((changed === 'inscrito' || changed === 'prestacion') && (chkInscrito.checked || chkPrestacion.checked)) {
+      chkNada.checked = false;
+    }
+  }
+
   function actualizarChecks() {
+    syncNadaLogic(); // aplica la lógica de exclusividad
+
     const activos = [];
     if (chkInscrito.checked) activos.push('Consta inscripción previa en SILA');
     if (chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
@@ -451,7 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
       estadoChecks.classList.remove('no-data');
       searchInput.disabled = false;
       btnSearch.disabled = false;
-      searchArea.style.display = 'flex';
+      // limpiamos campo/resultados anteriores para forzar búsqueda nueva
+      searchInput.value = '';
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
     } else {
       estadoChecks.textContent = 'ninguna';
       estadoChecks.classList.add('no-data');
@@ -463,11 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  [chkInscrito, chkPrestacion, chkNada].forEach(chk => {
-    chk.addEventListener('change', actualizarChecks);
-  });
+  // listeners
+  chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
+  chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
+  chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
 
-  // --- Carga inicial del JSON ---
+  // JSON load (una sola vez)
   async function loadJSON(){
     try{
       const res = await fetch('./SituacionesAdministrativas.json', {cache:'no-store'});
@@ -481,59 +192,74 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadJSON();
 
-  // --- Lógica de búsqueda (simplificada, la tuya original sirve igual) ---
-  btnSearch.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
-
+  // búsqueda (usa ANVERSO y REVERSO solamente)
   function normalize(s){
     if(s==null) return '';
-    return String(s)
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu,'')
-      .replace(/[^\p{L}\p{N}]+/gu,' ')
-      .toLowerCase()
-      .trim();
+    return String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim();
   }
 
-  function doSearch() {
+  function tokenize(q){
+    return normalize(q).split(/\s+/).filter(Boolean);
+  }
+
+  btnSearch.addEventListener('click', doSearch);
+  searchInput.addEventListener('keydown', e => { if (e.key==='Enter') doSearch(); });
+
+  function doSearch(){
     resultsEl.innerHTML = '';
     const q = searchInput.value.trim();
-    if (!q) {
-      resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
-      countResults.textContent = '0';
-      return;
-    }
+    if(!q){ resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
 
-    const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const tokens = tokenize(q);
+    if(tokens.length===0){ resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
+
     const matches = [];
 
     db.forEach((rec, idx) => {
-      const anverso = normalize(rec['ANVERSO'] || '');
-      const reverso = normalize(rec['REVERSO'] || '');
-      const combined = `${anverso} ${reverso}`;
+      const anverso = normalize(rec['ANVERSO']||'');
+      const reverso = normalize(rec['REVERSO']||'');
+      const combined = `${anverso} ${reverso}`.trim();
+
+      // buscar tokens como palabras (evitar falsos positivos en "no autoriza" vs "autoriza")
       let presentCount = 0;
-      tokens.forEach(tok => { if (combined.includes(tok)) presentCount++; });
-      if (tokens.length > 0 && (presentCount / tokens.length) >= 0.75) matches.push({ rec, idx });
+      tokens.forEach(tok => {
+        if(tok === 'autoriza'){
+          // autoriza sólo si aparece como palabra y NO forma parte de 'no autoriza'
+          if(/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) presentCount++;
+        } else if(tok === 'no' && tokens.includes('autoriza')){
+          // esto ya estaría combinado si el usuario escribió "no autoriza" como tokens separados;
+          // mejor comportamiento es permitir que tokenize fusione 'no autoriza' si lo escribe tal cual,
+          // pero dejamos cobertura por si no se combinó
+          if(/\bno\s+autoriza\b/.test(combined)) presentCount++;
+        } else {
+          // coincidencia simple por palabra
+          const re = new RegExp('\\b' + tok.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b','u');
+          if(re.test(combined)) presentCount++;
+        }
+      });
+
+      if(tokens.length>0 && (presentCount / tokens.length) >= 0.75){
+        matches.push({rec, idx});
+      }
     });
 
-    if (matches.length === 0) {
+    if(matches.length===0){
       resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
-      countResults.textContent = '0';
+      countResults.textContent='0';
       return;
     }
 
     countResults.textContent = String(matches.length);
-    matches.forEach(m => {
+    matches.forEach(m=>{
       const rec = m.rec;
       const wrapper = document.createElement('div');
       wrapper.className = 'result-item';
       const title = document.createElement('h3');
-      title.textContent = (rec['ANVERSO'] || '').substring(0,120);
+      title.textContent = (rec['ANVERSO']||'').substring(0,120);
       const p = document.createElement('p');
-      p.textContent = (rec['REVERSO'] || '').substring(0,220);
-      wrapper.appendChild(title);
-      wrapper.appendChild(p);
-      wrapper.addEventListener('click', ()=>openModalDetalle(rec));
+      p.textContent = (rec['REVERSO']||'').substring(0,220);
+      wrapper.appendChild(title); wrapper.appendChild(p);
+      wrapper.addEventListener('click', ()=> openModalDetalle(rec));
       resultsEl.appendChild(wrapper);
     });
   }
@@ -546,13 +272,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
       <div class="field"><strong>Documentación:</strong> ${rec["Documentación"]?`<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>`:''}</div>
     `;
-    modalDetalle.style.display='flex';
+    modalDetalle.style.display = 'flex';
+    modalDetalle.setAttribute('aria-hidden','false');
   }
 
-  btnVolverDetalle.addEventListener('click', ()=>{ modalDetalle.style.display='none'; });
-  btnCerrarDetalle.addEventListener('click', ()=>{ modalDetalle.style.display='none'; });
+  function closeModalDetalle(){
+    modalDetalle.style.display = 'none';
+    modalDetalle.setAttribute('aria-hidden','true');
+  }
+
+  btnVolverDetalle.addEventListener('click', ()=>{ closeModalDetalle(); });
+  btnCerrarDetalle.addEventListener('click', ()=>{ closeModalDetalle(); });
+
+  // inicio: dejar todo limpio (checkboxes sin marcar)
+  actualizarChecks();
 });
 </script>
 </body>
-
 </html>
+
