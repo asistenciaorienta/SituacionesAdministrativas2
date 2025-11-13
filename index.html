@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function normalize(s){ return s?String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim():''; }
   const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
-  function tokenize(q){
+  function tokenizeQuery(q) {
     const norm = normalize(q);
     if (!norm) return [];
     const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
@@ -306,9 +306,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return merged.length > 0 ? merged : filtered;
   }
 
+
   btnSearch.addEventListener('click', doSearch);
   searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
+function anversoPreview(rec){
+  const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+  return av.split('\\n')[0].substring(0,120);
+}
+  
 function doSearch() {
   resultsEl.innerHTML = '';
   selectedIndex = null;
@@ -330,6 +336,7 @@ function doSearch() {
   const matches = [];
 
   db.forEach((rec, idx) => {
+    // Filtrado por respuesta del técnico (SI/NO)
     const valInscritoAnterior = getField(rec, [
       '¿Inscrito anteriormente?', 'Inscrito anteriormente',
       'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
@@ -343,18 +350,11 @@ function doSearch() {
     const combined = `${anverso} ${reverso}`;
 
     let presentCount = 0;
-
     tokens.forEach(tok => {
       if (tok === 'autoriza') {
-        // Solo si aparece "autoriza" sin que esté precedido por "no"
-        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) {
-          presentCount++;
-        }
+        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) presentCount++;
       } else if (tok === 'no autoriza') {
-        // Solo si aparece la secuencia exacta "no autoriza"
-        if (/\bno\s+autoriza\b/.test(combined)) {
-          presentCount++;
-        }
+        if (/\bno\s+autoriza\b/.test(combined)) presentCount++;
       } else {
         if (combined.includes(tok)) presentCount++;
       }
@@ -403,6 +403,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
   function openModalDetalle(rec){
     modalDetalleContent.innerHTML=`
