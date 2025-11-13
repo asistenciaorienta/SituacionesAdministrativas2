@@ -86,23 +86,28 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
 .clear-btn {
   position: absolute;
-  right: 10px;
-  background: none;
+  right: 8px;                     /* cerca del borde */
+  top: 50%;
+  transform: translateY(-50%);    /* centrado vertical */
+  background: #fff;                /* fondo blanco */
   border: none;
-  color: #777;              /* gris discreto */
-  font-size: 18px;          /* tamaño equilibrado */
+  color: #777;                     /* gris sutil */
+  font-size: 16px;                 /* tamaño equilibrado */
   cursor: pointer;
-  display: none;            /* aparece solo cuando hay texto */
+  display: none;                   /* aparece solo con texto */
   line-height: 1;
-  padding: 0;
-  font-weight: 300;         /* más fina */
-  opacity: 0.6;             /* más sutil */
+  padding: 0 2px;                  /* ligero padding horizontal */
+  font-weight: 300;                /* más fina */
+  opacity: 0.6;                    /* más sutil */
+  border-radius: 50%;              /* opcional, redonda */
 }
 
 .clear-btn:hover {
   opacity: 1;
-  color: #000;              /* se destaca al pasar el ratón */
+  color: #000;                     /* se destaca al pasar el ratón */
 }
+
+
   
 .results .small {
   color: #1b5e20;
@@ -147,7 +152,6 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
       <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>
       <span class="small">Resultados: <span id="countResults">0</span></span>
     </div>
-    <span class="small">Pulsa sobre el resultado adecuado.</span>
     <div class="results" id="results" aria-live="polite"></div>
   </div>
 
@@ -278,8 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const info = document.createElement('div');
     info.className = 'small';
     info.style.marginBottom = '8px';
-    info.style.fontWeight = 'bold';
-    info.textContent =' 👉 <strong>Pulsa sobre la situación correcta:</strong>';
+    info.style.cssText = 'font-weight:bold; text-align:center;';
+    info.textContent =' 👉 Pulsa sobre la situación correcta:';
     resultsEl.appendChild(info);
     
     countResults.textContent=String(matches.length);
@@ -330,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     countResults.textContent = '0';
     searchInput.focus();
   });  
+  
 });
 
   
