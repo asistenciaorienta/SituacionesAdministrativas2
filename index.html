@@ -352,6 +352,27 @@ document.addEventListener('DOMContentLoaded', () => {
       countResults.textContent='0';
     });
   }
+  function containsTokenExact(recordText, token) {
+    const text = normalize(recordText); 
+    const words = text.split(/\s+/);
+    token = token.toLowerCase();
+  
+    if(token === 'autoriza'){
+      for(let i=0;i<words.length;i++){
+        if(words[i] === 'autoriza'){
+          if(i===0 || words[i-1] !== 'no') return true;
+        }
+      }
+      return false;
+    } else if(token === 'no autoriza'){
+      for(let i=0;i<words.length-1;i++){
+        if(words[i]==='no' && words[i+1]==='autoriza') return true;
+      }
+      return false;
+    } else {
+      return words.includes(token);
+    }
+  }
 
   // --- Búsqueda ---
   function doSearch(){
@@ -384,14 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
       let presentCount=0;
       tokens.forEach(tok=>{
-        if(tok==='autoriza'){
-          if(/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) presentCount++;
-        } else if(tok==='no autoriza'){
-          if(/\bno\s+autoriza\b/.test(combined)) presentCount++;
-        } else {
-          if(combined.includes(tok)) presentCount++;
-        }
+        if(containsTokenExact(combined, tok)) presentCount++;
       });
+
     
       // Coincidencia casi completa
       if(tokens.length>0 && (presentCount/tokens.length) >= 0.95){
