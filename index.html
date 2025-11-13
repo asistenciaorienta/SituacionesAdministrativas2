@@ -14,12 +14,12 @@
 html,body{height:100%;margin:0;background:#f5f5f5}
 header {position: relative;display:flex;align-items:center;gap:12px;padding:8px 20px;justify-content: space-between;} /* separa los logos a los lados */
 header .logo-izquierda{height:60px; object-fit: contain;flex-shrink: 0;}
-header .logo-derecha{height:120px; object-fit: contain;flex-shrink: 0;}
+header .logo-derecha{height:60px; object-fit: contain;flex-shrink: 0;}
 header h1{margin:0;color:var(--sae-green);font-size:30px}
 header h2{margin:0;font-size:19px;color:var(--muted)}
 header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
 .search-container { display:flex; flex-direction:column; align-items:center; margin: 30px auto; width:100%; max-width:820px; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
-.search-intro { text-align:center; width:100%; margin-bottom:12px; font-size:2rem; color:#222; }
+.search-intro { text-align:center; width:100%; margin-bottom:8px; font-size:17px; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content:flex-start; flex-wrap:wrap; margin-bottom:14px; }
 .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
 .filters input[type="checkbox"]{ width:16px; height:16px; }
@@ -89,7 +89,7 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   right: 8px;                  /* cerca del borde derecho */
   top: 50%;
   transform: translateY(-50%); /* centrado vertical */
-  background: transparent;     /* sin fondo */
+  background: #333;     /* sin fondo */
   border: none;                /* sin borde */
   color: #777;                 /* gris tenue */
   font-size: 18px;             /* un poco más grande para legibilidad */
@@ -103,6 +103,7 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
 .clear-btn:hover {
   opacity: 1;
+  background: #444;  
   color: #000;                 /* se destaca al pasar el ratón */
 }
 
@@ -128,6 +129,12 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   </header> 
 
   <div class="search-container" role="region" aria-labelledby="intro">
+    <div id="doc" class="search-intro">
+      <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
+      <p>Tarjeta TIE.</p>
+      <p>Resolución.</p>
+      <p>Solicitud acompañada de NIE y docuementación...</p>
+    </div>    
     <div id="intro" class="search-intro">
       <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
     </div>
@@ -279,9 +286,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🟩 Añadimos el texto superior antes de mostrar los resultados
     const info = document.createElement('div');
     info.className = 'small';
-    info.style.marginBottom = '12px';
-    info.style.cssText = 'font-weight:bold; text-align:center;';
-    info.textContent =' 👉 Pulsa sobre la situación correcta.<br>';
+    info.style.cssText = 'font-weight:bold; text-align:center; margin-bottom:20px;';
+    info.textContent =' 👉 Pulsa sobre la situación correcta.';
     resultsEl.appendChild(info);
     
     countResults.textContent=String(matches.length);
