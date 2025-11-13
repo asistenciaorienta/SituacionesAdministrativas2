@@ -78,35 +78,35 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
 .search-input-wrapper input {
   width: 100%;
-  padding: 12px 28px 12px 14px; /* espacio justo para la cruz */
+  padding: 12px 28px 12px 14px; /* espacio para la cruz */
   border-radius: 8px;
   border: 1px solid #dfeee0;
   font-size: 16px;
 }
 
-.clear-btn {
+/* La cruz como pseudo-elemento */
+.search-input-wrapper::after {
+  content: "×";                  /* la cruz */
   position: absolute;
-  right: 8px;                  /* cerca del borde derecho */
+  right: 8px;
   top: 50%;
-  transform: translateY(-50%); /* centrado vertical */
-  background: #333;     /* sin fondo */
-  border: none;                /* sin borde */
-  color: #777;                 /* gris tenue */
-  font-size: 18px;             /* un poco más grande para legibilidad */
+  transform: translateY(-50%);
+  color: #777;                   /* gris tenue */
+  font-size: 18px;
   cursor: pointer;
-  display: none;               /* aparece solo cuando hay texto */
-  line-height: 1;
-  padding: 0;                  /* sin padding */
-  font-weight: 300;            /* ligera */
-  opacity: 0.6;                /* sutil */
+  opacity: 0;                    /* invisible por defecto */
+  transition: opacity 0.2s ease;
 }
 
-.clear-btn:hover {
+/* Mostrar la cruz solo cuando hay texto */
+.search-input-wrapper.has-text::after {
+  opacity: 0.6;
+}
+
+.search-input-wrapper.has-text:hover::after {
   opacity: 1;
-  background: #444;  
-  color: #000;                 /* se destaca al pasar el ratón */
+  color: #000;                   /* se destaca al pasar el ratón */
 }
-
   
 .results .small {
   color: #1b5e20;
@@ -126,15 +126,16 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
       <h2>Aplicación de soporte para la inscripción de migrantes</h2>
     </div>
     <img class="logo-derecha" src="images/Logo_SILA_Migrantes.png" alt="Logo proyecto">
-  </header> 
-
-  <div class="search-container" role="region" aria-labelledby="intro">
-    <div id="doc" class="search-intro">
-      <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
-      <p>Tarjeta TIE.</p>
-      <p>Resolución.</p>
-      <p>Solicitud acompañada de NIE y docuementación...</p>
-    </div>    
+  </header>
+  
+  <div id="doc" class="search-container">
+    <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
+    <p>Tarjeta TIE.</p>
+    <p>Resolución.</p>
+    <p>Solicitud acompañada de NIE y docuementación...</p>
+  </div>  
+  
+  <div class="search-container" role="region" aria-labelledby="intro">  
     <div id="intro" class="search-intro">
       <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
     </div>
@@ -323,21 +324,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // inicio limpio
   actualizarChecks();
-  const clearSearch = document.getElementById('clearSearch');
-  
-  // Mostrar u ocultar la cruz según haya texto
-  searchInput.addEventListener('input', () => {
-    clearSearch.style.display = searchInput.value ? 'block' : 'none';
-  });
-  
-  // Limpiar el texto al pulsar la cruz
-  clearSearch.addEventListener('click', () => {
+const searchInput = document.getElementById('searchInput');
+const wrapper = document.querySelector('.search-input-wrapper');
+
+searchInput.addEventListener('input', () => {
+  if (searchInput.value) {
+    wrapper.classList.add('has-text');
+  } else {
+    wrapper.classList.remove('has-text');
+  }
+});
+
+// Detectar clic en el pseudo-elemento
+wrapper.addEventListener('click', (e) => {
+  const rect = wrapper.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clearZoneStart = rect.width - 24; // zona de la cruz
+  if (clickX > clearZoneStart) {
     searchInput.value = '';
-    clearSearch.style.display = 'none';
-    resultsEl.innerHTML = '';
-    countResults.textContent = '0';
+    wrapper.classList.remove('has-text');
     searchInput.focus();
-  });  
+  }
+});
+
   
 });
 
