@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const re=new RegExp('\\b'+tok.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','u');
         if(re.test(combined)) presentCount++;
       });
-      if(tokens.length>0 && (presentCount/tokens.length)>=0.75) matches.push(rec);
+      if(tokens.length>0 && (presentCount/tokens.length)>=0.95) matches.push(rec);
     });
 
     if(matches.length===0){
