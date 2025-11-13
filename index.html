@@ -373,16 +373,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const matches=[];
 
     db.forEach((rec, idx)=>{
-      // Filtro SILA
       const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
       const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
       const includeByInscrito = valInscritoAnteriorNormalized==='' || (userInscritoAnswer && valInscritoAnteriorNormalized===userInscritoAnswer);
       if(!includeByInscrito) return;
-
+    
       const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
       const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
       const combined = `${anverso} ${reverso}`;
-
+    
       let presentCount=0;
       tokens.forEach(tok=>{
         if(tok==='autoriza'){
@@ -393,11 +392,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if(combined.includes(tok)) presentCount++;
         }
       });
-
-      if((presentCount/tokens.length)>=0.95){
+    
+      // Coincidencia casi completa
+      if(tokens.length>0 && (presentCount/tokens.length) >= 0.95){
         matches.push({rec, idx});
       }
     });
+
 
     if(matches.length===0){
       resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
