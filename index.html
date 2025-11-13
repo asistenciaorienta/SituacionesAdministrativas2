@@ -200,7 +200,26 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- Utilidades para leer campos con posibles variantes de nombre ---
+  // --- Variables de elementos ---
+  const chkInscrito = document.getElementById('chkInscrito');
+  const chkPrestacion = document.getElementById('chkPrestacion');
+  const chkNada = document.getElementById('chkNada');
+  const estadoChecks = document.getElementById('inscritoEstado');
+
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  const resultsEl = document.getElementById('results');
+  const countResults = document.getElementById('countResults');
+  const clearBtn = document.getElementById('clearSearch');
+
+  const modalDetalle = document.getElementById('modalDetalle');
+  const modalDetalleContent = document.getElementById('modalDetalleContent');
+  const btnVolverDetalle = document.getElementById('btnVolverDetalle');
+
+  let db = [];
+  let userInscritoAnswer = null;
+
+  // --- Utilidades ---
   function getField(obj, possibleNames){
     const keys = Object.keys(obj);
     for(const n of possibleNames){
@@ -212,27 +231,75 @@ document.addEventListener('DOMContentLoaded', () => {
     return undefined;
   }
 
-  function escapeHtml(unsafe) {
-    return unsafe.replace(/[&<"'>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
+  function normalize(s){
+    if(!s) return '';
+    return String(s)
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu,'')
+      .replace(/[^\p{L}\p{N}]+/gu,' ')
+      .toLowerCase()
+      .trim();
   }
-  
-  const chkInscrito = document.getElementById('chkInscrito');
-  const chkPrestacion = document.getElementById('chkPrestacion');
-  const chkNada = document.getElementById('chkNada');
-  const estadoChecks = document.getElementById('inscritoEstado'); // CORREGIDO
 
-  const searchInput = document.getElementById('searchInput');
-  const btnSearch = document.getElementById('btnSearch');
-  const resultsEl = document.getElementById('results');
-  const countResults = document.getElementById('countResults');
+  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
 
-  const modalDetalle = document.getElementById('modalDetalle');
-  const modalDetalleContent = document.getElementById('modalDetalleContent');
-  const btnVolverDetalle = document.getElementById('btnVolverDetalle');
-  const btnCerrarDetalle = document.getElementById('btnCerrarDetalle');
+  function tokenizeQuery(q) {
+    const norm = normalize(q);
+    if (!norm) return [];
+    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+    const filtered = toks.filter(t => !STOPWORDS.has(t));
 
-  let db = [];
+    const merged = [];
+    for (let i = 0; i < filtered.length; i++) {
+      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+        merged.push('no autoriza');
+        i++;
+      } else {
+        merged.push(filtered[i]);
+      }
+    }
+    return merged.length > 0 ? merged : filtered;
+  }
 
+  function anversoPreview(rec){
+    const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+    return av.split('\n')[0].substring(0,120);
+  }
+
+  function openModalDetalle(rec){
+    modalDetalleContent.innerHTML = `
+      <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
+      <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
+      <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
+      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
+      <div class="field"><strong>Documentación:</strong> ${rec["Documentación"] ? `<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>` : ''}</div>
+    `;
+    modalDetalle.style.display = 'flex';
+    modalDetalle.setAttribute('aria-hidden','false');
+  }
+
+  function closeModalDetalle(){
+    modalDetalle.style.display='none';
+    modalDetalle.setAttribute('aria-hidden','true');
+  }
+
+  if(btnVolverDetalle) btnVolverDetalle.addEventListener('click', closeModalDetalle);
+
+  // --- Carga JSON ---
+  async function loadJSON(){
+    try{
+      const res = await fetch('./SituacionesAdministrativas.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('No se pudo cargar SituacionesAdministrativas.json');
+      db = await res.json();
+      console.log('Registros cargados:', db.length);
+    }catch(err){
+      console.error(err);
+      resultsEl.innerHTML = `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
+    }
+  }
+  loadJSON();
+
+  // --- Lógica de filtros ---
   function syncNadaLogic(changed){
     if(changed==='nada' && chkNada.checked){
       chkInscrito.checked=false;
@@ -246,7 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function actualizarChecks(){
     syncNadaLogic();
     const activos=[];
-    if(chkInscrito.checked) activos.push('Consta inscripción previa en SILA');
+    if(chkInscrito.checked) { activos.push('Consta inscripción previa en SILA'); userInscritoAnswer='SI'; }
+    else userInscritoAnswer=null;
     if(chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
     if(chkNada.checked) activos.push('Nada de lo anterior');
 
@@ -268,182 +336,117 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
-  chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
-  chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
+  if(chkInscrito) chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
+  if(chkPrestacion) chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
+  if(chkNada) chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
 
-  async function loadJSON(){
-    try{
-      const res = await fetch('./SituacionesAdministrativas.json', {cache:'no-store'});
-      if(!res.ok) throw new Error('No se pudo cargar SituacionesAdministrativas.json');
-      db = await res.json();
-      console.log('Registros cargados:', db.length);
-    }catch(err){
-      console.error(err);
-      resultsEl.innerHTML = `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
+  actualizarChecks();
+
+  // --- Búsqueda ---
+  function doSearch() {
+    resultsEl.innerHTML = '';
+    const q = searchInput.value.trim();
+    if (!q) {
+      resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+      countResults.textContent = '0';
+      return;
     }
-  }
-  loadJSON();
 
-  function normalize(s){ return s?String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim():''; }
-  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
-  function tokenizeQuery(q) {
-    const norm = normalize(q);
-    if (!norm) return [];
-    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
-    const filtered = toks.filter(t => !STOPWORDS.has(t));
-  
-    // 🔸 Unir "no autoriza" en un solo token
-    const merged = [];
-    for (let i = 0; i < filtered.length; i++) {
-      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
-        merged.push('no autoriza');
-        i++; // saltamos la siguiente
-      } else {
-        merged.push(filtered[i]);
-      }
+    const tokens = tokenizeQuery(q);
+    if(tokens.length===0){
+      resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+      countResults.textContent = '0';
+      return;
     }
-    return merged.length > 0 ? merged : filtered;
-  }
 
+    const matches = [];
 
-  btnSearch.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+    db.forEach((rec, idx)=>{
+      const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
+      const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+      const includeByInscrito = valInscritoAnteriorNormalized==='' || (userInscritoAnswer && valInscritoAnteriorNormalized===userInscritoAnswer);
+      if(!includeByInscrito) return;
 
-function anversoPreview(rec){
-  const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
-  return av.split('\\n')[0].substring(0,120);
-}
-  
-function doSearch() {
-  resultsEl.innerHTML = '';
-  selectedIndex = null;
+      const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
+      const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
+      const combined = `${anverso} ${reverso}`;
 
-  const q = searchInput.value.trim();
-  if (!q) {
-    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
-    countResults.textContent = '0';
-    return;
-  }
+      let presentCount=0;
+      tokens.forEach(tok=>{
+        if(tok==='autoriza'){
+          if(/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) presentCount++;
+        } else if(tok==='no autoriza'){
+          if(/\bno\s+autoriza\b/.test(combined)) presentCount++;
+        } else {
+          if(combined.includes(tok)) presentCount++;
+        }
+      });
 
-  const tokens = tokenizeQuery(q);
-  if (tokens.length === 0) {
-    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
-    countResults.textContent = '0';
-    return;
-  }
-
-  const matches = [];
-
-  db.forEach((rec, idx) => {
-    // Filtrado por respuesta del técnico (SI/NO)
-    const valInscritoAnterior = getField(rec, [
-      '¿Inscrito anteriormente?', 'Inscrito anteriormente',
-      'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
-    ]);
-    const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
-    const includeByInscrito = valInscritoAnteriorNormalized === '' || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
-    if (!includeByInscrito) return;
-
-    const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
-    const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
-    const combined = `${anverso} ${reverso}`;
-
-    let presentCount = 0;
-    tokens.forEach(tok => {
-      if (tok === 'autoriza') {
-        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) presentCount++;
-      } else if (tok === 'no autoriza') {
-        if (/\bno\s+autoriza\b/.test(combined)) presentCount++;
-      } else {
-        if (combined.includes(tok)) presentCount++;
+      if(tokens.length>0 && (presentCount/tokens.length)>=0.95){
+        matches.push({rec, idx});
       }
     });
 
-    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.95) {
-      matches.push({ rec, idx });
+    if(matches.length===0){
+      resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+      countResults.textContent='0';
+      return;
     }
-  });
 
-  if (matches.length === 0) {
-    resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
-    countResults.textContent = '0';
-    return;
+    countResults.textContent = String(matches.length);
+
+    matches.forEach(m=>{
+      const rec = m.rec;
+      const wrapper = document.createElement('div');
+      wrapper.className='result-item';
+
+      const chkWrap = document.createElement('div');
+      chkWrap.className='check';
+      const chk = document.createElement('input');
+      chk.type='checkbox';
+      chk.name='selectRec';
+      chk.dataset.index=m.idx;
+      chk.addEventListener('change', (e)=>{
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
+        if(!e.target.checked) return;
+        openModalDetalle(db[m.idx]);
+      });
+      chkWrap.appendChild(chk);
+
+      const content = document.createElement('div');
+      content.style.flex='1';
+      const title = document.createElement('h3');
+      const anversoVal = anversoPreview(rec) || '';
+      const reversoVal = getField(rec,['REVERSO','Reverso','reverso'])||'';
+      title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0,80) : 'Registro sin ANVERSO/REVERSO');
+      const p = document.createElement('p');
+      p.textContent = (reversoVal ? reversoVal : '').substring(0,220);
+
+      content.appendChild(title);
+      content.appendChild(p);
+      wrapper.appendChild(chkWrap);
+      wrapper.appendChild(content);
+      resultsEl.appendChild(wrapper);
+    });
   }
 
-  countResults.textContent = String(matches.length);
+  if(btnSearch) btnSearch.addEventListener('click', doSearch);
+  if(searchInput) searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
-  matches.forEach(m => {
-    const rec = m.rec;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'result-item';
-
-    const chkWrap = document.createElement('div');
-    chkWrap.className = 'check';
-    const chk = document.createElement('input');
-    chk.type = 'checkbox';
-    chk.name = 'selectRec';
-    chk.dataset.index = m.idx;
-    chk.addEventListener('change', onSelectRecord);
-    chkWrap.appendChild(chk);
-
-    const content = document.createElement('div');
-    content.style.flex = '1';
-    const title = document.createElement('h3');
-    const anversoVal = anversoPreview(rec) || '';
-    const reversoVal = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
-    title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0, 80) : 'Registro sin ANVERSO/REVERSO');
-    const p = document.createElement('p');
-    p.textContent = (reversoVal ? reversoVal : '').substring(0, 220);
-
-    content.appendChild(title);
-    content.appendChild(p);
-    wrapper.appendChild(chkWrap);
-    wrapper.appendChild(content);
-    resultsEl.appendChild(wrapper);
-  });
-}
-
-
-  function openModalDetalle(rec){
-    modalDetalleContent.innerHTML=`
-      <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
-      <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
-      <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
-      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
-      <div class="field"><strong>Documentación:</strong> ${rec["Documentación"]?`<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>`:''}</div>
-    `;
-    modalDetalle.style.display='flex';
-    modalDetalle.setAttribute('aria-hidden','false');
+  // --- Botón limpiar ---
+  if(clearBtn){
+    searchInput.addEventListener('input', ()=>{ clearBtn.style.display = searchInput.value ? 'block' : 'none'; });
+    clearBtn.addEventListener('click', ()=>{
+      searchInput.value='';
+      clearBtn.style.display='none';
+      searchInput.focus();
+    });
   }
 
-  function closeModalDetalle(){
-    modalDetalle.style.display='none';
-    modalDetalle.setAttribute('aria-hidden','true');
-  }
-
-  btnVolverDetalle.addEventListener('click', closeModalDetalle);
-  btnCerrarDetalle.addEventListener('click', closeModalDetalle);
-
-  // inicio limpio
-  actualizarChecks();
-  const clearBtn = document.getElementById('clearSearch');
-  
-  // Mostrar/ocultar cruz
-  searchInput.addEventListener('input', () => {
-    clearBtn.style.display = searchInput.value ? 'block' : 'none';
-  });
-  
-  // Borrar texto al pulsar cruz
-  clearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    clearBtn.style.display = 'none';
-    searchInput.focus();
-  });  
 });
-
-  
 </script>
+
 </body>
 </html>
 
