@@ -19,7 +19,7 @@ header h1{margin:0;color:var(--sae-green);font-size:30px}
 header h2{margin:0;font-size:19px;color:var(--muted)}
 header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
 .search-container { display:flex; flex-direction:column; align-items:center; margin: 30px auto; width:100%; max-width:820px; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
-.search-intro { text-align:left; width:100%; margin-bottom:12px; font-size:1rem; color:#222; }
+.search-intro { text-align:center; width:100%; margin-bottom:12px; font-size:2rem; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content:flex-start; flex-wrap:wrap; margin-bottom:14px; }
 .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
 .filters input[type="checkbox"]{ width:16px; height:16px; }
@@ -86,26 +86,26 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
 .clear-btn {
   position: absolute;
-  right: 8px;                     /* cerca del borde */
+  right: 8px;                  /* cerca del borde derecho */
   top: 50%;
-  transform: translateY(-50%);    /* centrado vertical */
-  background: #fff;                /* fondo blanco */
-  border: none;
-  color: #777;                     /* gris sutil */
-  font-size: 16px;                 /* tamaño equilibrado */
+  transform: translateY(-50%); /* centrado vertical */
+  background: transparent;     /* sin fondo */
+  border: none;                /* sin borde */
+  color: #777;                 /* gris tenue */
+  font-size: 18px;             /* un poco más grande para legibilidad */
   cursor: pointer;
-  display: none;                   /* aparece solo con texto */
+  display: none;               /* aparece solo cuando hay texto */
   line-height: 1;
-  padding: 0 2px;                  /* ligero padding horizontal */
-  font-weight: 300;                /* más fina */
-  opacity: 0.6;                    /* más sutil */
-  border-radius: 50%;              /* opcional, redonda */
+  padding: 0;                  /* sin padding */
+  font-weight: 300;            /* ligera */
+  opacity: 0.6;                /* sutil */
 }
 
 .clear-btn:hover {
   opacity: 1;
-  color: #000;                     /* se destaca al pasar el ratón */
+  color: #000;                 /* se destaca al pasar el ratón */
 }
+
   
 .results .small {
   color: #1b5e20;
@@ -279,9 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🟩 Añadimos el texto superior antes de mostrar los resultados
     const info = document.createElement('div');
     info.className = 'small';
-    info.style.marginBottom = '8px';
+    info.style.marginBottom = '12px';
     info.style.cssText = 'font-weight:bold; text-align:center;';
-    info.textContent =' 👉 Pulsa sobre la situación correcta:';
+    info.textContent =' 👉 Pulsa sobre la situación correcta.<br>';
     resultsEl.appendChild(info);
     
     countResults.textContent=String(matches.length);
