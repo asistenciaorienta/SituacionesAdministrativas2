@@ -89,7 +89,7 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   background: none;
   border: none;
   color: #dfeee0;
-  font-size: 100px;
+  font-size: 10px;
   cursor: pointer;
   display: none;
   line-height: 1;
@@ -295,22 +295,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // inicio limpio
   actualizarChecks();
+  const clearSearch = document.getElementById('clearSearch');
+  
+  // Mostrar u ocultar la cruz según haya texto
+  searchInput.addEventListener('input', () => {
+    clearSearch.style.display = searchInput.value ? 'block' : 'none';
+  });
+  
+  // Limpiar el texto al pulsar la cruz
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.style.display = 'none';
+    resultsEl.innerHTML = '';
+    countResults.textContent = '0';
+    searchInput.focus();
+  });  
 });
-const clearSearch = document.getElementById('clearSearch');
 
-// Mostrar u ocultar la cruz según haya texto
-searchInput.addEventListener('input', () => {
-  clearSearch.style.display = searchInput.value ? 'block' : 'none';
-});
-
-// Limpiar el texto al pulsar la cruz
-clearSearch.addEventListener('click', () => {
-  searchInput.value = '';
-  clearSearch.style.display = 'none';
-  resultsEl.innerHTML = '';
-  countResults.textContent = '0';
-  searchInput.focus();
-});
   
 </script>
 </body>
