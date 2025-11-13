@@ -12,10 +12,11 @@
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Arial;
 }
 html,body{height:100%;margin:0;background:#f5f5f5}
-header{display:flex;align-items:center;gap:12px;padding:8px 0}
+header{display:flex;align-items:center;gap:12px;padding:8px 0;justify-content: space-between;} /* separa los logos a los lados */
 header img{height:60px}
 header h1{margin:0;color:var(--sae-green);font-size:20px}
 header h2{margin:0;font-size:14px;color:var(--muted)}
+header .titulo-header {text-align: center;flex: 1;}  
 .search-container { display:flex; flex-direction:column; align-items:center; margin: 30px auto; width:100%; max-width:820px; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
 .search-intro { text-align:left; width:100%; margin-bottom:12px; font-size:1rem; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content:flex-start; flex-wrap:wrap; margin-bottom:14px; }
@@ -48,9 +49,8 @@ header h2{margin:0;font-size:14px;color:var(--muted)}
   padding: 10px 15px;}
 
 .footer-logo .logo-text {
-  font-size: 14px;
-  font-weight: bold;
-  color: #007A33;
+  font-size: 13px;
+  color: color:var(--muted);
   left: 0;}
 
 .footer-logo img {
@@ -72,12 +72,13 @@ header h2{margin:0;font-size:14px;color:var(--muted)}
 <body>
 <div class="container">
   <header>
-    <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo">
-    <div>
+    <img class="logo-izquierda" src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía">
+    <div class="titulo-header">
       <h1>ASIM-SAE</h1>
       <h2>Aplicación de soporte para la inscripción de migrantes</h2>
     </div>
-  </header>
+    <img class="logo-derecha" src="/SituacionesAdministrativas/images/Ayuda_SILA_Migrantes3.png" alt="Logo proyecto">
+  </header> 
 
   <div class="search-container" role="region" aria-labelledby="intro">
     <div id="intro" class="search-intro">
@@ -113,20 +114,18 @@ header h2{margin:0;font-size:14px;color:var(--muted)}
       </div>
     </div>
   </div>
-
-
-    <footer>
-      <div class="footer-logo">
-        <div class="logo-text"><b>Versión 6.01 — Dirección Provincial de Granada</b> </div>
-      </div>
-      <div class="footer-datos">
-        <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
-        <hr>
-        Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
-        José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
-      </div>
-    </footer>
-  </div>  
+  
+  <footer>
+    <div class="footer-logo">
+      <div class="logo-text"><b>Versión 6.01 — Dirección Provincial de Granada</b> </div>
+    </div>
+    <div class="footer-datos">
+      <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
+      <hr>
+      Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
+      José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
+    </div>
+  </footer>
 </div>
 
 <script>
