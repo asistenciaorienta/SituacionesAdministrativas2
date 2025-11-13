@@ -124,6 +124,9 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   font-size: 15px;
   color: #333;
 }
+.results .result-item p {
+  white-space: pre-wrap; /* mantiene saltos de línea */
+}
 
   
 </style>
@@ -340,6 +343,27 @@ document.addEventListener('DOMContentLoaded', () => {
   if(chkPrestacion) chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
   if(chkNada) chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
 
+chk.addEventListener('change', onSelectRecord);
+
+function onSelectRecord(e){
+  const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+  all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
+
+  if(!e.target.checked) return;
+  const idx = Number(e.target.dataset.index);
+  const rec = db[idx];
+
+  openModalDetalle(`
+    <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
+    <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
+    <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
+    <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
+    <div class="field"><strong>Documentación:</strong> ${rec["Documentación"]?`<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>`:''}</div>
+  `);
+}
+
+
+  
   actualizarChecks();
 
   // --- Búsqueda ---
@@ -417,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = document.createElement('div');
       content.style.flex='1';
       const title = document.createElement('h3');
-      const anversoVal = anversoPreview(rec) || '';
-      const reversoVal = getField(rec,['REVERSO','Reverso','reverso'])||'';
-      title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0,80) : 'Registro sin ANVERSO/REVERSO');
+      const anversoVal = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+      const reversoVal = getField(rec,['REVERSO','Reverso','reverso']) || '';
+      title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal : 'Registro sin ANVERSO/REVERSO');
       const p = document.createElement('p');
-      p.textContent = (reversoVal ? reversoVal : '').substring(0,220);
+      p.textContent = reversoVal || '';
 
       content.appendChild(title);
       content.appendChild(p);
