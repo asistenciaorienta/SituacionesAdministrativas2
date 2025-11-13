@@ -84,34 +84,43 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   font-size: 16px;
 }
 
-/* La cruz como pseudo-elemento */
-.search-input-wrapper::after {
-  content: "×";                  /* la cruz */
+.clear-btn {
   position: absolute;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: #777;                   /* gris tenue */
-  font-size: 18px;
+  background: none;
+  border: none;
+  color: #777;      /* gris tenue */
+  font-size: 16px;
   cursor: pointer;
-  opacity: 0;                    /* invisible por defecto */
-  transition: opacity 0.2s ease;
-}
-
-/* Mostrar la cruz solo cuando hay texto */
-.search-input-wrapper.has-text::after {
+  padding: 0;
+  line-height: 1;
   opacity: 0.6;
+  display: none;    /* solo cuando hay texto */
 }
 
-.search-input-wrapper.has-text:hover::after {
+.clear-btn:hover {
+  color: #000;
   opacity: 1;
-  color: #000;                   /* se destaca al pasar el ratón */
 }
+
   
 .results .small {
   color: #1b5e20;
   font-size: 15px;
   margin-bottom: 6px;
+}
+#doc ul {
+  margin: 8px 0 0 20px;   /* separación y sangría */
+  padding: 0;
+  list-style-type: disc;  /* tipo de viñeta: disc, circle, square */
+}
+
+#doc li {
+  margin-bottom: 6px;     /* espacio entre elementos */
+  font-size: 15px;
+  color: #333;
 }
 
   
@@ -130,11 +139,13 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
   
   <div id="doc" class="search-container">
     <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
-    <p>Identificación de la persona usuaria: Documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte)</p>
-    <p>Tarjeta TIE o Resolución en Vigor.</p>
-    <p>Solicitud</p>    
-  </div>  
-  
+    <ul>
+      <li>Identificación de la persona usuaria: Documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte)</li>
+      <li>Tarjeta TIE o Resolución en Vigor.</li>
+      <li>Solicitud</li>
+    </ul>
+  </div>
+
   <div class="search-container" role="region" aria-labelledby="intro">  
     <div id="intro" class="search-intro">
       <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
@@ -324,28 +335,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // inicio limpio
   actualizarChecks();
-const searchInput = document.getElementById('searchInput');
-const wrapper = document.querySelector('.search-input-wrapper');
+const clearBtn = document.getElementById('clearSearch');
 
+// Mostrar/ocultar cruz
 searchInput.addEventListener('input', () => {
-  if (searchInput.value) {
-    wrapper.classList.add('has-text');
-  } else {
-    wrapper.classList.remove('has-text');
-  }
+  clearBtn.style.display = searchInput.value ? 'block' : 'none';
 });
 
-// Detectar clic en el pseudo-elemento
-wrapper.addEventListener('click', (e) => {
-  const rect = wrapper.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const clearZoneStart = rect.width - 24; // zona de la cruz
-  if (clickX > clearZoneStart) {
-    searchInput.value = '';
-    wrapper.classList.remove('has-text');
-    searchInput.focus();
-  }
+// Borrar texto al pulsar cruz
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  clearBtn.style.display = 'none';
+  searchInput.focus();
 });
+
 
   
 });
