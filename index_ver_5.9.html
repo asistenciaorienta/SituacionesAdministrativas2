@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Apoyo SAE — Situaciones Administrativas</title>
+  <style>
+    :root{
+      --sae-green:#007A33; /* verde institucional (ajustable) */
+      --sae-green-dark:#1b5e20;
+      --muted:#6b6b6b;
+      --card-bg:#fff;
+      --glass: rgba(255,255,255,0.9);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+/* CENTRADO PAGINA INICIAL */
+body{
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  min-height:100vh;
+  display:block; 
+}
+
+/* centrado solo del bloque inicial */
+#pagina_inicial{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* --- HEADER NUEVO --- */
+header{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start; /* logo a la izquierda */
+  padding:6px 12px;
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+/* logo más pequeño */
+header img{
+  width:auto;
+  height:60px;
+  object-fit:contain;
+  margin-left: 1rem;
+}
+
+/* título centrado arriba */
+header h1{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:26px;
+  text-align:center;
+  width:100%;
+  max-width:900px;
+  margin-top:2rem;
+  color: #007A33;
+}
+
+#nacionalidad-page{
+  max-width:870px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  padding:30px 20px;
+}
+h2{
+  font-size:20px;
+  text-align:center;
+}
+    p.lead{margin:6px 0 0;color:var(--muted)}
+
+    /* Botones principales */
+    .cta-row{display:flex;gap:16px;margin:20px 0}
+    .btn{padding:12px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:600;box-shadow:0 6px 18px rgba(46,125,50,0.08)}
+    .btn:active{transform:translateY(1px)}
+    .btn-comunitario{background:transparent;color:var(--sae-green-dark);border:2px solid var(--sae-green);min-width:160px}
+    .btn-nocomunitario{background:var(--sae-green);color:#fff;min-width:220px;font-size:18px}
+
+    /* Modal */
+    
+    .modal-backdrop{   
+      text-align: center; /* centra el texto y botones dentro */   
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      position: fixed;      /* fijo en pantalla */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5); /* fondo semi-transparente */
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;        /* muy alto para que esté por encima de todo */
+    }   
+    .modal {
+      background: var(--card-bg);
+      border-radius: 12px;
+      max-width: 720px;      
+      padding: 18px;
+      opacity: 0;
+      transform: scale(.92);
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    
+    .modal.show {
+      opacity: 1;
+      transform: scale(1);
+    }    
+    .modal h2{margin:0 0 8px}
+    .modal .muted{color:var(--muted);font-size:14px}
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+
+    /* Search UI */
+.search-area{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  margin:auto;
+  width:100%;
+  max-width:960px;
+  display:none;
+  background:white;
+  padding:24px;
+  overflow:auto;
+  border-radius:0;
+}
+    
+    .search-row{display:flex;gap:10px;align-items:center}
+    input[type=text]{flex:1;padding:10px;border-radius:8px;border:1px solid #dfeee0}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Results */
+    .results{margin-top:16px}
+    .result-item{display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid #e6efe7;background:white;margin-bottom:8px}
+    .result-item .check{margin-top:2px}
+    .result-item h3{margin:0;font-size:15px}
+    .result-item p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .details{margin-top:12px;padding:12px;border-radius:8px;background:#fff;border:1px solid #e6efe7}
+    .field{display:flex;gap:8px;padding:6px 0}
+    .field .label{width:180px;font-weight:600;color:var(--sae-green-dark);font-size:13px}
+    .no-data{color:var(--muted);font-style:italic}
+
+    footer{margin-top:22px;color:var(--muted);font-size:13px}
+
+    /* Responsive */
+    @media (max-width:600px){.cta-row{flex-direction:column}.btn-nocomunitario{min-width:unset;width:100%}}
+
+.footer-logo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.footer-logo .logo-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: #007A33;
+  left: 0;
+}
+
+.footer-logo img {
+  height: 70px;
+}
+
+.footer-datos {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background-color: #f5f5f5;
+  color: #007A33;
+  font-size: 14px;
+  text-align: right;
+  padding: 10px 15px;
+  border-top-left-radius: 8px;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}    
+.btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-container {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+}
+
+.help-icon {
+  background-color: #FFFFFF;
+  color: #007A33;
+  border-radius: 30%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}    
+.btn-comunitario-wrapper{
+  position:relative;
+  padding-right:34px; /* espacio para el ? dentro */
+}
+
+.btn-comunitario-wrapper .help-icon{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  background:white;
+  color:var(--sae-green);
+  border-radius:50%;
+  width:20px;
+  height:20px;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  line-height:20px;
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* tooltip */
+.btn-comunitario-wrapper .tooltip-text{
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  background:white;
+  border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  padding:10px 14px;
+  width:260px;
+  font-size:13px;
+  color:var(--muted);
+  display:none;
+  z-index:5;
+}
+
+/* solo se activa al pasar por el ? */
+.btn-comunitario-wrapper .help-icon:hover + .tooltip-text{
+  display:block;
+}
+#modalComunitarioBackdrop,
+#modalNoComunitarioBackdrop {
+  display:none;   /* ocultos desde inicio */
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  inset:0;
+  background: rgba(0,122,51,0.35); /* verde SAE con transparencia */
+  backdrop-filter: blur(3px);
+}    
+#searchArea{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:30px;
+  padding:25px;
+}
+
+.search-top{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  max-width:600px;
+  gap:14px;
+}
+
+.search-top input{
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #dfeee0;
+  font-size:17px;
+}
+
+.search-top button{
+  align-self:center;
+  padding:12px 24px;
+  font-size:18px;
+}
+
+.search-meta{
+  width:100%;
+  max-width:600px;
+  display:flex;
+  justify-content:space-between;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:14px;
+}
+.modal-detalle{
+  padding:0;
+  overflow:hidden;
+  max-width:680px;
+}
+
+.modal-header-sae{
+  background:var(--sae-green);
+  color:white;
+  padding:16px 22px;
+  border-top-left-radius:12px;
+  border-top-right-radius:12px;
+}
+
+.modal-header-sae h2{
+  margin:0;
+  font-size:20px;
+}
+
+.modal-body-sae{
+  padding:20px 22px;
+  color:#222;
+  max-height:60vh;
+  overflow-y:auto;
+  font-size:15px;
+  line-height:1.35;
+}
+    
+  </style>
+</head>
+<body>
+  <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
+  Jefe de Servicio: Francisco Escabias García.
+  Diseñador: Valentín Jiménez Extremera.
+  Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
+  Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés, Beatriz Girela Muñoz.
+  Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE. -->  
+  <div class="container">
+    <header>      
+      <img src="/SituacionesAdministrativas/images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía" />
+      <div>
+        <h1>Ayuda para el registro en SILA de una persona Extranjera</h1>
+      </div>
+    </header>
+
+    <div id="pagina_inicial">
+        <!-- Página de nacionalidad (ORIGEN) -->
+        <div id="nacionalidad-page" class="nacionalidad-card">
+          <h2>Selecciona el Origen de la persona usuaria</h2>
+          <div class="botones-nacionalidad">
+            <div class="btn-wrapper">
+              <button id="btnComunitario" class="btn btn-comunitario btn-comunitario-wrapper">
+                Comunitario
+                <span class="help-icon">?</span>
+                <span class="tooltip-text">
+                  <strong>Países comunitarios:</strong><br>
+                  Austria, Bélgica, Bulgaria, Chipre, República Checa, Dinamarca, Estonia, Finlandia, Francia,
+                  Alemania, Grecia, Hungría, Irlanda, Italia, Letonia, Lituania, Luxemburgo, Malta,
+                  Países Bajos, Polonia, Portugal, Rumanía, Eslovaquia, Eslovenia, España, Suecia,
+                  Islandia, Liechtenstein, Noruega, Suiza.
+                </span>
+              </button>
+            </div>
+            <button id="btnNoComunitario" class="btn btn-nocomunitario">No comunitario</button>
+          </div>
+        </div>
+      </div>  <!-- fin pagina inicial -->
+ 
+    <!-- Modal Comunitario -->
+    <div id="modalComunitarioBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal" role="document">
+        <h2>Comunitario</h2>
+        <h2>Documentación Necesaria para Inscribir a una persona Comunitaria</h2>
+        <br>
+        Documento acreditativo de identidad
+        <br>
+        Certificado de inscripción .....
+        <br>
+        Tarjeta Verde...
+        <br>       
+        <div class="actions">
+          <button id="closeComunitario" class="btn btn-comunitario">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal No Comunitario - pregunta SILA -->
+    <div id="modalNoComunitarioBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h2>No comunitario</h2>
+        <p class="muted">Antes de buscar dime si tras consultar SILA, ¿la persona está actualmente inscrita en SILA?</p>
+        <div style="display:flex; gap:20px; margin-top:12px; justify-content:center;">
+          <button id="inscritoSi" class="btn" style="background:#fff;border:2px solid var(--sae-green);">Sí — Está inscrita</button>
+          <button id="inscritoNo" class="btn" style="background:#fff;border:2px solid #c62828;color:#c62828">No — No está inscrita</button>
+        </div>
+        <div class="actions">
+          <button id="closeNoComunitario" class="btn btn-comunitario">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de búsqueda -->
+    <div id="searchArea" class="search-area" aria-live="polite" style="display:none;">
+      <div class="search-top">
+        <input id="searchInput" type="text" placeholder="Buscar por palabras…">
+        <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
+      </div>
+      <div class="search-meta">
+        <span class="small">Filtro SILA: <span id="inscritoEstado" class="small no-data">no definido</span></span>
+        <span class="small">Resultados: <span id="countResults">0</span></span>
+      </div>
+      <div class="results" id="results"></div>
+    </div>
+    
+    <!-- MODAL DE DETALLES SELECCIONADO -->
+    <div id="modalDetalle" class="modal-backdrop" style="display:none;">
+      <div class="modal modal-detalle">
+        <div class="modal-header-sae">
+          <h2 id="modalDetalleTitulo">Detalles del registro seleccionado</h2>
+        </div>
+        <div class="modal-body-sae">
+          <div id="modalDetalleContent"></div>
+        </div>
+        <div class="actions" style="justify-content:center;margin-top:20px; gap:20px">
+          <button id="btnVolverDetalle" class="btn btn-comunitario" style="font-size:17px;padding:10px 26px">Volver</button>
+          <button id="btnCerrarDetalle" class="btn btn-nocomunitario" style="font-size:17px;padding:10px 26px">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-logo">
+        <div class="logo-text">Dirección Provincial de Granada</div>
+      </div>
+      <div class="footer-datos">
+        <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
+        <hr>
+        Versión 5.00<br>
+        Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
+        José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
+      </div>
+    </footer>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Utilidades para leer campos con posibles variantes de nombre ---
+  function getField(obj, possibleNames){
+    const keys = Object.keys(obj);
+    for(const n of possibleNames){
+      const normN = n.trim().toLowerCase();
+      for(const key of keys){
+        if(key.trim().toLowerCase() === normN) return obj[key];
+      }
+    }
+    return undefined;
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<"'>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
+  }
+
+  function normalize(s){
+    if(s==null) return '';
+    return String(s)
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu,'')
+      .replace(/[^\p{L}\p{N}]+/gu,' ')
+      .toLowerCase()
+      .trim();
+  }
+
+  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
+
+function tokenizeQuery(q) {
+  const norm = normalize(q);
+  if (!norm) return [];
+  const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+  const filtered = toks.filter(t => !STOPWORDS.has(t));
+
+  // 🔸 Unir "no autoriza" en un solo token
+  const merged = [];
+  for (let i = 0; i < filtered.length; i++) {
+    if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+      merged.push('no autoriza');
+      i++; // saltamos la siguiente
+    } else {
+      merged.push(filtered[i]);
+    }
+  }
+  return merged.length > 0 ? merged : filtered;
+}
+
+
+  function anversoPreview(rec){
+    const av = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+    return av.split('\\n')[0].substring(0,120);
+  }
+
+  // --- Elementos ---
+  const paginaInicial = document.getElementById('pagina_inicial');
+
+  const btnComunitario = document.getElementById('btnComunitario');
+  const modalComunitarioBackdrop = document.getElementById('modalComunitarioBackdrop');
+  const closeComunitario = document.getElementById('closeComunitario');
+
+  const btnNoComunitario = document.getElementById('btnNoComunitario');
+  const modalNoComunitarioBackdrop = document.getElementById('modalNoComunitarioBackdrop');
+  const closeNoComunitario = document.getElementById('closeNoComunitario');
+  const inscritoSi = document.getElementById('inscritoSi');
+  const inscritoNo = document.getElementById('inscritoNo');
+
+  const searchArea = document.getElementById('searchArea');
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  const resultsEl = document.getElementById('results');
+  const countResults = document.getElementById('countResults');
+  const inscritoEstado = document.getElementById('inscritoEstado');
+
+  const modalDetalle = document.getElementById('modalDetalle');
+  const modalDetalleContent = document.getElementById('modalDetalleContent');
+  const btnVolverDetalle = document.getElementById('btnVolverDetalle');
+  const btnCerrarDetalle = document.getElementById('btnCerrarDetalle');
+
+  let db = [];
+  let userInscritoAnswer = null;
+  let selectedIndex = null;
+
+  // --- Eventos modales comunitario ---
+  btnComunitario.addEventListener('click', () => {
+    paginaInicial.style.display='none';
+    openModal('modalComunitarioBackdrop');
+  });
+  closeComunitario.addEventListener('click', () => { closeModal('modalComunitarioBackdrop'); });
+  modalComunitarioBackdrop.addEventListener('click', e => { if(e.target===modalComunitarioBackdrop) closeModal('modalComunitarioBackdrop'); });
+
+  // --- Eventos modales no comunitario ---
+  btnNoComunitario.addEventListener('click', () => {
+    paginaInicial.style.display='none';
+    openModal('modalNoComunitarioBackdrop');
+  });
+  closeNoComunitario.addEventListener('click', () => { closeModal('modalNoComunitarioBackdrop'); });
+  modalNoComunitarioBackdrop.addEventListener('click', e => { if(e.target===modalNoComunitarioBackdrop) closeModal('modalNoComunitarioBackdrop'); });
+
+  inscritoSi.addEventListener('click', () => {
+    setInscritoAnswer('SI');
+    modalNoComunitarioBackdrop.style.display='none';
+    openSearchArea();
+  });
+  inscritoNo.addEventListener('click', () => {
+    setInscritoAnswer('NO');
+    modalNoComunitarioBackdrop.style.display='none';
+    openSearchArea();
+  });
+
+  function setInscritoAnswer(val){
+    userInscritoAnswer = val;
+    inscritoEstado.textContent = val==='SI' ? 'Sí (técnico respondió: Sí)' : 'No (técnico respondió: No)';
+    inscritoEstado.classList.remove('no-data');
+  }
+
+  function openSearchArea(){    
+    // limpiar campo de búsqueda
+    searchInput.value = '';
+    // limpiar resultados anteriores
+    resultsEl.innerHTML = '';
+    countResults.textContent = '0';
+
+    searchArea.style.display='flex';
+    if(db.length===0) loadJSON();
+  }
+
+  async function loadJSON(){
+    try{
+      const res = await fetch('./SituacionesAdministrativas.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('No se pudo cargar SituacionesAdministrativas.json');
+      db = await res.json();
+      console.log('Registros cargados:', db.length);
+    }catch(err){
+      console.error(err);
+      resultsEl.innerHTML = `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
+    }
+  }
+
+  // --- Búsqueda ---
+// --- Búsqueda --- 
+btnSearch.addEventListener('click', doSearch);
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+function doSearch() {
+  resultsEl.innerHTML = '';
+  selectedIndex = null;
+
+  const q = searchInput.value.trim();
+  if (!q) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
+
+  const tokens = tokenizeQuery(q);
+  if (tokens.length === 0) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
+
+  const matches = [];
+
+  db.forEach((rec, idx) => {
+    const valInscritoAnterior = getField(rec, [
+      '¿Inscrito anteriormente?', 'Inscrito anteriormente',
+      'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
+    ]);
+    const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+    const includeByInscrito = valInscritoAnteriorNormalized === '' || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
+    if (!includeByInscrito) return;
+
+    const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
+    const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
+    const combined = `${anverso} ${reverso}`;
+
+    let presentCount = 0;
+
+    tokens.forEach(tok => {
+      if (tok === 'autoriza') {
+        // Solo si aparece "autoriza" sin que esté precedido por "no"
+        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) {
+          presentCount++;
+        }
+      } else if (tok === 'no autoriza') {
+        // Solo si aparece la secuencia exacta "no autoriza"
+        if (/\bno\s+autoriza\b/.test(combined)) {
+          presentCount++;
+        }
+      } else {
+        if (combined.includes(tok)) presentCount++;
+      }
+    });
+
+    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.95) {
+      matches.push({ rec, idx });
+    }
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+    countResults.textContent = '0';
+    return;
+  }
+
+  countResults.textContent = String(matches.length);
+
+  matches.forEach(m => {
+    const rec = m.rec;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'result-item';
+
+    const chkWrap = document.createElement('div');
+    chkWrap.className = 'check';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.name = 'selectRec';
+    chk.dataset.index = m.idx;
+    chk.addEventListener('change', onSelectRecord);
+    chkWrap.appendChild(chk);
+
+    const content = document.createElement('div');
+    content.style.flex = '1';
+    const title = document.createElement('h3');
+    const anversoVal = anversoPreview(rec) || '';
+    const reversoVal = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+    title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0, 80) : 'Registro sin ANVERSO/REVERSO');
+    const p = document.createElement('p');
+    p.textContent = (reversoVal ? reversoVal : '').substring(0, 220);
+
+    content.appendChild(title);
+    content.appendChild(p);
+    wrapper.appendChild(chkWrap);
+    wrapper.appendChild(content);
+    resultsEl.appendChild(wrapper);
+  });
+}
+
+
+
+  
+function containsTokenExact(recordText, token) {
+  const text = normalize(recordText); // normalizamos igual que antes
+  const words = text.split(/\s+/);
+  token = token.toLowerCase();
+
+  if(token === 'autoriza') {
+    // busca "autoriza" que **no esté precedida por "no"**
+    for(let i=0; i<words.length; i++){
+      if(words[i] === 'autoriza'){
+        if(i===0 || words[i-1] !== 'no') return true;
+      }
+    }
+    return false;
+  } else if(token === 'no autoriza') {
+    // busca exactamente "no autoriza" como secuencia
+    for(let i=0; i<words.length-1; i++){
+      if(words[i] === 'no' && words[i+1] === 'autoriza') return true;
+    }
+    return false;
+  } else {
+    // coincidencia exacta normal
+    return words.includes(token);
+  }
+}
+
+function containsPhrase(wordsArray, phrase) {
+  // wordsArray: array de palabras (anverso o reverso)
+  // phrase: string de palabras a buscar, separadas por espacios
+  const phraseWords = phrase.toLowerCase().split(/\s+/);
+  for (let i = 0; i <= wordsArray.length - phraseWords.length; i++) {
+    let match = true;
+    for (let j = 0; j < phraseWords.length; j++) {
+      if (wordsArray[i + j] !== phraseWords[j]) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return true;
+  }
+  return false;
+}
+
+  
+  function onSelectRecord(e){
+    const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+    all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
+
+    if(!e.target.checked) return;
+    const idx = Number(e.target.dataset.index);
+    const rec = db[idx];
+
+    openModalDetalle(`
+      <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
+      <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
+      <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
+      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
+      <div class="field"><strong>Documentación:</strong> ${rec["Documentación"]?`<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>`:''}</div>
+    `);
+  }
+
+  // --- Modales generales ---
+  function openModal(modalId){
+    const bd=document.getElementById(modalId);
+    if(!bd) return;
+    bd.style.display='flex';
+    const mdl = bd.querySelector('.modal');
+    if(mdl) requestAnimationFrame(()=>mdl.classList.add('show'));
+  }
+
+  function closeModal(modalId){
+    const bd=document.getElementById(modalId);
+    if(!bd) return;
+    const mdl = bd.querySelector('.modal');
+    if(mdl){ mdl.classList.remove('show'); setTimeout(()=>{ bd.style.display='none'; },200); } 
+    else bd.style.display='none';
+    paginaInicial.style.display='flex';
+  }
+
+  function openModalDetalle(html){
+      modalDetalleContent.innerHTML = html;
+      modalDetalle.style.display = 'flex';
+      const mdl = modalDetalle.querySelector('.modal');
+      if(mdl) requestAnimationFrame(() => mdl.classList.add('show'));
+  }
+  function closeModalDetalle() {
+      const mdl = modalDetalle.querySelector('.modal');
+      if(mdl) {
+          mdl.classList.remove('show');
+          setTimeout(() => { modalDetalle.style.display='none'; }, 200);
+      } else {
+          modalDetalle.style.display='none';
+      }
+  }
+
+  btnVolverDetalle.addEventListener('click', ()=>{ 
+    closeModalDetalle(); 
+    searchArea.style.display = 'flex'; 
+  });
+
+  btnCerrarDetalle.addEventListener('click', () => {
+      closeModalDetalle();
+      searchArea.style.display='none';
+      paginaInicial.style.display='flex';
+  });
+
+  // ocultar búsqueda al inicio
+  searchArea.style.display='none';
+
+});
+</script>
+</body>
+</html>
