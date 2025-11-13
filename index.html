@@ -270,7 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
   loadJSON();
 
   function normalize(s){ return s?String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim():''; }
-  function tokenize(q){ return normalize(q).split(/\s+/).filter(Boolean); }
+  function tokenize(q){
+    const stopwords = ['de','la','los','las','el','un','una','unos','unas','a','y','en','del','al','por','para','con','sin','sobre','que'];
+    return normalize(q)
+            .split(/\s+/)
+            .filter(tok => tok && !stopwords.includes(tok));
+  }
 
   btnSearch.addEventListener('click', doSearch);
   searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
