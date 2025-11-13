@@ -180,7 +180,6 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
       <div class="modal-body-sae" id="modalDetalleContent"></div>
       <div class="actions">
         <button id="btnVolverDetalle" class="btn">Volver</button>
-        <button id="btnCerrarDetalle" class="btn" style="background:#b71c1c;color:#fff">Cerrar</button>
       </div>
     </div>
   </div>
@@ -200,6 +199,23 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Utilidades para leer campos con posibles variantes de nombre ---
+  function getField(obj, possibleNames){
+    const keys = Object.keys(obj);
+    for(const n of possibleNames){
+      const normN = n.trim().toLowerCase();
+      for(const key of keys){
+        if(key.trim().toLowerCase() === normN) return obj[key];
+      }
+    }
+    return undefined;
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<"'>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
+  }
+  
   const chkInscrito = document.getElementById('chkInscrito');
   const chkPrestacion = document.getElementById('chkPrestacion');
   const chkNada = document.getElementById('chkNada');
@@ -270,55 +286,123 @@ document.addEventListener('DOMContentLoaded', () => {
   loadJSON();
 
   function normalize(s){ return s?String(s).normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim():''; }
+  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
   function tokenize(q){
-    const stopwords = ['de','la','los','las','el','un','una','unos','unas','a','y','en','del','al','por','para','con','sin','sobre','que'];
-    return normalize(q)
-            .split(/\s+/)
-            .filter(tok => tok && !stopwords.includes(tok));
+    const norm = normalize(q);
+    if (!norm) return [];
+    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+    const filtered = toks.filter(t => !STOPWORDS.has(t));
+  
+    // 🔸 Unir "no autoriza" en un solo token
+    const merged = [];
+    for (let i = 0; i < filtered.length; i++) {
+      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+        merged.push('no autoriza');
+        i++; // saltamos la siguiente
+      } else {
+        merged.push(filtered[i]);
+      }
+    }
+    return merged.length > 0 ? merged : filtered;
   }
 
   btnSearch.addEventListener('click', doSearch);
   searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
-  function doSearch(){
-    resultsEl.innerHTML='';
-    const q = searchInput.value.trim();
-    if(!q){ resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>'; countResults.textContent='0'; return; }
+function doSearch() {
+  resultsEl.innerHTML = '';
+  selectedIndex = null;
 
-    const tokens = tokenize(q);
-    const matches=[];
-    db.forEach(rec=>{
-      const combined = normalize(rec['ANVERSO']||'')+' '+normalize(rec['REVERSO']||'');
-      let presentCount=0;
-      tokens.forEach(tok=>{
-        const re=new RegExp('\\b'+tok.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','u');
-        if(re.test(combined)) presentCount++;
-      });
-      if(tokens.length>0 && (presentCount/tokens.length)>=0.95) matches.push(rec);
-    });
-
-    if(matches.length===0){
-      resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
-      countResults.textContent='0';
-      return;
-    }
-    // 🟩 Añadimos el texto superior antes de mostrar los resultados
-    const info = document.createElement('div');
-    info.className = 'small';
-    info.style.cssText = 'font-weight:bold; text-align:center; margin-bottom:20px;';
-    info.textContent =' 👉 Pulsa sobre la situación correcta.';
-    resultsEl.appendChild(info);
-    
-    countResults.textContent=String(matches.length);
-    matches.forEach(rec=>{
-      const wrapper=document.createElement('div'); wrapper.className='result-item';
-      const title=document.createElement('h3'); title.textContent=(rec['ANVERSO']||'').substring(0,120);
-      const p=document.createElement('p'); p.textContent=(rec['REVERSO']||'').substring(0,220);
-      wrapper.appendChild(title); wrapper.appendChild(p);
-      wrapper.addEventListener('click', ()=>openModalDetalle(rec));
-      resultsEl.appendChild(wrapper);
-    });
+  const q = searchInput.value.trim();
+  if (!q) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
   }
+
+  const tokens = tokenizeQuery(q);
+  if (tokens.length === 0) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
+
+  const matches = [];
+
+  db.forEach((rec, idx) => {
+    const valInscritoAnterior = getField(rec, [
+      '¿Inscrito anteriormente?', 'Inscrito anteriormente',
+      'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
+    ]);
+    const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+    const includeByInscrito = valInscritoAnteriorNormalized === '' || (userInscritoAnswer && valInscritoAnteriorNormalized === userInscritoAnswer);
+    if (!includeByInscrito) return;
+
+    const anverso = normalize(getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '');
+    const reverso = normalize(getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '');
+    const combined = `${anverso} ${reverso}`;
+
+    let presentCount = 0;
+
+    tokens.forEach(tok => {
+      if (tok === 'autoriza') {
+        // Solo si aparece "autoriza" sin que esté precedido por "no"
+        if (/\bautoriza\b/.test(combined) && !/\bno\s+autoriza\b/.test(combined)) {
+          presentCount++;
+        }
+      } else if (tok === 'no autoriza') {
+        // Solo si aparece la secuencia exacta "no autoriza"
+        if (/\bno\s+autoriza\b/.test(combined)) {
+          presentCount++;
+        }
+      } else {
+        if (combined.includes(tok)) presentCount++;
+      }
+    });
+
+    if (tokens.length > 0 && (presentCount / tokens.length) >= 0.95) {
+      matches.push({ rec, idx });
+    }
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+    countResults.textContent = '0';
+    return;
+  }
+
+  countResults.textContent = String(matches.length);
+
+  matches.forEach(m => {
+    const rec = m.rec;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'result-item';
+
+    const chkWrap = document.createElement('div');
+    chkWrap.className = 'check';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.name = 'selectRec';
+    chk.dataset.index = m.idx;
+    chk.addEventListener('change', onSelectRecord);
+    chkWrap.appendChild(chk);
+
+    const content = document.createElement('div');
+    content.style.flex = '1';
+    const title = document.createElement('h3');
+    const anversoVal = anversoPreview(rec) || '';
+    const reversoVal = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+    title.textContent = anversoVal ? anversoVal : (reversoVal ? reversoVal.substring(0, 80) : 'Registro sin ANVERSO/REVERSO');
+    const p = document.createElement('p');
+    p.textContent = (reversoVal ? reversoVal : '').substring(0, 220);
+
+    content.appendChild(title);
+    content.appendChild(p);
+    wrapper.appendChild(chkWrap);
+    wrapper.appendChild(content);
+    resultsEl.appendChild(wrapper);
+  });
+}
 
   function openModalDetalle(rec){
     modalDetalleContent.innerHTML=`
@@ -342,22 +426,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // inicio limpio
   actualizarChecks();
-const clearBtn = document.getElementById('clearSearch');
-
-// Mostrar/ocultar cruz
-searchInput.addEventListener('input', () => {
-  clearBtn.style.display = searchInput.value ? 'block' : 'none';
-});
-
-// Borrar texto al pulsar cruz
-clearBtn.addEventListener('click', () => {
-  searchInput.value = '';
-  clearBtn.style.display = 'none';
-  searchInput.focus();
-});
-
-
+  const clearBtn = document.getElementById('clearSearch');
   
+  // Mostrar/ocultar cruz
+  searchInput.addEventListener('input', () => {
+    clearBtn.style.display = searchInput.value ? 'block' : 'none';
+  });
+  
+  // Borrar texto al pulsar cruz
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    searchInput.focus();
+  });  
 });
 
   
