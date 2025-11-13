@@ -411,34 +411,55 @@ document.addEventListener('DOMContentLoaded', () => {
       const rec = m.rec;
       const wrapper = document.createElement('div');
       wrapper.className='result-item';
-
+      wrapper.style.cursor='pointer'; // Indicar que es clicable
+    
       const chkWrap = document.createElement('div');
       chkWrap.className='check';
       const chk = document.createElement('input');
       chk.type='checkbox';
       chk.name='selectRec';
       chk.dataset.index=m.idx;
-      chk.addEventListener('change', (e)=>{
-        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
-        if(!e.target.checked) return;
-        openModalDetalle(db[m.idx]);
-      });
       chkWrap.appendChild(chk);
-
+    
       const content = document.createElement('div');
       content.style.flex='1';
       const title = document.createElement('h3');
       title.textContent = getField(rec, ['ANVERSO','Anverso','anverso']) || 'Registro sin ANVERSO';
       const p = document.createElement('p');
       p.textContent = getField(rec, ['REVERSO','Reverso','reverso']) || '';
-
       content.appendChild(title);
       content.appendChild(p);
+    
       wrapper.appendChild(chkWrap);
       wrapper.appendChild(content);
+    
+      // --- Evento: clic en todo el wrapper ---
+      wrapper.addEventListener('click', (e)=>{
+        // Evitar que el clic en el checkbox se duplique
+        if(e.target.tagName.toLowerCase() === 'input') return;
+    
+        // Desmarcar todos los checkboxes
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp=>{ inp.checked=false; });
+    
+        // Marcar el del resultado clicado
+        chk.checked = true;
+    
+        // Abrir modal
+        openModalDetalle(rec);
+      });
+    
+      // --- Evento: checkbox ---
+      chk.addEventListener('change', (e)=>{
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
+        if(!e.target.checked) return;
+        openModalDetalle(rec);
+      });
+    
       resultsEl.appendChild(wrapper);
     });
+
   }
 
   if(btnSearch) btnSearch.addEventListener('click', doSearch);
