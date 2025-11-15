@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASIM-SAE — Aplicación de soporte para la inscripción de migrantes</title>
+<style>
+:root{
+  --sae-green:#007A33;
+  --muted:#6b6b6b;
+  --card-bg:#fff;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Arial;
+}
+html,body{height:100%;margin:0;background:#f5f5f5}
+header {position: relative;display:flex;align-items:center;gap:12px;padding:8px 20px;justify-content: space-between;} /* separa los logos a los lados */
+header .logo-izquierda{height:60px; object-fit: contain;flex-shrink: 0;}
+header .logo-derecha{height:75px; object-fit: contain;flex-shrink: 0;}
+header h1{margin:0;color:var(--sae-green);font-size:30px}
+header h2{margin:0;font-size:19px;color:var(--muted)}
+header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
+.search-container { display:flex; flex-direction:column; align-items:center; margin: 30px auto; width:100%; max-width:820px; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.search-intro { text-align:center; width:100%; margin-bottom:8px; font-size:17px; color:#222; }
+.filters { display:flex; gap:18px; width:100%; justify-content:flex-start; flex-wrap:wrap; margin-bottom:14px; }
+.filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
+.filters input[type="checkbox"]{ width:16px; height:16px; }
+#searchArea{ width:100%; display:flex; flex-direction:column; gap:10px }
+.search-top{ display:flex; gap:10px; align-items:center }
+.search-top input{ flex:1; padding:12px 14px; border-radius:8px; border:1px solid #dfeee0; font-size:16px }
+.search-top button{ padding:11px 18px; border-radius:8px; border:none; background:var(--sae-green); color:#fff; font-weight:600; cursor:pointer }
+.search-top button[disabled]{ opacity:0.5; cursor:not-allowed }
+.search-meta{ display:flex; justify-content:space-between; color:var(--muted); font-size:13px; }
+.results{ margin-top:8px }
+.result-item{ display:flex; gap:12px; padding:10px; border-radius:8px; border:1px solid #e6efe7; background:#fff; margin-bottom:8px; cursor:pointer }
+.result-item h3{ margin:0;font-size:15px }
+.result-item p{ margin:6px 0 0;color:var(--muted);font-size:13px }
+.modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); justify-content:center; align-items:center; z-index:9999 }
+.modal{ background:var(--card-bg); border-radius:10px; padding:0; width:90%; max-width:720px; max-height:80vh; overflow:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25) }
+.modal-header-sae{ background:var(--sae-green); color:#fff; padding:14px 18px; border-top-left-radius:10px; border-top-right-radius:10px }
+.modal-body-sae{ padding:16px 18px }
+.actions{ display:flex; gap:10px; justify-content:center; padding:12px }
+.no-data{ color:var(--muted); font-style:italic }
+@media (max-width:600px){ .filters{flex-direction:column;align-items:flex-start} }
+.footer-logo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 15px;}
+
+.footer-logo .logo-text {
+  font-size: 13px;
+  color:var(--muted);
+  left: 0;}
+
+.footer-logo img {
+  height: 70px;}
+
+.footer-datos {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background-color: #f5f5f5;
+  color: #007A33;
+  font-size: 14px;
+  text-align: right;
+  padding: 10px 15px;
+  border-top-left-radius: 8px;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);}    
+  
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding: 12px 28px 12px 14px; /* espacio para la cruz */
+  border-radius: 8px;
+  border: 1px solid #dfeee0;
+  font-size: 16px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 5px;
+  top:50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #777;      /* gris tenue */
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.6;
+  display: none;    /* solo cuando hay texto */
+  width: 15px;
+  height: 15px;
+}
+
+.clear-btn:hover {
+  color: #000;
+  opacity: 1;
+}
+
+  
+.results .small {
+  color: #1b5e20;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+#doc ul {
+  margin: 8px 0 0 20px;   /* separación y sangría */
+  padding: 0;
+  list-style-type: disc;  /* tipo de viñeta: disc, circle, square */
+}
+
+#doc li {
+  margin-bottom: 6px;     /* espacio entre elementos */
+  font-size: 15px;
+  color: #333;
+}
+.results .result-item p {
+  white-space: pre-wrap; /* mantiene saltos de línea */
+}
+
+  
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <img class="logo-izquierda" src="images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía">
+    <div class="titulo-header">
+      <h1>ASIM-SAE</h1>
+      <h2>Aplicación de soporte para la inscripción de migrantes</h2>
+    </div>
+    <img class="logo-derecha" src="images/Logo_SILA_Migrantes.png" alt="Logo proyecto">
+  </header>
+  
+  <div id="doc" class="search-container">
+    <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
+    <ul>
+      <li>Identificación de la persona usuaria: documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte)</li>
+      <li>Tarjeta TIE o Resolución en Vigor.</li>
+      <li>Solicitud</li>
+    </ul>
+  </div>
+
+  <div class="search-container" role="region" aria-labelledby="intro">  
+    <div id="intro" class="search-intro">
+      <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
+    </div>
+
+    <div class="filters" aria-label="Opciones SILA">
+      <label><input type="checkbox" id="chkInscrito"> Consta una inscripción previa en SILA</label>
+      <label><input type="checkbox" id="chkPrestacion"> Cobra prestación o subsidio</label>
+      <label><input type="checkbox" id="chkNada"> Nada de lo anterior</label>
+    </div>
+
+  <div id="searchArea" class="search-area" aria-live="polite">
+    <div class="search-top">
+      <div class="search-input-wrapper">
+        <input id="searchInput" type="text" placeholder="Buscar por palabras…" aria-label="Buscar por palabras" disabled>
+        <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">x</button>
+      </div>
+      <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
+    </div>
+    <div class="search-meta">
+      <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>
+      <span class="small">Resultados: <span id="countResults">0</span></span>
+    </div>
+    <div class="results" id="results" aria-live="polite"></div>
+  </div>
+
+  <div id="modalDetalle" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <div class="modal-header-sae"><h3 id="modalDetalleTitulo">Detalles del registro</h3></div>
+      <div class="modal-body-sae" id="modalDetalleContent"></div>
+      <div class="actions">
+        <button id="btnVolverDetalle" class="btn">Volver</button>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <div class="footer-logo">
+      <div class="logo-text"><b>Versión 6.01 — Dirección Provincial de Granada</b> </div>
+    </div>
+    <div class="footer-datos">
+      <b>Apoyo durante la fase de testeo para la resolución de dudas y la recogida de incidencias:</b><br>
+      <hr>
+      Elisabeth Huertas García &lt;<a href="mailto:elisabeth.huertas.garcia@juntadeandalucia.es">elisabeth.huertas.garcia@juntadeandalucia.es</a>&gt; – 765145<br>
+      José Manuel Robles Chaves &lt;<a href="mailto:josem.robles@juntadeandalucia.es">josem.robles@juntadeandalucia.es</a>&gt; – 653467
+    </div>
+  </footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Elementos ---
+  const chkInscrito = document.getElementById('chkInscrito');
+  const chkPrestacion = document.getElementById('chkPrestacion');
+  const chkNada = document.getElementById('chkNada');
+  const estadoChecks = document.getElementById('inscritoEstado');
+
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  const resultsEl = document.getElementById('results');
+  const countResults = document.getElementById('countResults');
+  const clearBtn = document.getElementById('clearSearch');
+
+  const modalDetalle = document.getElementById('modalDetalle');
+  const modalDetalleContent = document.getElementById('modalDetalleContent');
+  const btnVolverDetalle = document.getElementById('btnVolverDetalle');
+
+  let db = [];
+  let userInscritoAnswer = null;
+
+  // --- Utilidades ---
+  function getField(obj, possibleNames){
+    const keys = Object.keys(obj);
+    for(const n of possibleNames){
+      const normN = n.trim().toLowerCase();
+      for(const key of keys){
+        if(key.trim().toLowerCase() === normN) return obj[key];
+      }
+    }
+    return undefined;
+  }
+
+  function normalize(s){
+    if(!s) return '';
+    return String(s)
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu,'')
+      .replace(/[^\p{L}\p{N}]+/gu,' ')
+      .toLowerCase()
+      .trim();
+  }
+
+  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
+
+  function tokenizeQuery(q) {
+    const norm = normalize(q);
+    if (!norm) return [];
+    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+    const filtered = toks.filter(t => !STOPWORDS.has(t));
+
+    // Unir "no autoriza"
+    const merged = [];
+    for (let i = 0; i < filtered.length; i++) {
+      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+        merged.push('no autoriza');
+        i++;
+      } else {
+        merged.push(filtered[i]);
+      }
+    }
+    return merged.length > 0 ? merged : filtered;
+  }
+
+  function openModalDetalle(rec){
+    modalDetalleContent.innerHTML = `
+      <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
+      <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
+      <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
+      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
+      <div class="field"><strong>Documentación:</strong> ${rec["Documentación"] ? `<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>` : ''}</div>
+    `;
+    modalDetalle.style.display = 'flex';
+    modalDetalle.setAttribute('aria-hidden','false');
+  }
+
+  function closeModalDetalle(){
+    modalDetalle.style.display='none';
+    modalDetalle.setAttribute('aria-hidden','true');
+  }
+
+  if(btnVolverDetalle) btnVolverDetalle.addEventListener('click', closeModalDetalle);
+
+  // --- Carga JSON ---
+  async function loadJSON(){
+    try{
+      const res = await fetch('./SituacionesAdministrativas.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('No se pudo cargar SituacionesAdministrativas.json');
+      db = await res.json();
+      console.log('Registros cargados:', db.length);
+    }catch(err){
+      console.error(err);
+      resultsEl.innerHTML = `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
+    }
+  }
+  loadJSON();
+
+  // --- Filtros ---
+  function syncNadaLogic(changed){
+    if(changed==='nada' && chkNada.checked){
+      chkInscrito.checked=false;
+      chkPrestacion.checked=false;
+    }
+    if((changed==='inscrito'||changed==='prestacion') && (chkInscrito.checked||chkPrestacion.checked)){
+      chkNada.checked=false;
+    }
+  }
+
+  function actualizarChecks(){
+    syncNadaLogic();
+    const activos=[];
+    if(chkInscrito.checked){ activos.push('Consta inscripción previa en SILA'); userInscritoAnswer='SI'; } 
+    else userInscritoAnswer=null;
+    if(chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
+    if(chkNada.checked) activos.push('Nada de lo anterior');
+
+    if(activos.length>0){
+      estadoChecks.textContent = activos.join(', ');
+      estadoChecks.classList.remove('no-data');
+      searchInput.disabled=false;
+      btnSearch.disabled=false;
+      resultsEl.innerHTML='';
+      countResults.textContent='0';
+    } else {
+      estadoChecks.textContent='ninguna';
+      estadoChecks.classList.add('no-data');
+      searchInput.disabled=true;
+      btnSearch.disabled=true;
+      searchInput.value='';
+      resultsEl.innerHTML='';
+      countResults.textContent='0';
+    }
+  }
+
+  if(chkInscrito) chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
+  if(chkPrestacion) chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
+  if(chkNada) chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
+
+  actualizarChecks();
+
+  // --- Botón limpiar ---
+  if(clearBtn){
+    searchInput.addEventListener('input', ()=>{ clearBtn.style.display = searchInput.value ? 'block' : 'none'; });
+    clearBtn.addEventListener('click', ()=>{
+      searchInput.value='';
+      clearBtn.style.display='none';
+      searchInput.focus();
+      resultsEl.innerHTML='';
+      countResults.textContent='0';
+    });
+  }
+  function containsTokenExact(recordText, token) {
+    const text = normalize(recordText); 
+    const words = text.split(/\s+/);
+    token = token.toLowerCase();
+  
+    if(token === 'autoriza'){
+      for(let i=0;i<words.length;i++){
+        if(words[i] === 'autoriza'){
+          if(i===0 || words[i-1] !== 'no') return true;
+        }
+      }
+      return false;
+    } else if(token === 'no autoriza'){
+      for(let i=0;i<words.length-1;i++){
+        if(words[i]==='no' && words[i+1]==='autoriza') return true;
+      }
+      return false;
+    } else {
+      return words.includes(token);
+    }
+  }
+
+  // --- Búsqueda ---
+  function doSearch(){
+    resultsEl.innerHTML='';
+    const q = searchInput.value.trim();
+    if(!q){
+      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
+      countResults.textContent='0';
+      return;
+    }
+
+    const tokens = tokenizeQuery(q);
+    if(tokens.length===0){
+      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
+      countResults.textContent='0';
+      return;
+    }
+
+    const matches=[];
+
+    db.forEach((rec, idx)=>{
+      const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
+      const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+      const includeByInscrito = valInscritoAnteriorNormalized==='' || (userInscritoAnswer && valInscritoAnteriorNormalized===userInscritoAnswer);
+      if(!includeByInscrito) return;
+    
+      const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
+      const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
+      const combined = `${anverso} ${reverso}`;
+    
+      let presentCount=0;
+      tokens.forEach(tok=>{
+        if(containsTokenExact(combined, tok)) presentCount++;
+      });
+
+    
+      // Coincidencia casi completa
+      if(tokens.length>0 && (presentCount/tokens.length) >= 0.95){
+        matches.push({rec, idx});
+      }
+    });
+
+
+    if(matches.length===0){
+      resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+      countResults.textContent='0';
+      return;
+    }
+
+    countResults.textContent = String(matches.length);
+
+    matches.forEach(m=>{
+      const rec = m.rec;
+      const wrapper = document.createElement('div');
+      wrapper.className='result-item';
+      wrapper.style.cursor='pointer'; // Indicar que es clicable
+    
+      const chkWrap = document.createElement('div');
+      chkWrap.className='check';
+      const chk = document.createElement('input');
+      chk.type='checkbox';
+      chk.name='selectRec';
+      chk.dataset.index=m.idx;
+      chkWrap.appendChild(chk);
+    
+      const content = document.createElement('div');
+      content.style.flex='1';
+      const title = document.createElement('h3');
+      title.textContent = getField(rec, ['ANVERSO','Anverso','anverso']) || 'Registro sin ANVERSO';
+      const p = document.createElement('p');
+      p.textContent = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+      content.appendChild(title);
+      content.appendChild(p);
+    
+      wrapper.appendChild(chkWrap);
+      wrapper.appendChild(content);
+    
+      // --- Evento: clic en todo el wrapper ---
+      wrapper.addEventListener('click', (e)=>{
+        // Evitar que el clic en el checkbox se duplique
+        if(e.target.tagName.toLowerCase() === 'input') return;
+    
+        // Desmarcar todos los checkboxes
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp=>{ inp.checked=false; });
+    
+        // Marcar el del resultado clicado
+        chk.checked = true;
+    
+        // Abrir modal
+        openModalDetalle(rec);
+      });
+    
+      // --- Evento: checkbox ---
+      chk.addEventListener('change', (e)=>{
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
+        if(!e.target.checked) return;
+        openModalDetalle(rec);
+      });
+    
+      resultsEl.appendChild(wrapper);
+    });
+
+  }
+
+  if(btnSearch) btnSearch.addEventListener('click', doSearch);
+  if(searchInput) searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+
+});
+</script>
+
+</body>
+</html>
