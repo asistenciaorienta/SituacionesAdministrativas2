@@ -97,15 +97,15 @@ footer {
 .clear-btn {
   background: none;
   border: none;
-  color: black; /* o el color institucional que prefieras */
-  font-size: 20px; /* ajusta según el tamaño deseado */
-  cursor: pointer;
   padding: 0;
-  line-height: 1;
-  display: inline-block;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.clear-btn:hover {
-  color: #666; /* tono más suave al pasar el cursor */
+.clear-btn svg {
+  width: 16px;
+  height: 16px;
 }
   
 </style>
@@ -145,7 +145,14 @@ footer {
     <div class="search-top">
       <div class="search-input-wrapper">
         <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar" disabled>
-        <span class="clear-btn-wrapper"> <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">x</button></span>
+        <span class="clear-btn-wrapper">
+          <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>        
+        </span>
       </div>
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
     </div>
