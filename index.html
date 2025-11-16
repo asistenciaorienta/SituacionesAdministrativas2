@@ -52,10 +52,10 @@ footer {
 
 .footer-logo, .footer-datos {
   position: static; /* mantienen su posición normal */
+  font-size: 13px;
+  color:var(--muted);  
 }
 .footer-logo .logo-text {
-  font-size: 13px;
-  color:var(--muted);
   left: 0;}
 
 .footer-logo img {height: 70px;}  
@@ -94,13 +94,12 @@ footer {
   white-space: pre-wrap; /* mantiene saltos de línea */
 }
 .clear-btn {
-  all: unset;        /* ¡Limpia cualquier estilo heredado! */
   position: absolute;
   right: 5px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 16px;
-  color: #777;
+  color: #ccc;
   cursor: pointer;
   opacity: 0.6;
   width: 15px;
@@ -110,7 +109,7 @@ footer {
 
 .clear-btn:hover {
   opacity: 1;
-  color: #000;
+  color: #222;
 }
   
 </style>
@@ -150,7 +149,7 @@ footer {
     <div class="search-top">
       <div class="search-input-wrapper">
         <input id="searchInput" type="text" placeholder="Buscar por palabras…" aria-label="Buscar por palabras" disabled>
-        <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">x</button>
+        <span class="clear-btn-wrapper"> <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">x</button></span>
       </div>
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
     </div>
