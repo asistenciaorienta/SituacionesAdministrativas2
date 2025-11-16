@@ -442,9 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = document.createElement('div');
       content.style.flex='1';
       const title = document.createElement('h3');
-      title.textContent = getField(rec, ['ANVERSO','Anverso','anverso']) || 'Registro sin ANVERSO';
+      title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
       const p = document.createElement('p');
-      p.textContent = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+      p.textContent = '';
       content.appendChild(title);
       content.appendChild(p);
     
