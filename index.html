@@ -36,9 +36,9 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 .modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); justify-content:center; align-items:center; z-index:9999 }
 .modal{ background:var(--card-bg); border-radius:10px; padding:0; width:90%; max-width:720px; max-height:80vh; overflow:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25) }
 .modal-header-sae{ background:var(--sae-green); color:#fff; padding:14px 18px; border-top-left-radius:10px; border-top-right-radius:10px }
-.modal-body-sae{ padding:16px 18px }
+.modal-body-sae{ padding:16px 18px; line-height:1.6;   /* interlineado mayor */ }
 .actions{ display:flex; gap:10px; justify-content:center; padding:12px }  
-.action button{ padding:11px 18px; border-radius:8px; border:none; background:var(--sae-green); color:#fff; font-weight:600; cursor:pointer }
+.actions button{ padding:11px 18px; border-radius:8px; border:none; background:var(--sae-green); color:#fff; font-weight:600; cursor:pointer }
 .no-data{ color:var(--muted); font-style:italic }
 @media (max-width:600px){ .filters{flex-direction:column;align-items:flex-start} }
 .footer-logo {
@@ -268,11 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openModalDetalle(rec){
     modalDetalleContent.innerHTML = `
-      <div class="field"><strong>Inscripción en SILA:</strong> ${rec["Inscripción en SILA"]||''}</div>
-      <div class="field"><strong>¿Autoriza a Trabajar?</strong> ${rec["¿Autoriza a Trabajar?"]||''}</div>
-      <div class="field"><strong>Tipo de Demanda:</strong> ${rec["Tipo de Demanda"]||''}</div>
-      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
-      <div class="field"><strong>Documentación:</strong> ${rec["Documentación"] ? `<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>` : ''}</div>
+      <div class="field">Inscripción en SILA: <strong>${rec["Inscripción en SILA"]||''}</strong></div>
+      <div class="field">¿Autoriza a Trabajar? <strong>${rec["¿Autoriza a Trabajar?"]||''}</strong></div>
+      <div class="field">Tipo de Demanda: <strong>${rec["Tipo de Demanda"]||''}</strong></div>
+      <div class="field">Observaciones: <strong>${rec["Observaciones"]||''}</strong></div>
+      <div class="field">Documentación: <strong>${rec["Documentación"] ? `<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>` : ''}</strong></div>
     `;
     modalDetalle.style.display = 'flex';
     modalDetalle.setAttribute('aria-hidden','false');
