@@ -82,13 +82,15 @@ footer {
 }
 .search-input-wrapper {
   position: relative;
-  display: inline-block;
+  width: 100%;
 }
 
 #searchInput {
-  padding-right: 28px; /* espacio para la cruz */
-  height: 32px;
+  width: 100%;
+  padding-right: 32px; /* espacio para la cruz */
+  height: 36px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .clear-btn-wrapper {
@@ -107,7 +109,8 @@ footer {
   stroke-linecap: round;
   stroke-linejoin: round;
   background: none;
-  pointer-events: none; /* evita que el SVG intercepte clics si no quieres que lo haga */
+  pointer-events: none;
+}
 }
   
 </style>
