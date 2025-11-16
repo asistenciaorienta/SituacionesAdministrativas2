@@ -61,20 +61,6 @@ footer {
 .footer-logo .logo-text {
   left: 0;}
   
-.search-input-wrapper {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.search-input-wrapper input {
-  width: 100%;
-  padding: 12px 28px 12px 14px; /* espacio para la cruz */
-  border-radius: 8px;
-  border: 1px solid #dfeee0;
-  font-size: 16px;
-} 
 .results .small {
   color: #1b5e20;
   font-size: 15px;
@@ -94,18 +80,34 @@ footer {
 .results .result-item p {
   white-space: pre-wrap; /* mantiene saltos de línea */
 }
-.clear-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.search-input-wrapper {
+  position: relative;
+  display: inline-block;
 }
-.clear-btn svg {
+
+#searchInput {
+  padding-right: 28px; /* espacio para la cruz */
+  height: 32px;
+  font-size: 14px;
+}
+
+.clear-btn-wrapper {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.clear-icon {
   width: 16px;
   height: 16px;
+  stroke: black;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: none;
+  pointer-events: none; /* evita que el SVG intercepte clics si no quieres que lo haga */
 }
   
 </style>
@@ -144,14 +146,12 @@ footer {
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar" disabled>
-        <span class="clear-btn-wrapper">
-          <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>        
+        <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar">
+        <span class="clear-btn-wrapper" onclick="document.getElementById('searchInput').value = ''">
+          <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </span>
       </div>
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
