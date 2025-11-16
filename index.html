@@ -37,7 +37,8 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 .modal{ background:var(--card-bg); border-radius:10px; padding:0; width:90%; max-width:720px; max-height:80vh; overflow:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25) }
 .modal-header-sae{ background:var(--sae-green); color:#fff; padding:14px 18px; border-top-left-radius:10px; border-top-right-radius:10px }
 .modal-body-sae{ padding:16px 18px }
-.actions{ display:flex; gap:10px; justify-content:center; padding:12px }
+.actions{ display:flex; gap:10px; justify-content:center; padding:12px }  
+.action button{ padding:11px 18px; border-radius:8px; border:none; background:var(--sae-green); color:#fff; font-weight:600; cursor:pointer }
 .no-data{ color:var(--muted); font-style:italic }
 @media (max-width:600px){ .filters{flex-direction:column;align-items:flex-start} }
 .footer-logo {
@@ -179,7 +180,7 @@ header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;t
 
   <div id="modalDetalle" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document">
-      <div class="modal-header-sae"><h3 id="modalDetalleTitulo">Detalles del registro</h3></div>
+      <div class="modal-header-sae"><h3 id="modalDetalleTitulo">Datos para la Inscripción</h3></div>
       <div class="modal-body-sae" id="modalDetalleContent"></div>
       <div class="actions">
         <button id="btnVolverDetalle" class="btn">Volver</button>
