@@ -95,22 +95,17 @@ footer {
   white-space: pre-wrap; /* mantiene saltos de línea */
 }
 .clear-btn {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: #ccc;
+  background: none;
+  border: none;
+  color: black; /* o el color institucional que prefieras */
+  font-size: 20px; /* ajusta según el tamaño deseado */
   cursor: pointer;
-  opacity: 0.6;
-  width: 15px;
-  height: 15px;
-  text-align: center;
+  padding: 0;
+  line-height: 1;
+  display: inline-block;
 }
-
 .clear-btn:hover {
-  opacity: 1;
-  color: #222;
+  color: #666; /* tono más suave al pasar el cursor */
 }
   
 </style>
@@ -149,7 +144,7 @@ footer {
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Buscar por palabras…" aria-label="Buscar por palabras" disabled>
+        <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar" disabled>
         <span class="clear-btn-wrapper"> <button id="clearSearch" class="clear-btn" title="Borrar búsqueda" aria-label="Borrar búsqueda">x</button></span>
       </div>
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
