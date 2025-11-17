@@ -260,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return merged.length > 0 ? merged : filtered;
   }
-
 function openModalDetalle(rec){
   // limpiar contenido previo
   modalDetalleContent.innerHTML = '';
@@ -273,34 +272,43 @@ function openModalDetalle(rec){
 
   // campos a mostrar
   const fields = [
-    { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'] },
-    { label: '¿Autoriza a Trabajar?', names: ['¿Autoriza a Trabajar?','Autoriza a Trabajar'] },
-    { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'] },
+    { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'], boldTitle: false },
+    { label: '¿Autoriza a Trabajar?', names: ['¿Autoriza a Trabajar?','Autoriza a Trabajar'], boldTitle: false },
+    { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'], boldTitle: false },
     { label: 'Observaciones', names: ['Observaciones','OBSERVACIONES'], boldTitle: true }
   ];
 
   let anyField = false;
 
   fields.forEach(f => {
-    const val = valueOf(f.names);
+    let val = valueOf(f.names);
+
+    // 🔥 NUEVO: tratar caso específico INSCRIPCIÓN EN SILA vacía
+    if (f.label === 'Inscripción en SILA' && (!val || val.trim() === '')) {
+      val = "Con esta solicitud no se puede inscribir en SILA.";
+    }
+
     if(val){
       anyField = true;
+
       const row = document.createElement('div');
       row.className = 'field';
 
-      // título
-      const strongTitle = document.createElement(f.boldTitle ? 'strong' : 'span');
-      strongTitle.textContent = f.label + ': ';
-      row.appendChild(strongTitle);
+      // título → negrita SOLO si es Observaciones
+      const titleElem = document.createElement(f.boldTitle ? 'strong' : 'span');
+      titleElem.textContent = f.label + ': ';
+      row.appendChild(titleElem);
 
-      // valor en negrita (menos Observaciones)
-      const valueElement = document.createElement(f.boldTitle ? 'span' : 'strong');
-      valueElement.textContent = val;
+      // valor → SIEMPRE en negrita excepto Observaciones
+      const valueElem = document.createElement(f.boldTitle ? 'span' : 'strong');
+      valueElem.textContent = val;
+      row.appendChild(valueElem);
 
-      row.appendChild(valueElement);
       modalDetalleContent.appendChild(row);
     }
   });
+}
+
 
   // Documentación
   const docVal = valueOf(['Documentación','Documentacion','DOCUMENTACIÓN']);
