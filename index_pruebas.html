@@ -391,13 +391,13 @@ function openModalDetalle(rec){
 
     const activos=[];
     if(chkInscrito.checked){
-      activos.push('Consta inscripción previa en SILA');
+      //activos.push('Consta inscripción previa en SILA');
       userInscritoAnswer='SI';
     }else{
       userInscritoAnswer=null;
     }
-    if(chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
-    if(chkNada.checked) activos.push('Inscripción Inicial');
+    //if(chkPrestacion.checked) {userPrestacionAnswer='SI';//activos.push('Cobra prestación o subsidio');}
+   // if(chkNada.checked) activos.push('Inscripción Inicial');
 
     if(activos.length>0){
       estadoChecks.textContent=activos.join(', ');
