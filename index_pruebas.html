@@ -265,66 +265,71 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- MODAL DETALLE ---
-  function openModalDetalle(rec){
-    modalDetalleContent.innerHTML = '';
-  
-    function valueOf(names){
-      const v = getField(rec, names);
-      return (v === undefined || v === null) ? '' : String(v).trim();
-    }
-  
-    // valores
-    const insc = valueOf(['Inscripción en SILA','Inscripcion en SILA']);
-    const autoriza = valueOf(['¿Autoriza a Trabajar?','Autoriza a Trabajar']);
-    const tipoDemanda = valueOf(['Tipo de Demanda','Tipo demanda']);
-    const obs = valueOf(['Observaciones','OBSERVACIONES']);
-  
-    // 🔥 SI INSCRIPCIÓN EN SILA ESTÁ VACÍO → SOLO MOSTRAR OBSERVACIONES
-    if (!insc) {
-      modalDetalleContent.innerHTML = '';
-  
+function openModalDetalle(rec){
+  modalDetalleContent.innerHTML = '';
+
+  function valueOf(names){
+    const v = getField(rec, names);
+    return (v === undefined || v === null) ? '' : String(v).trim();
+  }
+
+  // valores
+  const insc = valueOf(['Inscripción en SILA','Inscripcion en SILA']);
+  const autoriza = valueOf(['¿Autoriza a Trabajar?','Autoriza a Trabajar']);
+  const tipoDemanda = valueOf(['Tipo de Demanda','Tipo demanda']);
+  const obs = valueOf(['Observaciones','OBSERVACIONES']);
+
+  // Si INSCRIPCIÓN EN SILA está vacío -> sólo mostrar Observaciones
+  if (!insc) {
+    const row = document.createElement('div');
+    row.className = 'field';
+
+    const title = document.createElement('strong');
+    title.textContent = 'Observaciones: ';
+    row.appendChild(title);
+
+    const value = document.createElement('span');
+    value.textContent = obs || '';
+    row.appendChild(value);
+
+    modalDetalleContent.appendChild(row);
+
+    // mostrar modal
+    modalDetalle.style.display = 'flex';
+    modalDetalle.setAttribute('aria-hidden','false');
+    return;
+  }
+
+  // Si hay Inscripción -> mostrar los campos habituales
+  const fields = [
+    { label: 'Inscripción en SILA', value: insc },
+    { label: '¿Autoriza a Trabajar?', value: autoriza },
+    { label: 'Tipo de Demanda', value: tipoDemanda },
+    { label: 'Observaciones', value: obs, boldTitle: true }
+  ];
+
+  fields.forEach(f => {
+    if (f.value) {
       const row = document.createElement('div');
       row.className = 'field';
-  
-      // título Observaciones en negrita
-      const title = document.createElement('strong');
-      title.textContent = 'Observaciones: ';
-      row.appendChild(title);
-  
-      // contenido Observaciones (si está vacío, no mostramos nada más)
-      const value = document.createElement('span');
-      value.textContent = obs || '';
+
+      const label = document.createElement(f.boldTitle ? 'strong' : 'span');
+      label.textContent = f.label + ': ';
+      row.appendChild(label);
+
+      const value = document.createElement(f.boldTitle ? 'span' : 'strong');
+      value.textContent = f.value;
       row.appendChild(value);
-  
+
       modalDetalleContent.appendChild(row);
-      return;  // 🔥 terminamos aquí
     }
-  
-    // Si hay Inscripción en SILA → seguimos con el modal normal
-    const fields = [
-      { label: 'Inscripción en SILA', value: insc },
-      { label: '¿Autoriza a Trabajar?', value: autoriza },
-      { label: 'Tipo de Demanda', value: tipoDemanda },
-      { label: 'Observaciones', value: obs, boldTitle: true }
-    ];
-  
-    fields.forEach(f => {
-      if (f.value) {
-        const row = document.createElement('div');
-        row.className = 'field';
-  
-        const label = document.createElement(f.boldTitle ? 'strong' : 'span');
-        label.textContent = f.label + ': ';
-        row.appendChild(label);
-  
-        const value = document.createElement(f.boldTitle ? 'span' : 'strong');
-        value.textContent = f.value;
-        row.appendChild(value);
-  
-        modalDetalleContent.appendChild(row);
-      }
-    });
-  }
+  });
+
+  // mostrar modal (faltaba esto)
+  modalDetalle.style.display = 'flex';
+  modalDetalle.setAttribute('aria-hidden','false');
+}
+
 
 
   function closeModalDetalle(){
