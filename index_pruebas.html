@@ -260,7 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return merged.length > 0 ? merged : filtered;
   }
-function openModalDetalle(rec){
+
+
+  function openModalDetalle(rec){
   // limpiar contenido previo
   modalDetalleContent.innerHTML = '';
 
@@ -342,6 +344,7 @@ function openModalDetalle(rec){
   modalDetalle.style.display = 'flex';
   modalDetalle.setAttribute('aria-hidden','false');
 }
+
 
 
   // Documentación
