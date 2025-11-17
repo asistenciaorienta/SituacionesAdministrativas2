@@ -22,7 +22,7 @@ header .logo-derecha{height:75px; object-fit: contain;flex-shrink: 0;}
 header h1{margin:0;color:var(--sae-green);font-size:30px}
 header h2{margin:0;font-size:19px;color:var(--muted)}
 header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
-.search-container { display:flex; flex-direction:column; align-items:center; margin: 25px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.search-container { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
 .search-intro { text-align:center; width:100%; margin-bottom:8px; font-size:17px; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content: center; flex-wrap:wrap; margin-bottom:14px; }
 .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
@@ -130,8 +130,8 @@ footer {
     <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
     <ul>
       <li>Identificación de la persona usuaria: documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte)</li>
-      <li>Tarjeta TIE o Resolución en Vigor.</li>
-      <li>Solicitud</li>
+      <li>Tarjeta TIE o Resolución en Vigor</li>
+      <li>Solicitud (sólo en los casos habilitados)</li>
     </ul>
   </div>
 
@@ -143,13 +143,13 @@ footer {
     <div class="filters" aria-label="Opciones SILA">
       <label><input type="checkbox" id="chkInscrito"> Consta una inscripción previa en SILA</label>
       <label><input type="checkbox" id="chkPrestacion"> Cobra prestación o subsidio</label>
-      <label><input type="checkbox" id="chkNada"> Nada de lo anterior</label>
+      <label><input type="checkbox" id="chkNada"> Inscripción Inicial</label>
     </div>
 
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar">
+        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar">
         <span class="clear-btn-wrapper" id="clearSearchInline">
           <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -180,7 +180,7 @@ footer {
 </div>
   <footer>
     <div class="footer-logo">
-      <div class="logo-text"><b>Versión 6.01 — Dirección Provincial de Granada</b> </div>
+      <div class="logo-text"><b>Versión 6.21 — Dirección Provincial de Granada</b> </div>
     </div>
     <div class="footer-datos">
       <b>Apoyo durante la fase de testeo, para la resolución de dudas y la recogida de incidencias:</b><br>
@@ -278,8 +278,8 @@ function openModalDetalle(rec){
   // campos a mostrar
   const fields = [
     { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'] },
-    { label: '¿Autoriza a Trabajar?', names: ['¿Autoriza a Trabajar?','Autoriza a Trabajar'] },
     { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'] },
+    { label: 'Autoriza a Trabajar', names: ['Autoriza a Trabajar','Autoriza a Trabajar'] },
     { label: 'Observaciones', names: ['Observaciones','OBSERVACIONES'], boldTitle: true }
   ];
 
@@ -491,7 +491,7 @@ function openModalDetalle(rec){
         if(containsTokenExact(combined, tok)) presentCount++;
       });
 
-      if(tokens.length>0 && (presentCount/tokens.length) >= 0.95){
+      if(tokens.length>0 && (presentCount/tokens.length) >= 0.75){
         matches.push({rec, idx});
       }
     });
