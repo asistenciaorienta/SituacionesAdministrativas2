@@ -272,41 +272,75 @@ function openModalDetalle(rec){
 
   // campos a mostrar
   const fields = [
-    { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'], boldTitle: false },
-    { label: '¿Autoriza a Trabajar?', names: ['¿Autoriza a Trabajar?','Autoriza a Trabajar'], boldTitle: false },
-    { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'], boldTitle: false },
+    { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'] },
+    { label: '¿Autoriza a Trabajar?', names: ['¿Autoriza a Trabajar?','Autoriza a Trabajar'] },
+    { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'] },
     { label: 'Observaciones', names: ['Observaciones','OBSERVACIONES'], boldTitle: true }
   ];
 
   let anyField = false;
 
   fields.forEach(f => {
-    let val = valueOf(f.names);
-
-    // 🔥 NUEVO: tratar caso específico INSCRIPCIÓN EN SILA vacía
-    if (f.label === 'Inscripción en SILA' && (!val || val.trim() === '')) {
-      val = "Con esta solicitud no se puede inscribir en SILA.";
-    }
-
+    const val = valueOf(f.names);
     if(val){
       anyField = true;
-
       const row = document.createElement('div');
       row.className = 'field';
 
-      // título → negrita SOLO si es Observaciones
-      const titleElem = document.createElement(f.boldTitle ? 'strong' : 'span');
-      titleElem.textContent = f.label + ': ';
-      row.appendChild(titleElem);
+      // título
+      const strongTitle = document.createElement(f.boldTitle ? 'strong' : 'span');
+      strongTitle.textContent = f.label + ': ';
+      row.appendChild(strongTitle);
 
-      // valor → SIEMPRE en negrita excepto Observaciones
-      const valueElem = document.createElement(f.boldTitle ? 'span' : 'strong');
-      valueElem.textContent = val;
-      row.appendChild(valueElem);
+      // valor en negrita (menos Observaciones)
+      const valueElement = document.createElement(f.boldTitle ? 'span' : 'strong');
+      valueElement.textContent = val;
 
+      row.appendChild(valueElement);
       modalDetalleContent.appendChild(row);
     }
   });
+
+  // Documentación
+  const docVal = valueOf(['Documentación','Documentacion','DOCUMENTACIÓN']);
+  if(docVal){
+    anyField = true;
+
+    const row = document.createElement('div');
+    row.className = 'field';
+
+    const title = document.createElement('span');
+    title.textContent = 'Documentación: ';
+    row.appendChild(title);
+
+    // valor en negrita si no es Observaciones
+    const valStrong = document.createElement('strong');
+
+    // enlace si parece URL
+    if(/^https?:\/\//i.test(docVal) || docVal.includes('/') || /\.(pdf|docx?|xlsx?)$/i.test(docVal)) {
+      const a = document.createElement('a');
+      a.href = docVal;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = 'Ver documento';
+      valStrong.appendChild(a);
+    } else {
+      valStrong.textContent = docVal;
+    }
+
+    row.appendChild(valStrong);
+    modalDetalleContent.appendChild(row);
+  }
+
+  if(!anyField){
+    const none = document.createElement('div');
+    none.className = 'small';
+    none.textContent = 'No hay datos para mostrar en este registro.';
+    modalDetalleContent.appendChild(none);
+  }
+
+  modalDetalle.style.display = 'flex';
+  modalDetalle.setAttribute('aria-hidden','false');
 }
 
 
