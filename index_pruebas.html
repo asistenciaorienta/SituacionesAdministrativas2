@@ -150,7 +150,7 @@ footer {
     <div class="search-top">
       <div class="search-input-wrapper">
         <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar">
-        <span class="clear-btn-wrapper" onclick="document.getElementById('searchInput').value = ''">
+        <span class="clear-btn-wrapper" id="clearSearchInline">
           <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -191,6 +191,13 @@ footer {
   </footer>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  
+  document.getElementById('clearSearchInline').addEventListener('click', () => {
+    searchInput.value = '';
+    resultsEl.innerHTML = '';
+    countResults.textContent = '0';
+    searchInput.focus();
+  });
 
   // --- Elementos ---
   const chkInscrito = document.getElementById('chkInscrito');
