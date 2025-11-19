@@ -92,8 +92,18 @@ footer {
   height: 36px;
   font-size: 14px;
   box-sizing: border-box;
-  background: #94EB9D;
+  /* background: #94EB9D;*/
 }
+
+#searchInput {
+  background-color: #e0e0e0;  /* color cuando está deshabilitado */
+  transition: background-color 0.3s ease;
+}
+
+#searchInput.enabled {
+  background-color: #d7f5d1; /* color cuando se desbloquea */
+}
+  
 
 .clear-btn-wrapper {
   position: absolute;
