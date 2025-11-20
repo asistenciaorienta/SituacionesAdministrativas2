@@ -22,7 +22,8 @@ header .logo-derecha{height:75px; object-fit: contain;flex-shrink: 0;}
 header h1{margin:0;color:var(--sae-green);font-size:30px}
 header h2{margin:0;font-size:19px;color:var(--muted)}
 header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
-.search-container { display:flex; flex-direction:column; align-items:center; margin: 25px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.search-container { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.search-container2 { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
 .search-intro { text-align:center; width:100%; margin-bottom:8px; font-size:17px; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content: center; flex-wrap:wrap; margin-bottom:14px; }
 .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
@@ -91,7 +92,29 @@ footer {
   height: 36px;
   font-size: 14px;
   box-sizing: border-box;
+  /* background: #94EB9D;*/
 }
+
+#searchInput {
+  background-color: #72D677;  /* color cuando está deshabilitado */
+  transition: background-color 0.3s ease;
+  color: #757575;
+}
+
+#searchInput.enabled {
+  background-color: #E9FFE5;  /* color cuando está habilitado */
+  color: #000;
+}
+/* Estilo del placeholder cuando está deshabilitado */
+#searchInput:disabled::placeholder {
+  color: #757575;  /* gris suave */
+}
+
+/* Ocultar placeholder cuando está habilitado */
+#searchInput.enabled::placeholder {
+  color: transparent;
+}
+  
 
 .clear-btn-wrapper {
   position: absolute;
@@ -111,8 +134,16 @@ footer {
   background: none;
   pointer-events: none;
 }
+/* Animación suave al activarse el campo */
+@keyframes inputFlash {
+  0%   { background-color: #d8f5d2; }   /* verde clarito */
+  100% { background-color: white; }
 }
-  
+
+input.enabled.flash {
+  animation: inputFlash 0.4s ease-out;
+}
+
 </style>
 </head>
 <body>
@@ -123,19 +154,19 @@ footer {
       <h1>ASIM-SAE</h1>
       <h2>Aplicación de soporte para la inscripción de migrantes</h2>
     </div>
-    <img class="logo-derecha" src="images/Logo_SILA_Migrantes.png" alt="Logo proyecto">
+    <img class="logo-derecha" src="images/Logo_SILA_Migrantes2_corto.png" alt="Logo proyecto">
   </header>
   
   <div id="doc" class="search-container">
     <p><strong>Documentación necesaria para la inscripción de una persona extranjera:</strong></p>
     <ul>
-      <li>Identificación de la persona usuaria: documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte)</li>
+      <li>Identificación de la persona usuaria: documentación expedida por España con foto (Tarjeta TIE, Resolución con Foto, Pasaporte).</li>
       <li>Tarjeta TIE o Resolución en Vigor.</li>
-      <li>Solicitud</li>
+      <li>Solicitud (sólo en los casos habilitados).</li>
     </ul>
   </div>
 
-  <div class="search-container" role="region" aria-labelledby="intro">  
+  <div class="search-container2" role="region" aria-labelledby="intro">  
     <div id="intro" class="search-intro">
       <p><strong>Consulta SILA y marca lo que corresponda:</strong></p>
     </div>
@@ -143,14 +174,14 @@ footer {
     <div class="filters" aria-label="Opciones SILA">
       <label><input type="checkbox" id="chkInscrito"> Consta una inscripción previa en SILA</label>
       <label><input type="checkbox" id="chkPrestacion"> Cobra prestación o subsidio</label>
-      <label><input type="checkbox" id="chkNada"> Nada de lo anterior</label>
+      <label><input type="checkbox" id="chkNada"> Inscripción Inicial</label>
     </div>
 
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Introduce el texto a buscar…" aria-label="Introduce el texto a buscar">
-        <span class="clear-btn-wrapper" onclick="document.getElementById('searchInput').value = ''">
+        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar" disabled>
+        <span class="clear-btn-wrapper" id="clearSearchInline">
           <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -160,7 +191,7 @@ footer {
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
     </div>
     <div class="search-meta">
-      <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>
+      <!-- <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>-->
       <span class="small">Resultados: <span id="countResults">0</span></span>
     </div>
     <div class="results" id="results" aria-live="polite"></div>
@@ -180,7 +211,7 @@ footer {
 </div>
   <footer>
     <div class="footer-logo">
-      <div class="logo-text"><b>Versión 6.01 — Dirección Provincial de Granada</b> </div>
+      <div class="logo-text"><b>Versión 6.21 — Dirección Provincial de Granada</b> </div>
     </div>
     <div class="footer-datos">
       <b>Apoyo durante la fase de testeo, para la resolución de dudas y la recogida de incidencias:</b><br>
@@ -202,11 +233,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSearch = document.getElementById('btnSearch');
   const resultsEl = document.getElementById('results');
   const countResults = document.getElementById('countResults');
-  const clearBtn = document.getElementById('clearSearch');
 
   const modalDetalle = document.getElementById('modalDetalle');
   const modalDetalleContent = document.getElementById('modalDetalleContent');
   const btnVolverDetalle = document.getElementById('btnVolverDetalle');
+
+  const clearSearchInline = document.getElementById('clearSearchInline');
+  if (clearSearchInline) {
+    clearSearchInline.addEventListener('click', () => {
+      searchInput.value = '';
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
+      searchInput.focus();
+    });
+  }
 
   let db = [];
   let userInscritoAnswer = null;
@@ -241,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
     const filtered = toks.filter(t => !STOPWORDS.has(t));
 
-    // Unir "no autoriza"
+    // “no autoriza”
     const merged = [];
     for (let i = 0; i < filtered.length; i++) {
       if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
@@ -254,24 +294,99 @@ document.addEventListener('DOMContentLoaded', () => {
     return merged.length > 0 ? merged : filtered;
   }
 
-  function openModalDetalle(rec){
-    modalDetalleContent.innerHTML = `
-      <div class="field">Inscripción en SILA: <strong>${rec["Inscripción en SILA"]||''}</strong></div>
-      <div class="field">¿Autoriza a Trabajar? <strong>${rec["¿Autoriza a Trabajar?"]||''}</strong></div>
-      <div class="field">Tipo de Demanda: <strong>${rec["Tipo de Demanda"]||''}</strong></div>
-      <div class="field"><strong>Observaciones:</strong> ${rec["Observaciones"]||''}</div>
-      <div class="field">Documentación: <strong>${rec["Documentación"] ? `<a href="${rec["Documentación"]}" target="_blank">Ver documento</a>` : ''}</strong></div>
-    `;
-    modalDetalle.style.display = 'flex';
-    modalDetalle.setAttribute('aria-hidden','false');
+  // --- MODAL DETALLE ----------------------------------------------------------------------
+function openModalDetalle(rec){
+  // limpiar contenido previo
+  modalDetalleContent.innerHTML = '';
+
+  // helper
+  function valueOf(names){
+    const v = getField(rec, names);
+    return (v === undefined || v === null) ? '' : String(v).trim();
   }
+
+  // campos a mostrar
+  const fields = [
+    { label: 'Inscripción en SILA', names: ['Inscripción en SILA','Inscripcion en SILA'] },
+    { label: 'Tipo de Demanda', names: ['Tipo de Demanda','Tipo demanda'] },
+    { label: 'Autoriza a Trabajar', names: ['Autoriza a Trabajar','Autoriza a Trabajar'] },
+    { label: 'Observaciones', names: ['Observaciones','OBSERVACIONES'], boldTitle: true }
+  ];
+
+  let anyField = false;
+
+  fields.forEach(f => {
+    const val = valueOf(f.names);
+    if(val){
+      anyField = true;
+      const row = document.createElement('div');
+      row.className = 'field';
+
+      // título
+      const strongTitle = document.createElement(f.boldTitle ? 'strong' : 'span');
+      strongTitle.textContent = f.label + ': ';
+      row.appendChild(strongTitle);
+
+      // valor en negrita (menos Observaciones)
+      const valueElement = document.createElement(f.boldTitle ? 'span' : 'strong');
+      valueElement.textContent = val;
+
+      row.appendChild(valueElement);
+      modalDetalleContent.appendChild(row);
+    }
+  });
+
+  // Documentación
+  const docVal = valueOf(['Documentación','Documentacion','DOCUMENTACIÓN']);
+  if(docVal){
+    anyField = true;
+
+    const row = document.createElement('div');
+    row.className = 'field';
+
+    const title = document.createElement('span');
+    title.textContent = 'Documentación: ';
+    row.appendChild(title);
+
+    // valor en negrita si no es Observaciones
+    const valStrong = document.createElement('strong');
+
+    // enlace si parece URL
+    if(/^https?:\/\//i.test(docVal) || docVal.includes('/') || /\.(pdf|docx?|xlsx?)$/i.test(docVal)) {
+      const a = document.createElement('a');
+      a.href = docVal;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = 'Ver documento';
+      valStrong.appendChild(a);
+    } else {
+      valStrong.textContent = docVal;
+    }
+
+    row.appendChild(valStrong);
+    modalDetalleContent.appendChild(row);
+  }
+
+  if(!anyField){
+    const none = document.createElement('div');
+    none.className = 'small';
+    none.textContent = 'No hay datos para mostrar en este registro.';
+    modalDetalleContent.appendChild(none);
+  }
+
+  modalDetalle.style.display = 'flex';
+  modalDetalle.setAttribute('aria-hidden','false');
+}
+
+
+
 
   function closeModalDetalle(){
     modalDetalle.style.display='none';
     modalDetalle.setAttribute('aria-hidden','true');
   }
 
-  if(btnVolverDetalle) btnVolverDetalle.addEventListener('click', closeModalDetalle);
+  btnVolverDetalle.addEventListener('click', closeModalDetalle);
 
   // --- Carga JSON ---
   async function loadJSON(){
@@ -281,71 +396,91 @@ document.addEventListener('DOMContentLoaded', () => {
       db = await res.json();
       console.log('Registros cargados:', db.length);
     }catch(err){
-      console.error(err);
-      resultsEl.innerHTML = `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
+      resultsEl.innerHTML =
+        `<div class="small" style="color:#c62828">Error al cargar JSON: ${err.message}</div>`;
     }
   }
   loadJSON();
 
-  // --- Filtros ---
+const searchWrapper = document.querySelector('.search-input-wrapper');
+
+searchWrapper.addEventListener('click', e => {
+  if (searchInput.disabled) {
+    // mostrar mensaje
+    msgDisabled.classList.add('show');
+    setTimeout(() => msgDisabled.classList.remove('show'), 3000);
+
+    // opcional: evitar que se haga focus
+    searchInput.blur();
+  }
+});
+
+  
+  // --- Filtros SILA ---
   function syncNadaLogic(changed){
     if(changed==='nada' && chkNada.checked){
       chkInscrito.checked=false;
       chkPrestacion.checked=false;
     }
-    if((changed==='inscrito'||changed==='prestacion') && (chkInscrito.checked||chkPrestacion.checked)){
+    if((changed==='inscrito'||changed==='prestacion') &&
+       (chkInscrito.checked||chkPrestacion.checked)){
       chkNada.checked=false;
     }
   }
 
-  function actualizarChecks(){
-    syncNadaLogic();
-    const activos=[];
-    if(chkInscrito.checked){ activos.push('Consta inscripción previa en SILA'); userInscritoAnswer='SI'; } 
-    else userInscritoAnswer=null;
-    if(chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
-    if(chkNada.checked) activos.push('Nada de lo anterior');
+function actualizarChecks(){
+  syncNadaLogic();
 
-    if(activos.length>0){
-      estadoChecks.textContent = activos.join(', ');
-      estadoChecks.classList.remove('no-data');
-      searchInput.disabled=false;
-      btnSearch.disabled=false;
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    } else {
-      estadoChecks.textContent='ninguna';
-      estadoChecks.classList.add('no-data');
-      searchInput.disabled=true;
-      btnSearch.disabled=true;
-      searchInput.value='';
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    }
+  const anyChecked = (chkInscrito.checked || chkPrestacion.checked || chkNada.checked);
+
+  if (anyChecked) {
+
+      // habilitar
+      searchInput.disabled = false;
+      btnSearch.disabled = false;
+
+      // borrar texto SIEMPRE al desbloquear
+      searchInput.value = '';
+
+      // activar estilo de campo activo
+      searchInput.classList.add("enabled");
+
+      // activar la animación
+      searchInput.classList.add("flash");
+      setTimeout(() => searchInput.classList.remove("flash"), 400);
+
+      // llevar el cursor al input
+      searchInput.focus();
+
+  } else {
+
+      searchInput.disabled = true;
+      btnSearch.disabled = true;
+
+      searchInput.value = '';
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
+
+      // quitar estilos
+      searchInput.classList.remove("enabled");
+      searchInput.classList.remove("flash");
   }
+}
 
-  if(chkInscrito) chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
-  if(chkPrestacion) chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
-  if(chkNada) chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
+
+
+  chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
+  chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
+  chkNada.addEventListener('change', ()=>{ syncNadaLogic('nada'); actualizarChecks(); });
 
   actualizarChecks();
 
-  // --- Botón limpiar ---
-  if(clearBtn){
-    searchInput.addEventListener('input', ()=>{ clearBtn.style.display = searchInput.value ? 'block' : 'none'; });
-    clearBtn.addEventListener('click', ()=>{
-      searchInput.value='';
-      clearBtn.style.display='none';
-      searchInput.focus();
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    });
-  }
+  // Normalizador exacto de tokens
   function containsTokenExact(recordText, token) {
     const text = normalize(recordText); 
     const words = text.split(/\s+/);
     token = token.toLowerCase();
-  
+
     if(token === 'autoriza'){
       for(let i=0;i<words.length;i++){
         if(words[i] === 'autoriza'){
@@ -384,26 +519,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     db.forEach((rec, idx)=>{
       const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
-      const valInscritoAnteriorNormalized = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
-      const includeByInscrito = valInscritoAnteriorNormalized==='' || (userInscritoAnswer && valInscritoAnteriorNormalized===userInscritoAnswer);
+      const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+      const includeByInscrito =
+        valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
       if(!includeByInscrito) return;
-    
+
       const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
       const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
       const combined = `${anverso} ${reverso}`;
-    
+
       let presentCount=0;
       tokens.forEach(tok=>{
         if(containsTokenExact(combined, tok)) presentCount++;
       });
 
-    
-      // Coincidencia casi completa
-      if(tokens.length>0 && (presentCount/tokens.length) >= 0.95){
+      if(tokens.length>0 && (presentCount/tokens.length) >= 0.75){
         matches.push({rec, idx});
       }
     });
-
 
     if(matches.length===0){
       resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
@@ -415,10 +548,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     matches.forEach(m=>{
       const rec = m.rec;
+
       const wrapper = document.createElement('div');
       wrapper.className='result-item';
-      wrapper.style.cursor='pointer'; // Indicar que es clicable
-    
+      wrapper.style.cursor='pointer';
+
       const chkWrap = document.createElement('div');
       chkWrap.className='check';
       const chk = document.createElement('input');
@@ -426,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chk.name='selectRec';
       chk.dataset.index=m.idx;
       chkWrap.appendChild(chk);
-    
+
       const content = document.createElement('div');
       content.style.flex='1';
       const title = document.createElement('h3');
@@ -435,44 +569,54 @@ document.addEventListener('DOMContentLoaded', () => {
       p.textContent = '';
       content.appendChild(title);
       content.appendChild(p);
-    
+
       wrapper.appendChild(chkWrap);
       wrapper.appendChild(content);
-    
-      // --- Evento: clic en todo el wrapper ---
+
       wrapper.addEventListener('click', (e)=>{
-        // Evitar que el clic en el checkbox se duplique
         if(e.target.tagName.toLowerCase() === 'input') return;
-    
-        // Desmarcar todos los checkboxes
         const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=>{ inp.checked=false; });
-    
-        // Marcar el del resultado clicado
+        all.forEach(inp=> inp.checked=false );
         chk.checked = true;
-    
-        // Abrir modal
         openModalDetalle(rec);
       });
-    
-      // --- Evento: checkbox ---
+
       chk.addEventListener('change', (e)=>{
         const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
         all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
         if(!e.target.checked) return;
         openModalDetalle(rec);
       });
-    
+
       resultsEl.appendChild(wrapper);
     });
-
   }
 
-  if(btnSearch) btnSearch.addEventListener('click', doSearch);
-  if(searchInput) searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+  btnSearch.addEventListener('click', doSearch);
+  
+  const msgDisabled = document.getElementById('msgDisabled');
+  
+  searchInput.addEventListener('keydown', e => {
+    if (searchInput.disabled) {
+      e.preventDefault(); // evita que escriba
+      
+      // Mostrar mensaje
+      msgDisabled.classList.add('show');
+  
+      // Ocultar mensaje después de 3 segundos
+      setTimeout(() => {
+        msgDisabled.classList.remove('show');
+      }, 3000);
+  
+    } else if (e.key === 'Enter') {
+      doSearch();
+    }
+  });
+
 
 });
 </script>
+
 
 </body>
 </html>
