@@ -98,7 +98,7 @@ footer {
 #searchInput {
   background-color: #72D677;  /* color cuando está deshabilitado */
   transition: background-color 0.3s ease;
-  color: #ccc;
+  color: #757575;
 }
 
 #searchInput.enabled {
@@ -421,6 +421,20 @@ function openModalDetalle(rec){
   }
   loadJSON();
 
+const searchWrapper = document.querySelector('.search-input-wrapper');
+
+searchWrapper.addEventListener('click', e => {
+  if (searchInput.disabled) {
+    // mostrar mensaje
+    msgDisabled.classList.add('show');
+    setTimeout(() => msgDisabled.classList.remove('show'), 3000);
+
+    // opcional: evitar que se haga focus
+    searchInput.blur();
+  }
+});
+
+  
   // --- Filtros SILA ---
   function syncNadaLogic(changed){
     if(changed==='nada' && chkNada.checked){
