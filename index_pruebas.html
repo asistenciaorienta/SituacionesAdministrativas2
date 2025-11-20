@@ -262,6 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return undefined;
   }
+  
+  function extractQuotedPhrases(text) {
+    const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => m[1].toLowerCase());
+    const noQuotes = text.replace(/"([^"]+)"/g,''); // texto fuera de comillas
+    return { quotes, noQuotes };
+  }
 
   function normalize(s){
     if(!s) return '';
@@ -524,14 +530,30 @@ function actualizarChecks(){
         valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
       if(!includeByInscrito) return;
 
-      const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
-      const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
-      const combined = `${anverso} ${reverso}`;
+      const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+      const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+      const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+      
+      const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
+      const combined = normalize(noQuotes); // texto normalizado sin comillas
+
 
       let presentCount=0;
-      tokens.forEach(tok=>{
-        if(containsTokenExact(combined, tok)) presentCount++;
+      let allTokensMatch = true;
+      
+      tokens.forEach(tok => {
+        const normTok = normalize(tok);
+        // si coincide con alguna frase exacta entre comillas, solo hacer match completo
+        let inQuotes = quotedPhrases.some(q => q === normTok);
+        if(inQuotes) {
+          // buscar coincidencia exacta en la frase entrecomillada
+          if(!quotedPhrases.includes(normTok)) allTokensMatch = false;
+        } else {
+          // buscar como antes en texto normal
+          if(!containsTokenExact(combined, normTok)) allTokensMatch = false;
+        }
       });
+
 
       if(tokens.length>0 && (presentCount/tokens.length) >= 0.75){
         matches.push({rec, idx});
