@@ -96,13 +96,13 @@ footer {
 }
 
 #searchInput {
-  background-color: #d7f5d1;  /* color cuando está deshabilitado */
+  background-color: #72D677;  /* color cuando está deshabilitado */
   transition: background-color 0.3s ease;
+  color: #ccc;
 }
 
 #searchInput.enabled {
-  background-color: #72D677; /* color cuando se desbloquea */
-  color: #737272;
+  color: #fff;
 }
   
 
@@ -395,31 +395,40 @@ function openModalDetalle(rec){
     }
   }
 
-  function actualizarChecks(){
+  function actualizarChecks() {
     syncNadaLogic();
   
-    if (chkInscrito.checked || chkPrestacion.checked || chkNada.checked) {
-        
-        searchInput.disabled = false;
-        btnSearch.disabled = false;
-  
-        // ACTIVAR COLOR CUANDO SE HABILITA
-        searchInput.classList.add("enabled");
-  
+    const activos = [];
+    if (chkInscrito.checked) {
+      userInscritoAnswer = 'SI';
     } else {
+      userInscritoAnswer = null;
+    }
   
-        searchInput.disabled = true;
-        btnSearch.disabled = true;
+    if (activos.length > 0) {
+      estadoChecks.textContent = activos.join(', ');
+      estadoChecks.classList.remove('no-data');
+      searchInput.disabled = false;
+      btnSearch.disabled = false;
   
-        // QUITAR COLOR
-        searchInput.classList.remove("enabled");
+      // 👉 NUEVO: activar estilo y mandar el cursor al input
+      searchInput.classList.add("enabled");
+      setTimeout(() => searchInput.focus(), 50);
   
-        searchInput.value = '';
-        resultsEl.innerHTML = '';
-        countResults.textContent = '0';
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
+    } else {
+      estadoChecks.textContent = 'ninguna';
+      estadoChecks.classList.add('no-data');
+      searchInput.disabled = true;
+      btnSearch.disabled = true;
+      searchInput.classList.remove("enabled"); // volver a estado gris
+      searchInput.value = '';
+  
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
     }
   }
-
 
   chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
   chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
