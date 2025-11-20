@@ -198,7 +198,7 @@ input.enabled.flash {
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar" disabled>
+        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar" readonly>
         <span class="clear-btn-wrapper" id="clearSearchInline">
           <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -455,8 +455,8 @@ function actualizarChecks(){
   if (anyChecked) {
 
       // habilitar
-      searchInput.disabled = false;
-      btnSearch.disabled = false;
+      searchInput.readonly = false;
+      btnSearch.readonly = false;
 
       // borrar texto SIEMPRE al desbloquear
       searchInput.value = '';
@@ -473,8 +473,8 @@ function actualizarChecks(){
 
   } else {
 
-      searchInput.disabled = true;
-      btnSearch.disabled = true;
+      searchInput.readonly = true;
+      btnSearch.readonly = true;
 
       searchInput.value = '';
       resultsEl.innerHTML = '';
@@ -616,7 +616,7 @@ function actualizarChecks(){
   const msgDisabled = document.getElementById('msgDisabled');
   
   searchInput.addEventListener('keydown', e => {
-    if (searchInput.disabled) {
+    if (searchInput.readonly) {
       e.preventDefault(); // evita que escriba
       
       // Mostrar mensaje
