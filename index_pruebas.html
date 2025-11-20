@@ -96,12 +96,12 @@ footer {
 }
 
 #searchInput {
-  background-color: #e0e0e0;  /* color cuando está deshabilitado */
+  background-color: #d7f5d1;  /* color cuando está deshabilitado */
   transition: background-color 0.3s ease;
 }
 
 #searchInput.enabled {
-  background-color: #d7f5d1; /* color cuando se desbloquea */
+  background-color: #e0e0e0; /* color cuando se desbloquea */
 }
   
 
@@ -413,6 +413,8 @@ function openModalDetalle(rec){
       estadoChecks.classList.remove('no-data');
       searchInput.disabled=false;
       btnSearch.disabled=false;
+      // 🔵 ACTIVAR COLOR CUANDO SE HABILITA
+      searchInput.classList.add("enabled");
       resultsEl.innerHTML='';
       countResults.textContent='0';
     } else {
@@ -420,6 +422,8 @@ function openModalDetalle(rec){
       estadoChecks.classList.add('no-data');
       searchInput.disabled=true;
       btnSearch.disabled=true;
+      // 🔵 QUITAR COLOR CUANDO SE DESHABILITA
+      searchInput.classList.remove("enabled");      
       searchInput.value='';
       resultsEl.innerHTML='';
       countResults.textContent='0';
