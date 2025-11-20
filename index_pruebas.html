@@ -395,40 +395,31 @@ function openModalDetalle(rec){
     }
   }
 
-  function actualizarChecks() {
-    syncNadaLogic();
-  
-    const activos = [];
-    if (chkInscrito.checked) {
-      userInscritoAnswer = 'SI';
-    } else {
-      userInscritoAnswer = null;
-    }
-  
-    if (activos.length > 0) {
-      estadoChecks.textContent = activos.join(', ');
-      estadoChecks.classList.remove('no-data');
+function actualizarChecks(){
+  syncNadaLogic();
+
+  if (chkInscrito.checked || chkPrestacion.checked || chkNada.checked) {
+      
       searchInput.disabled = false;
       btnSearch.disabled = false;
-  
-      // 👉 NUEVO: activar estilo y mandar el cursor al input
+
+      // ACTIVAR COLOR CUANDO SE HABILITA
       searchInput.classList.add("enabled");
-      setTimeout(() => searchInput.focus(), 50);
-  
-      resultsEl.innerHTML = '';
-      countResults.textContent = '0';
-    } else {
-      estadoChecks.textContent = 'ninguna';
-      estadoChecks.classList.add('no-data');
+
+  } else {
+
       searchInput.disabled = true;
       btnSearch.disabled = true;
-      searchInput.classList.remove("enabled"); // volver a estado gris
+
+      // QUITAR COLOR
+      searchInput.classList.remove("enabled");
+
       searchInput.value = '';
-  
       resultsEl.innerHTML = '';
       countResults.textContent = '0';
-    }
   }
+}
+
 
   chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
   chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
