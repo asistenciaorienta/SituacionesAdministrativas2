@@ -262,12 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return undefined;
   }
-  
-  function extractQuotedPhrases(text) {
-    const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => m[1].toLowerCase());
-    const noQuotes = text.replace(/"([^"]+)"/g,''); // texto fuera de comillas
-    return { quotes, noQuotes };
-  }
+
 
   function normalize(s){
     if(!s) return '';
@@ -505,114 +500,123 @@ function actualizarChecks(){
   }
 
   // --- Búsqueda ---
-  function doSearch(){
-    resultsEl.innerHTML='';
-    const q = searchInput.value.trim();
-    if(!q){
-      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
-      countResults.textContent='0';
-      return;
-    }
+// --- Búsqueda ---
+function doSearch() {
+  resultsEl.innerHTML = '';
+  const q = searchInput.value.trim();
+  if (!q) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
 
-    const tokens = tokenizeQuery(q);
-    if(tokens.length===0){
-      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
-      countResults.textContent='0';
-      return;
-    }
+  const tokens = tokenizeQuery(q);
+  if (tokens.length === 0) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
 
-    const matches=[];
+  const matches = [];
 
-    db.forEach((rec, idx)=>{
-      const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
-      const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
-      const includeByInscrito =
-        valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
-      if(!includeByInscrito) return;
+  db.forEach((rec, idx) => {
+    // Filtro por inscripción si lo aplicas
+    const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?', 'Inscrito anteriormente', 'INSCRITO ANTERIORMENTE', 'inscrito anteriormente']);
+    const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+    const includeByInscrito = valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
+    if (!includeByInscrito) return;
 
-      const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
-      const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
-      const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
-      
-      const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
-      const combined = normalize(noQuotes); // texto normalizado sin comillas
+    const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
+    const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+    const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
 
+    // Extraer frases entre comillas
+    const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
+    const combined = normalize(noQuotes);
 
-      let presentCount=0;
-      let allTokensMatch = true;
-      
-      tokens.forEach(tok => {
-        const normTok = normalize(tok);
-        // si coincide con alguna frase exacta entre comillas, solo hacer match completo
-        let inQuotes = quotedPhrases.some(q => q === normTok);
-        if(inQuotes) {
-          // buscar coincidencia exacta en la frase entrecomillada
-          if(!quotedPhrases.includes(normTok)) allTokensMatch = false;
-        } else {
-          // buscar como antes en texto normal
-          if(!containsTokenExact(combined, normTok)) allTokensMatch = false;
-        }
-      });
+    // Función que comprueba si un token coincide respetando frases entre comillas
+    let allTokensMatch = true;
+    tokens.forEach(tok => {
+      const normTok = normalize(tok);
 
+      // Ver si coincide exactamente con alguna frase entre comillas
+      const inQuotes = quotedPhrases.some(q => q === normTok);
 
-      if(tokens.length>0 && (presentCount/tokens.length) >= 0.75){
-        matches.push({rec, idx});
+      if (inQuotes) {
+        // Solo coincidir si el token es exactamente la frase completa
+        if (!quotedPhrases.includes(normTok)) allTokensMatch = false;
+      } else {
+        // Buscar en texto normal
+        if (!containsTokenExact(combined, normTok)) allTokensMatch = false;
       }
     });
 
-    if(matches.length===0){
-      resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
-      countResults.textContent='0';
-      return;
+    if (allTokensMatch) {
+      matches.push({ rec, idx });
     }
+  });
 
-    countResults.textContent = String(matches.length);
-
-    matches.forEach(m=>{
-      const rec = m.rec;
-
-      const wrapper = document.createElement('div');
-      wrapper.className='result-item';
-      wrapper.style.cursor='pointer';
-
-      const chkWrap = document.createElement('div');
-      chkWrap.className='check';
-      const chk = document.createElement('input');
-      chk.type='checkbox';
-      chk.name='selectRec';
-      chk.dataset.index=m.idx;
-      chkWrap.appendChild(chk);
-
-      const content = document.createElement('div');
-      content.style.flex='1';
-      const title = document.createElement('h3');
-      title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
-      const p = document.createElement('p');
-      p.textContent = '';
-      content.appendChild(title);
-      content.appendChild(p);
-
-      wrapper.appendChild(chkWrap);
-      wrapper.appendChild(content);
-
-      wrapper.addEventListener('click', (e)=>{
-        if(e.target.tagName.toLowerCase() === 'input') return;
-        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=> inp.checked=false );
-        chk.checked = true;
-        openModalDetalle(rec);
-      });
-
-      chk.addEventListener('change', (e)=>{
-        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
-        if(!e.target.checked) return;
-        openModalDetalle(rec);
-      });
-
-      resultsEl.appendChild(wrapper);
-    });
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+    countResults.textContent = '0';
+    return;
   }
+
+  countResults.textContent = String(matches.length);
+
+  matches.forEach(m => {
+    const rec = m.rec;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'result-item';
+    wrapper.style.cursor = 'pointer';
+
+    const chkWrap = document.createElement('div');
+    chkWrap.className = 'check';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.name = 'selectRec';
+    chk.dataset.index = m.idx;
+    chkWrap.appendChild(chk);
+
+    const content = document.createElement('div');
+    content.style.flex = '1';
+    const title = document.createElement('h3');
+    title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    const p = document.createElement('p');
+    p.textContent = '';
+    content.appendChild(title);
+    content.appendChild(p);
+
+    wrapper.appendChild(chkWrap);
+    wrapper.appendChild(content);
+
+    wrapper.addEventListener('click', e => {
+      if (e.target.tagName.toLowerCase() === 'input') return;
+      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+      all.forEach(inp => inp.checked = false);
+      chk.checked = true;
+      openModalDetalle(rec);
+    });
+
+    chk.addEventListener('change', e => {
+      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+      all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
+      if (!e.target.checked) return;
+      openModalDetalle(rec);
+    });
+
+    resultsEl.appendChild(wrapper);
+  });
+}
+
+// --- Función auxiliar para extraer frases entre comillas ---
+function extractQuotedPhrases(text) {
+  const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => normalize(m[1]));
+  const noQuotes = text.replace(/"([^"]+)"/g, ''); // texto fuera de comillas
+  return { quotes, noQuotes };
+}
+
 
   btnSearch.addEventListener('click', doSearch);
   
