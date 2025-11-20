@@ -124,6 +124,15 @@ footer {
   background: none;
   pointer-events: none;
 }
+/* Animación suave al activarse el campo */
+@keyframes inputFlash {
+  0%   { background-color: #d8f5d2; }   /* verde clarito */
+  100% { background-color: white; }
+}
+
+input.enabled.flash {
+  animation: inputFlash 0.4s ease-out;
+}
   
 </style>
 </head>
@@ -398,14 +407,25 @@ function openModalDetalle(rec){
 function actualizarChecks(){
   syncNadaLogic();
 
-  if (chkInscrito.checked || chkPrestacion.checked || chkNada.checked) {
-      
+  const anyChecked = (chkInscrito.checked || chkPrestacion.checked || chkNada.checked);
+
+  if (anyChecked) {
+
+      // habilitar
       searchInput.disabled = false;
       btnSearch.disabled = false;
 
-      // ACTIVAR COLOR CUANDO SE HABILITA
+      // borrar texto SIEMPRE al desbloquear
+      searchInput.value = '';
+
+      // activar estilo de campo activo
       searchInput.classList.add("enabled");
-      // 👉 ENVIAR EL CURSOR AL INPUT AUTOMÁTICAMENTE
+
+      // activar la animación
+      searchInput.classList.add("flash");
+      setTimeout(() => searchInput.classList.remove("flash"), 400);
+
+      // llevar el cursor al input
       searchInput.focus();
 
   } else {
@@ -413,14 +433,16 @@ function actualizarChecks(){
       searchInput.disabled = true;
       btnSearch.disabled = true;
 
-      // QUITAR COLOR
-      searchInput.classList.remove("enabled");
-
       searchInput.value = '';
       resultsEl.innerHTML = '';
       countResults.textContent = '0';
+
+      // quitar estilos
+      searchInput.classList.remove("enabled");
+      searchInput.classList.remove("flash");
   }
 }
+
 
 
   chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
