@@ -102,7 +102,17 @@ footer {
 }
 
 #searchInput.enabled {
+  background-color: #E9FFE5;  /* color cuando está habilitado */
   color: #000;
+}
+/* Estilo del placeholder cuando está deshabilitado */
+#searchInput:disabled::placeholder {
+  color: #999;  /* gris suave */
+}
+
+/* Ocultar placeholder cuando está habilitado */
+#searchInput.enabled::placeholder {
+  color: transparent;
 }
   
 
