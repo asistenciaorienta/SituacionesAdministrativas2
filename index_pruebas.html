@@ -478,27 +478,31 @@ function actualizarChecks(){
   actualizarChecks();
 
   // Normalizador exacto de tokens
-  function containsTokenExact(recordText, token) {
-    const text = normalize(recordText); 
-    const words = text.split(/\s+/);
-    token = token.toLowerCase();
+function containsTokenExact(text, token) {
+  const words = text.split(/\s+/);    // texto ya normalizado
+  token = token.toLowerCase();
 
-    if(token === 'autoriza'){
-      for(let i=0;i<words.length;i++){
-        if(words[i] === 'autoriza'){
-          if(i===0 || words[i-1] !== 'no') return true;
-        }
+  // Control especial: "autoriza" y "no autoriza"
+  if (token === 'autoriza') {
+    for (let i = 0; i < words.length; i++) {
+      if (words[i] === 'autoriza') {
+        if (i === 0 || words[i - 1] !== 'no') return true; // autoriza sin "no" delante
       }
-      return false;
-    } else if(token === 'no autoriza'){
-      for(let i=0;i<words.length-1;i++){
-        if(words[i]==='no' && words[i+1]==='autoriza') return true;
-      }
-      return false;
-    } else {
-      return words.includes(token);
     }
+    return false;
   }
+
+  if (token === 'no autoriza') {
+    for (let i = 0; i < words.length - 1; i++) {
+      if (words[i] === 'no' && words[i + 1] === 'autoriza') return true;
+    }
+    return false;
+  }
+
+  // Búsqueda exacta en palabras
+  return words.includes(token);
+}
+
 
   // --- Búsqueda ---
 // --- Búsqueda ---
@@ -611,10 +615,38 @@ function doSearch() {
   });
 }
 
+function recordMatchesSearch(rec, tokens) {
+  const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
+  const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+  const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+
+  const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
+  const combinedNorm = normalize(noQuotes);
+
+  return tokens.every(tok => {
+    const normTok = normalize(tok);
+
+    // Si el registro contiene una frase entre comillas…
+    if (quotedPhrases.includes(normTok)) {
+      // …solo coincide si el token es exactamente esa frase.
+      return true;
+    }
+
+    // Si el token coincide con una frase entre comillas PERO NO es exacto → no coincide
+    if (quotedPhrases.some(q => q.includes(normTok) || normTok.includes(q))) {
+      return false;
+    }
+
+    // Resto del texto: búsqueda normal por palabras
+    return containsTokenExact(combinedNorm, normTok);
+  });
+}
+
+  
 // --- Función auxiliar para extraer frases entre comillas ---
 function extractQuotedPhrases(text) {
   const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => normalize(m[1]));
-  const noQuotes = text.replace(/"([^"]+)"/g, ''); // texto fuera de comillas
+  const noQuotes = text.replace(/"([^"]+)"/g, ''); 
   return { quotes, noQuotes };
 }
 
