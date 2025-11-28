@@ -664,14 +664,65 @@ function doSearch() {
 
   // --- FASE 1: búsqueda estricta ---
   matches = db
-    .map((rec, idx) => recordMatchesStrict(rec, tokens, queryNorm, idx))
-    .filter(Boolean); // eliminar false
-  
-  // --- FASE 2: si no hay resultados, búsqueda tolerante ---
+    .map((rec, idx) => {
+      const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+      const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+      const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+      const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
+
+      // 1️⃣ Coincidencia exacta de la frase completa (entre comillas o no)
+      if (combinedNorm.includes(queryNorm)) return { rec, idx };
+
+      // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
+      for (const qp of quotedPhrases) {
+        if (!queryNorm.includes(qp)) {
+          const qpWords = qp.split(/\s+/).filter(Boolean);
+          for (const tok of tokens) {
+            if (qpWords.includes(tok)) return false; // palabra parcial de frase → rechazar
+          }
+        }
+      }
+
+      // 3️⃣ Todos los tokens deben coincidir exactamente en texto normalizado
+      for (const tok of tokens) {
+        if (!containsTokenExact(combinedNorm, tok)) return false;
+      }
+
+      return { rec, idx };
+    })
+    .filter(Boolean);
+
+  // --- FASE 2: si no hay resultados, búsqueda tolerante solo para palabras sueltas ---
   if (matches.length === 0) {
     matches = db
-      .map((rec, idx) => recordMatchesTolerant(rec, tokens, queryNorm, idx))
-      .filter(Boolean); // eliminar false
+      .map((rec, idx) => {
+        const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+        const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+        const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+        const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
+
+        // 1️⃣ Coincidencia exacta de la frase completa
+        if (combinedNorm.includes(queryNorm)) return { rec, idx };
+
+        // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
+        for (const qp of quotedPhrases) {
+          if (!queryNorm.includes(qp)) {
+            const qpWords = qp.split(/\s+/).filter(Boolean);
+            for (const tok of tokens) {
+              if (qpWords.includes(tok)) return false;
+            }
+          }
+        }
+
+        // 3️⃣ Comprobar tokens fuera de comillas con tolerancia
+        for (const tok of tokens) {
+          if (quotedPhrases.includes(tok)) continue; // token coincide exactamente con frase → ok
+          if (!containsTokenTolerant(combinedNorm, tok)) return false;
+        }
+
+        return { rec, idx };
+      })
+      .filter(Boolean);
   }
 
   // --- Mostrar resultados ---
@@ -723,6 +774,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
 
 
