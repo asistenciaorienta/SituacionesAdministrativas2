@@ -511,60 +511,90 @@ function containsTokenExact(text, token) {
   return words.includes(token);
 }
 
+// --- Función auxiliar para extraer frases entrecomilladas ---
+function extractQuotedPhrases(text) {
+  // Devuelve { quotes: [..frases normalizadas..], normalizedText: texto normalizado entero }
+  // Buscamos comillas dobles "..." dentro del propio valor.
+  const quotes = [];
+  for (const m of text.matchAll(/"([^"]+)"/g)) {
+    quotes.push(normalize(m[1]));
+  }
+  const normalizedText = normalize(text);
+  return { quotes, normalizedText };
+}
 
-  // --- Búsqueda ---
-// --- Búsqueda ---
+/* doSearch reemplazado */
 function doSearch() {
   resultsEl.innerHTML = '';
-  const q = searchInput.value.trim();
-  if (!q) {
+  const rawQuery = searchInput.value.trim();
+  if (!rawQuery) {
     resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
     countResults.textContent = '0';
     return;
   }
 
-  const tokens = tokenizeQuery(q);
+  const tokens = tokenizeQuery(rawQuery); // tokens normalizados y sin stopwords
   if (tokens.length === 0) {
     resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
     countResults.textContent = '0';
     return;
   }
 
+  const queryNorm = normalize(rawQuery); // cadena normalizada completa (útil para buscar frases completas)
   const matches = [];
 
   db.forEach((rec, idx) => {
-    // Filtro por inscripción si lo aplicas
+    // filtro por inscripción (si aplica)
     const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?', 'Inscrito anteriormente', 'INSCRITO ANTERIORMENTE', 'inscrito anteriormente']);
     const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
     const includeByInscrito = valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
     if (!includeByInscrito) return;
 
-    const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
-    const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+    const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+    const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
     const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
 
-    // Extraer frases entre comillas
-    const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
-    const combined = normalize(noQuotes);
+    // Extraer frases entrecomilladas y texto normalizado
+    const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
 
-    // Función que comprueba si un token coincide respetando frases entre comillas
-    let allTokensMatch = true;
-    tokens.forEach(tok => {
-      const normTok = normalize(tok);
-
-      // Ver si coincide exactamente con alguna frase entre comillas
-      const inQuotes = quotedPhrases.some(q => q === normTok);
-
-      if (inQuotes) {
-        // Solo coincidir si el token es exactamente la frase completa
-        if (!quotedPhrases.includes(normTok)) allTokensMatch = false;
-      } else {
-        // Buscar en texto normal
-        if (!containsTokenExact(combined, normTok)) allTokensMatch = false;
+    // Regla especial: si el registro contiene frases entrecomilladas,
+    // y el usuario busca SOLO una parte de una de esas frases -> RECHAZAR.
+    // Pero si el usuario ha buscado la frase completa (query incluye la frase completa) -> permitir.
+    let rejectedBecausePartialQuoted = false;
+    if (quotedPhrases.length > 0) {
+      for (const qp of quotedPhrases) {
+        // qp es la frase entrecomillada normalizada, p.ej. "tarjeta verde"
+        // Si el usuario buscó exactamente la frase (como substring normalizado) => OK
+        if (queryNorm.includes(qp)) {
+          // usuario buscó la frase completa → no rechazar por esta frase
+          continue;
+        }
+        // Si el usuario incluye alguna palabra que forma parte de la frase entrecomillada
+        // pero no la frase completa, rechazamos el registro.
+        const qpWords = qp.split(/\s+/).filter(Boolean);
+        for (const tok of tokens) {
+          if (qpWords.includes(tok)) {
+            // el usuario busca una palabra que forma parte de una frase entrecomillada
+            // pero no buscó la frase entera (ya comprobado arriba), así que rechazamos.
+            rejectedBecausePartialQuoted = true;
+            break;
+          }
+        }
+        if (rejectedBecausePartialQuoted) break;
       }
-    });
+    }
+    if (rejectedBecausePartialQuoted) return; // no incluir este registro
 
-    if (allTokensMatch) {
+    // Si pasamos las reglas de comillas, ahora comprobamos que todos los tokens estén presentes
+    // en el texto normalizado (búsqueda por palabras)
+    let allTokensFound = true;
+    for (const tok of tokens) {
+      if (!containsTokenExact(combinedNorm, tok)) {
+        allTokensFound = false;
+        break;
+      }
+    }
+    if (allTokensFound) {
       matches.push({ rec, idx });
     }
   });
@@ -623,6 +653,7 @@ function doSearch() {
   });
 }
 
+
 function recordMatchesSearch(rec, tokens) {
   const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
   const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
@@ -648,14 +679,6 @@ function recordMatchesSearch(rec, tokens) {
     // Resto del texto: búsqueda normal por palabras
     return containsTokenExact(combinedNorm, normTok);
   });
-}
-
-  
-// --- Función auxiliar para extraer frases entre comillas ---
-function extractQuotedPhrases(text) {
-  const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => normalize(m[1]));
-  const noQuotes = text.replace(/"([^"]+)"/g, ''); 
-  return { quotes, noQuotes };
 }
 
 
