@@ -266,37 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return undefined;
   }
 
-  function normalize(s){
-    if(!s) return '';
-    return String(s)
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu,'')
-      .replace(/[^\p{L}\p{N}]+/gu,' ')
-      .toLowerCase()
-      .trim();
-  }
-
-  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
-
-  function tokenizeQuery(q) {
-    const norm = normalize(q);
-    if (!norm) return [];
-    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
-    const filtered = toks.filter(t => !STOPWORDS.has(t));
-
-    // “no autoriza”
-    const merged = [];
-    for (let i = 0; i < filtered.length; i++) {
-      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
-        merged.push('no autoriza');
-        i++;
-      } else {
-        merged.push(filtered[i]);
-      }
-    }
-    return merged.length > 0 ? merged : filtered;
-  }
-
   // --- MODAL DETALLE ----------------------------------------------------------------------
 function openModalDetalle(rec){
   // limpiar contenido previo
@@ -486,72 +455,6 @@ function actualizarChecks(){
   actualizarChecks();
 
   // Normalizador exacto de tokens
-function containsTokenExact(text, token) {
-  const words = text.split(/\s+/);
-  token = token.toLowerCase();
-
-  // Control especial: "autoriza" y "no autoriza"
-  if (token === 'autoriza') {
-    for (let i = 0; i < words.length; i++) {
-      if (words[i] === 'autoriza') {
-        if (i === 0 || words[i - 1] !== 'no') return true;
-      }
-    }
-    return false;
-  }
-  if (token === 'no autoriza') {
-    for (let i = 0; i < words.length - 1; i++) {
-      if (words[i] === 'no' && words[i + 1] === 'autoriza') return true;
-    }
-    return false;
-  }
-
-  return words.includes(token);
-}
-
-function containsTokenTolerant(text, token) {
-  const words = text.split(/\s+/);
-  token = token.toLowerCase();
-
-  for (const w of words) {
-    const word = w.toLowerCase();
-
-    // Coincidencia exacta
-    if (word === token) return true;
-
-    // Tolerancia solo si la palabra tiene al menos 5 letras
-    if (token.length >= 5 && word.length >= 5) {
-      const maxLen = Math.max(word.length, token.length);
-      const threshold = Math.max(1, Math.ceil(maxLen * 0.10)); // 10% tolerancia mínima 1
-      if (levenshtein(word, token) <= threshold) return true;
-    }
-  }
-
-  return false;
-}
-
-
-
-function levenshtein(a, b) {
-  const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
-    Array.from({ length: b.length + 1 }, (__, j) => i === 0 ? j : j === 0 ? i : 0)
-  );
-
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
-      );
-    }
-  }
-
-  return matrix[a.length][b.length];
-}
-
-
 
 function palabraCoincide(palabra, texto) {
   const palabrasTexto = texto.toLowerCase().split(/\s+/);
@@ -570,19 +473,6 @@ function palabraCoincide(palabra, texto) {
   }
 
   return false;
-}
-
-  
-// --- Función auxiliar para extraer frases entrecomilladas ---
-function extractQuotedPhrases(text) {
-  // Devuelve { quotes: [..frases normalizadas..], normalizedText: texto normalizado entero }
-  // Buscamos comillas dobles "..." dentro del propio valor.
-  const quotes = [];
-  for (const m of text.matchAll(/"([^"]+)"/g)) {
-    quotes.push(normalize(m[1]));
-  }
-  const normalizedText = normalize(text);
-  return { quotes, normalizedText };
 }
 
 function recordMatchesStrict(rec, tokens, queryNorm, idx) {
@@ -641,8 +531,6 @@ function recordMatchesTolerant(rec, tokens, queryNorm, idx) {
   return { rec, idx };
 }
   
-  
-/* doSearch reemplazado */
 function doSearch() {
   resultsEl.innerHTML = '';
   const rawQuery = searchInput.value.trim();
@@ -652,77 +540,155 @@ function doSearch() {
     return;
   }
 
+  // --- Normalización y tokenización ---
+  function normalize(s) {
+    if (!s) return '';
+    return String(s)
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu,'')
+      .replace(/[^\p{L}\p{N}]+/gu,' ')
+      .toLowerCase()
+      .trim();
+  }
+
+  const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
+
+  function tokenizeQuery(q) {
+    const norm = normalize(q);
+    if (!norm) return [];
+    const toks = Array.from(new Set(norm.split(/\s+/).filter(Boolean)));
+    const filtered = toks.filter(t => !STOPWORDS.has(t));
+    const merged = [];
+    for (let i = 0; i < filtered.length; i++) {
+      if (filtered[i] === 'no' && filtered[i + 1] === 'autoriza') {
+        merged.push('no autoriza');
+        i++;
+      } else {
+        merged.push(filtered[i]);
+      }
+    }
+    return merged.length > 0 ? merged : filtered;
+  }
+
+  function levenshtein(a, b) {
+    const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
+      Array.from({ length: b.length + 1 }, (__, j) => i === 0 ? j : j === 0 ? i : 0)
+    );
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return matrix[a.length][b.length];
+  }
+
+  function containsTokenExact(text, token) {
+    const words = text.split(/\s+/).map(w => w.toLowerCase());
+    token = token.toLowerCase();
+    if (token === 'autoriza') {
+      for (let i = 0; i < words.length; i++) {
+        if (words[i] === 'autoriza' && (i === 0 || words[i-1] !== 'no')) return true;
+      }
+      return false;
+    }
+    if (token === 'no autoriza') {
+      for (let i = 0; i < words.length - 1; i++) {
+        if (words[i] === 'no' && words[i+1] === 'autoriza') return true;
+      }
+      return false;
+    }
+    return words.includes(token);
+  }
+
+  function containsTokenTolerant(text, token) {
+    const words = text.split(/\s+/);
+    token = token.toLowerCase();
+    for (const w of words) {
+      const word = w.toLowerCase();
+      if (word === token) return true;
+      if (token.length >= 5 && word.length >= 5) {
+        const maxLen = Math.max(word.length, token.length);
+        const threshold = Math.max(1, Math.ceil(maxLen * 0.10));
+        if (levenshtein(word, token) <= threshold) return true;
+      }
+    }
+    return false;
+  }
+
+  function extractQuotedPhrases(text) {
+    const quotes = [];
+    for (const m of text.matchAll(/"([^"]+)"/g)) {
+      quotes.push(normalize(m[1]));
+    }
+    const normalizedText = normalize(text);
+    return { quotes, normalizedText };
+  }
+
   const tokens = tokenizeQuery(rawQuery);
   if (tokens.length === 0) {
     resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
     countResults.textContent = '0';
     return;
   }
-
   const queryNorm = normalize(rawQuery);
   let matches = [];
 
   // --- FASE 1: búsqueda estricta ---
-  matches = db
-    .map((rec, idx) => {
+  matches = db.map((rec, idx) => {
+    const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
+    const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
+    const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+    const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
+
+    if (combinedNorm.includes(queryNorm)) return { rec, idx };
+
+    for (const qp of quotedPhrases) {
+      if (!queryNorm.includes(qp)) {
+        const qpWords = qp.split(/\s+/).filter(Boolean);
+        for (const tok of tokens) {
+          if (qpWords.includes(tok)) return false;
+        }
+      }
+    }
+
+    for (const tok of tokens) {
+      if (!containsTokenExact(combinedNorm, tok)) return false;
+    }
+
+    return { rec, idx };
+  }).filter(Boolean);
+
+  // --- FASE 2: búsqueda tolerante si no hay resultados ---
+  if (matches.length === 0) {
+    matches = db.map((rec, idx) => {
       const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
       const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
       const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
       const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
 
-      // 1️⃣ Coincidencia exacta de la frase completa (entre comillas o no)
       if (combinedNorm.includes(queryNorm)) return { rec, idx };
 
-      // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
       for (const qp of quotedPhrases) {
         if (!queryNorm.includes(qp)) {
           const qpWords = qp.split(/\s+/).filter(Boolean);
           for (const tok of tokens) {
-            if (qpWords.includes(tok)) return false; // palabra parcial de frase → rechazar
+            if (qpWords.includes(tok)) return false;
           }
         }
       }
 
-      // 3️⃣ Todos los tokens deben coincidir exactamente en texto normalizado
       for (const tok of tokens) {
-        if (!containsTokenExact(combinedNorm, tok)) return false;
+        if (quotedPhrases.includes(tok)) continue;
+        if (!containsTokenTolerant(combinedNorm, tok)) return false;
       }
 
       return { rec, idx };
-    })
-    .filter(Boolean);
-
-  // --- FASE 2: si no hay resultados, búsqueda tolerante solo para palabras sueltas ---
-  if (matches.length === 0) {
-    matches = db
-      .map((rec, idx) => {
-        const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
-        const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
-        const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
-        const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
-
-        // 1️⃣ Coincidencia exacta de la frase completa
-        if (combinedNorm.includes(queryNorm)) return { rec, idx };
-
-        // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
-        for (const qp of quotedPhrases) {
-          if (!queryNorm.includes(qp)) {
-            const qpWords = qp.split(/\s+/).filter(Boolean);
-            for (const tok of tokens) {
-              if (qpWords.includes(tok)) return false;
-            }
-          }
-        }
-
-        // 3️⃣ Comprobar tokens fuera de comillas con tolerancia
-        for (const tok of tokens) {
-          if (quotedPhrases.includes(tok)) continue; // token coincide exactamente con frase → ok
-          if (!containsTokenTolerant(combinedNorm, tok)) return false;
-        }
-
-        return { rec, idx };
-      })
-      .filter(Boolean);
+    }).filter(Boolean);
   }
 
   // --- Mostrar resultados ---
@@ -733,7 +699,6 @@ function doSearch() {
   }
 
   countResults.textContent = String(matches.length);
-
   matches.forEach(m => {
     const rec = m.rec;
     const wrapper = document.createElement('div');
@@ -774,6 +739,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
 
 
