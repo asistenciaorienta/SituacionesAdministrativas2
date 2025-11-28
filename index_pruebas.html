@@ -507,17 +507,20 @@ function containsTokenExact(text, token) {
     return false;
   }
 
-  // --- Coincidencias normales con tolerancia ---
+  // --- Coincidencias normales con tolerancia adaptativa ---
   for (const w of words) {
     const wnorm = w.toLowerCase();
 
-    // 1) coincidencia directa / parcial
+    // coincidencia directa / parcial
     if (wnorm === token || wnorm.includes(token) || token.includes(wnorm))
       return true;
 
-    // 2) tolerancia (Levenshtein)
+    // tolerancia (Levenshtein) con umbral adaptativo:
     const maxLen = Math.max(wnorm.length, token.length);
-    const umbral = Math.max(2, Math.ceil(maxLen * 0.10)); // mínimo 2 errores
+
+    // regla: para palabras muy cortas (<=4) permitir como máximo 1 error,
+    // para palabras medianas/grandes usar 10% redondeado pero nunca menos de 1.
+    const umbral = (maxLen <= 4) ? 1 : Math.max(1, Math.ceil(maxLen * 0.10));
 
     if (levenshtein(wnorm, token) <= umbral)
       return true;
@@ -525,6 +528,7 @@ function containsTokenExact(text, token) {
 
   return false;
 }
+
 
 
 function levenshtein(a, b) {
