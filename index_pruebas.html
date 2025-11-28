@@ -595,21 +595,14 @@ function recordMatchesStrict(rec, tokens, queryNorm, idx) {
   if (combinedNorm.includes(queryNorm)) return { rec, idx };
 
   // Rechazar búsqueda parcial de frases entrecomilladas
-  let rejectedBecausePartialQuoted = false;
-  if (quotedPhrases.length > 0) {
-    for (const qp of quotedPhrases) {
-      if (queryNorm.includes(qp)) continue;
+  for (const qp of quotedPhrases) {
+    if (!queryNorm.includes(qp)) {
       const qpWords = qp.split(/\s+/).filter(Boolean);
       for (const tok of tokens) {
-        if (qpWords.includes(tok)) {
-          rejectedBecausePartialQuoted = true;
-          break;
-        }
+        if (qpWords.includes(tok)) return false;
       }
-      if (rejectedBecausePartialQuoted) break;
     }
   }
-  if (rejectedBecausePartialQuoted) return false;
 
   // Comprobar que todos los tokens están presentes tal cual
   for (const tok of tokens) {
@@ -625,33 +618,24 @@ function recordMatchesTolerant(rec, tokens, queryNorm, idx) {
   const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
   const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
 
-  // 1️⃣ Coincidencia exacta de frase completa
+  // Coincidencia exacta de frase completa (frases entre comillas)
   if (combinedNorm.includes(queryNorm)) return { rec, idx };
 
-  // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
-  if (quotedPhrases.length > 0) {
-    for (const qp of quotedPhrases) {
-      if (queryNorm.includes(qp)) continue; // coincide con toda la frase
+  // Rechazar búsqueda parcial de frases entrecomilladas
+  for (const qp of quotedPhrases) {
+    if (!queryNorm.includes(qp)) {
       const qpWords = qp.split(/\s+/).filter(Boolean);
       for (const tok of tokens) {
-        if (qpWords.includes(tok)) return false; // no coincide parcialmente
+        if (qpWords.includes(tok)) return false;
       }
     }
   }
 
-  // 3️⃣ Comprobar tokens con tolerancia (palabras sueltas)
+  // Verificar tolerancia solo para palabras sueltas fuera de las comillas
   for (const tok of tokens) {
-    let matchedInQuotes = false;
-
-    // revisar si el token coincide exactamente con alguna frase entrecomillada
-    for (const qp of quotedPhrases) {
-      if (qp === tok) {
-        matchedInQuotes = true;
-        break;
-      }
-    }
-
-    if (!matchedInQuotes && !containsTokenTolerant(combinedNorm, tok)) return false;
+    // ignorar tokens que coinciden exactamente con alguna frase entre comillas
+    if (quotedPhrases.includes(tok)) continue;
+    if (!containsTokenTolerant(combinedNorm, tok)) return false;
   }
 
   return { rec, idx };
