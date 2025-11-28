@@ -625,29 +625,33 @@ function recordMatchesTolerant(rec, tokens, queryNorm, idx) {
   const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
   const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
 
-  // Coincidencia exacta de frase completa
+  // 1️⃣ Coincidencia exacta de frase completa
   if (combinedNorm.includes(queryNorm)) return { rec, idx };
 
-  // Rechazar búsqueda parcial de frases entrecomilladas
-  let rejectedBecausePartialQuoted = false;
+  // 2️⃣ Rechazar búsqueda parcial de frases entrecomilladas
   if (quotedPhrases.length > 0) {
     for (const qp of quotedPhrases) {
-      if (queryNorm.includes(qp)) continue;
+      if (queryNorm.includes(qp)) continue; // coincide con toda la frase
       const qpWords = qp.split(/\s+/).filter(Boolean);
       for (const tok of tokens) {
-        if (qpWords.includes(tok)) {
-          rejectedBecausePartialQuoted = true;
-          break;
-        }
+        if (qpWords.includes(tok)) return false; // no coincide parcialmente
       }
-      if (rejectedBecausePartialQuoted) break;
     }
   }
-  if (rejectedBecausePartialQuoted) return false;
 
-  // Comprobar tokens con tolerancia
+  // 3️⃣ Comprobar tokens con tolerancia (palabras sueltas)
   for (const tok of tokens) {
-    if (!containsTokenTolerant(combinedNorm, tok)) return false;
+    let matchedInQuotes = false;
+
+    // revisar si el token coincide exactamente con alguna frase entrecomillada
+    for (const qp of quotedPhrases) {
+      if (qp === tok) {
+        matchedInQuotes = true;
+        break;
+      }
+    }
+
+    if (!matchedInQuotes && !containsTokenTolerant(combinedNorm, tok)) return false;
   }
 
   return { rec, idx };
