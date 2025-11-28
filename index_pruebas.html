@@ -464,7 +464,7 @@ function doSearch() {
     return;
   }
 
-  // --- Normalización y tokenización ---
+  // --- Normalización ---
   function normalize(s) {
     if (!s) return '';
     return String(s)
@@ -475,8 +475,8 @@ function doSearch() {
       .trim();
   }
 
+  // --- Tokenización ---
   const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
-
   function tokenizeQuery(q) {
     const norm = normalize(q);
     if (!norm) return [];
@@ -494,6 +494,7 @@ function doSearch() {
     return merged.length > 0 ? merged : filtered;
   }
 
+  // --- Levenshtein para tolerancia ---
   function levenshtein(a, b) {
     const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
       Array.from({ length: b.length + 1 }, (__, j) => i === 0 ? j : j === 0 ? i : 0)
@@ -560,17 +561,15 @@ function doSearch() {
     return;
   }
   const queryNorm = normalize(rawQuery);
-  let matches = [];
 
-  // --- FASE 1: búsqueda estricta ---
-  matches = db.map((rec, idx) => {
+  // --- Función central de coincidencia ---
+  function recordMatches(rec, tokens, queryNorm, tolerant=false) {
     const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
     const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
     const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
     const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
 
-    if (combinedNorm.includes(queryNorm)) return { rec, idx };
-
+    // frases entre comillas
     for (const qp of quotedPhrases) {
       if (!queryNorm.includes(qp)) {
         const qpWords = qp.split(/\s+/).filter(Boolean);
@@ -580,39 +579,32 @@ function doSearch() {
       }
     }
 
+    // validar tokens
     for (const tok of tokens) {
-      if (!containsTokenExact(combinedNorm, tok)) return false;
-    }
-
-    return { rec, idx };
-  }).filter(Boolean);
-
-  // --- FASE 2: búsqueda tolerante si no hay resultados ---
-  if (matches.length === 0) {
-    matches = db.map((rec, idx) => {
-      const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
-      const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
-      const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
-      const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
-
-      if (combinedNorm.includes(queryNorm)) return { rec, idx };
-
-      for (const qp of quotedPhrases) {
-        if (!queryNorm.includes(qp)) {
-          const qpWords = qp.split(/\s+/).filter(Boolean);
-          for (const tok of tokens) {
-            if (qpWords.includes(tok)) return false;
-          }
+      if (tok === 'autoriza') {
+        if (!combinedNorm.includes('autoriza') || combinedNorm.includes('no autoriza')) return false;
+      } else if (tok === 'no autoriza') {
+        if (!combinedNorm.includes('no autoriza')) return false;
+      } else if (quotedPhrases.includes(tok)) {
+        continue;
+      } else {
+        if (tolerant) {
+          if (!containsTokenTolerant(combinedNorm, tok)) return false;
+        } else {
+          if (!containsTokenExact(combinedNorm, tok)) return false;
         }
       }
+    }
 
-      for (const tok of tokens) {
-        if (quotedPhrases.includes(tok)) continue;
-        if (!containsTokenTolerant(combinedNorm, tok)) return false;
-      }
+    return true;
+  }
 
-      return { rec, idx };
-    }).filter(Boolean);
+  // --- Fase 1: búsqueda estricta ---
+  let matches = db.map((rec, idx) => recordMatches(rec, tokens, queryNorm, false) ? {rec, idx} : null).filter(Boolean);
+
+  // --- Fase 2: búsqueda tolerante ---
+  if (matches.length === 0) {
+    matches = db.map((rec, idx) => recordMatches(rec, tokens, queryNorm, true) ? {rec, idx} : null).filter(Boolean);
   }
 
   // --- Mostrar resultados ---
@@ -663,6 +655,7 @@ function doSearch() {
     resultsEl.appendChild(wrapper);
   });
 }
+
 
 
   btnSearch.addEventListener('click', doSearch);
