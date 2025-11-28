@@ -23,7 +23,7 @@ header h1{margin:0;color:var(--sae-green);font-size:30px}
 header h2{margin:0;font-size:19px;color:var(--muted)}
 header .titulo-header {position: absolute;text-align: center;flex: 1;left: 50%;transform: translateX(-50%);white-space: nowrap;}    
 .search-container { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
-.search-container2 { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:#8DD697; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.search-container2 { display:flex; flex-direction:column; align-items:center; margin: 15px auto; width:100%; max-width:950px; background:white; padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
 .search-intro { text-align:center; width:100%; margin-bottom:8px; font-size:17px; color:#222; }
 .filters { display:flex; gap:18px; width:100%; justify-content: center; flex-wrap:wrap; margin-bottom:14px; }
 .filters label { display:flex; align-items:center; gap:8px; font-size:0.95rem; color:#222; }
@@ -92,7 +92,29 @@ footer {
   height: 36px;
   font-size: 14px;
   box-sizing: border-box;
+  /* background: #94EB9D;*/
 }
+
+#searchInput {
+  background-color: #72D677;  /* color cuando está deshabilitado */
+  transition: background-color 0.3s ease;
+  color: #757575;
+}
+
+#searchInput.enabled {
+  background-color: #E9FFE5;  /* color cuando está habilitado */
+  color: #000;
+}
+/* Estilo del placeholder cuando está deshabilitado */
+#searchInput:disabled::placeholder {
+  color: #757575;  /* gris suave */
+}
+
+/* Ocultar placeholder cuando está habilitado */
+#searchInput.enabled::placeholder {
+  color: transparent;
+}
+  
 
 .clear-btn-wrapper {
   position: absolute;
@@ -112,8 +134,16 @@ footer {
   background: none;
   pointer-events: none;
 }
+/* Animación suave al activarse el campo */
+@keyframes inputFlash {
+  0%   { background-color: #d8f5d2; }   /* verde clarito */
+  100% { background-color: white; }
 }
-  
+
+input.enabled.flash {
+  animation: inputFlash 0.4s ease-out;
+}
+
 </style>
 </head>
 <body>
@@ -124,7 +154,7 @@ footer {
       <h1>ASIM-SAE</h1>
       <h2>Aplicación de soporte para la inscripción de migrantes</h2>
     </div>
-    <img class="logo-derecha" src="images/Logo_SILA_Migrantes.png" alt="Logo proyecto">
+    <img class="logo-derecha" src="images/Logo_SILA_Migrantes2_corto.png" alt="Logo proyecto">
   </header>
   
   <div id="doc" class="search-container">
@@ -150,7 +180,7 @@ footer {
   <div id="searchArea" class="search-area" aria-live="polite">
     <div class="search-top">
       <div class="search-input-wrapper">
-        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar">
+        <input id="searchInput" type="text" placeholder="Introduce la denominación de la autorización o solicitud a buscar…" aria-label="Introduce el texto a buscar" disabled>
         <span class="clear-btn-wrapper" id="clearSearchInline">
           <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -161,10 +191,11 @@ footer {
       <button id="btnSearch" class="btn btn-nocomunitario">Buscar</button>
     </div>
     <div class="search-meta">
-      <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>
+      <!-- <span class="small">Filtros SILA marcados: <span id="inscritoEstado" class="small no-data">no definido</span></span>-->
       <span class="small">Resultados: <span id="countResults">0</span></span>
     </div>
     <div class="results" id="results" aria-live="polite"></div>
+    <div class="results" aria-live="polite" style="color:var(--muted);font-size:13px;text-align: center;" >La información ofrecida con esta herramienta es meramente orientativa y pretende ser un apoyo a la inscripción de las personas migrantes en SILA.<br> <u>En ningún caso puede sustituir al sistema de resolución de incidencias establecido vía SAEclick.</u></div>
   </div>
 
   <div id="modalDetalle" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
@@ -181,7 +212,7 @@ footer {
 </div>
   <footer>
     <div class="footer-logo">
-      <div class="logo-text"><b>Versión 6.21 — Dirección Provincial de Granada</b> </div>
+      <div class="logo-text"><b>Versión 6.23 — Dirección Provincial de Granada</b> </div>
     </div>
     <div class="footer-datos">
       <b>Apoyo durante la fase de testeo, para la resolución de dudas y la recogida de incidencias:</b><br>
@@ -203,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSearch = document.getElementById('btnSearch');
   const resultsEl = document.getElementById('results');
   const countResults = document.getElementById('countResults');
-  const clearBtn = document.getElementById('clearSearch');
 
   const modalDetalle = document.getElementById('modalDetalle');
   const modalDetalleContent = document.getElementById('modalDetalleContent');
@@ -233,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return undefined;
   }
+
 
   function normalize(s){
     if(!s) return '';
@@ -373,6 +404,20 @@ function openModalDetalle(rec){
   }
   loadJSON();
 
+const searchWrapper = document.querySelector('.search-input-wrapper');
+
+searchWrapper.addEventListener('click', e => {
+  if (searchInput.disabled) {
+    // mostrar mensaje
+    msgDisabled.classList.add('show');
+    setTimeout(() => msgDisabled.classList.remove('show'), 3000);
+
+    // opcional: evitar que se haga focus
+    searchInput.blur();
+  }
+});
+
+  
   // --- Filtros SILA ---
   function syncNadaLogic(changed){
     if(changed==='nada' && chkNada.checked){
@@ -385,36 +430,46 @@ function openModalDetalle(rec){
     }
   }
 
-  function actualizarChecks(){
-    syncNadaLogic();
+function actualizarChecks(){
+  syncNadaLogic();
 
-    const activos=[];
-    if(chkInscrito.checked){
-      activos.push('Consta inscripción previa en SILA');
-      userInscritoAnswer='SI';
-    }else{
-      userInscritoAnswer=null;
-    }
-    if(chkPrestacion.checked) activos.push('Cobra prestación o subsidio');
-    if(chkNada.checked) activos.push('Inscripción Inicial');
+  const anyChecked = (chkInscrito.checked || chkPrestacion.checked || chkNada.checked);
 
-    if(activos.length>0){
-      estadoChecks.textContent=activos.join(', ');
-      estadoChecks.classList.remove('no-data');
-      searchInput.disabled=false;
-      btnSearch.disabled=false;
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    } else {
-      estadoChecks.textContent='ninguna';
-      estadoChecks.classList.add('no-data');
-      searchInput.disabled=true;
-      btnSearch.disabled=true;
-      searchInput.value='';
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    }
+  if (anyChecked) {
+
+      // habilitar
+      searchInput.disabled = false;
+      btnSearch.disabled = false;
+
+      // borrar texto SIEMPRE al desbloquear
+      searchInput.value = '';
+
+      // activar estilo de campo activo
+      searchInput.classList.add("enabled");
+
+      // activar la animación
+      searchInput.classList.add("flash");
+      setTimeout(() => searchInput.classList.remove("flash"), 400);
+
+      // llevar el cursor al input
+      searchInput.focus();
+
+  } else {
+
+      searchInput.disabled = true;
+      btnSearch.disabled = true;
+
+      searchInput.value = '';
+      resultsEl.innerHTML = '';
+      countResults.textContent = '0';
+
+      // quitar estilos
+      searchInput.classList.remove("enabled");
+      searchInput.classList.remove("flash");
   }
+}
+
+
 
   chkInscrito.addEventListener('change', ()=>{ syncNadaLogic('inscrito'); actualizarChecks(); });
   chkPrestacion.addEventListener('change', ()=>{ syncNadaLogic('prestacion'); actualizarChecks(); });
@@ -422,139 +477,201 @@ function openModalDetalle(rec){
 
   actualizarChecks();
 
-  // --- Botón limpiar ---
-  if(clearBtn){
-    searchInput.addEventListener('input', ()=>{ clearBtn.style.display = searchInput.value ? 'block' : 'none'; });
-    clearBtn.addEventListener('click', ()=>{
-      searchInput.value='';
-      clearBtn.style.display='none';
-      searchInput.focus();
-      resultsEl.innerHTML='';
-      countResults.textContent='0';
-    });
-  }
-
   // Normalizador exacto de tokens
-  function containsTokenExact(recordText, token) {
-    const text = normalize(recordText); 
-    const words = text.split(/\s+/);
-    token = token.toLowerCase();
+function containsTokenExact(text, token) {
+  const words = text.split(/\s+/);    // texto ya normalizado
+  token = token.toLowerCase();
 
-    if(token === 'autoriza'){
-      for(let i=0;i<words.length;i++){
-        if(words[i] === 'autoriza'){
-          if(i===0 || words[i-1] !== 'no') return true;
-        }
+  // Control especial: "autoriza" y "no autoriza"
+  if (token === 'autoriza') {
+    for (let i = 0; i < words.length; i++) {
+      if (words[i] === 'autoriza') {
+        if (i === 0 || words[i - 1] !== 'no') return true; // autoriza sin "no" delante
       }
-      return false;
-    } else if(token === 'no autoriza'){
-      for(let i=0;i<words.length-1;i++){
-        if(words[i]==='no' && words[i+1]==='autoriza') return true;
-      }
-      return false;
-    } else {
-      return words.includes(token);
     }
+    return false;
   }
+
+  if (token === 'no autoriza') {
+    for (let i = 0; i < words.length - 1; i++) {
+      if (words[i] === 'no' && words[i + 1] === 'autoriza') return true;
+    }
+    return false;
+  }
+
+  // Búsqueda exacta en palabras
+  return words.includes(token);
+}
+
 
   // --- Búsqueda ---
-  function doSearch(){
-    resultsEl.innerHTML='';
-    const q = searchInput.value.trim();
-    if(!q){
-      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
-      countResults.textContent='0';
-      return;
-    }
+// --- Búsqueda ---
+function doSearch() {
+  resultsEl.innerHTML = '';
+  const q = searchInput.value.trim();
+  if (!q) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
 
-    const tokens = tokenizeQuery(q);
-    if(tokens.length===0){
-      resultsEl.innerHTML='<div class="small">Escribe una o varias palabras para buscar.</div>';
-      countResults.textContent='0';
-      return;
-    }
+  const tokens = tokenizeQuery(q);
+  if (tokens.length === 0) {
+    resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
+    countResults.textContent = '0';
+    return;
+  }
 
-    const matches=[];
+  const matches = [];
 
-    db.forEach((rec, idx)=>{
-      const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?','Inscrito anteriormente','INSCRITO ANTERIORMENTE','inscrito anteriormente']);
-      const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
-      const includeByInscrito =
-        valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
-      if(!includeByInscrito) return;
+  db.forEach((rec, idx) => {
+    // Filtro por inscripción si lo aplicas
+    const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?', 'Inscrito anteriormente', 'INSCRITO ANTERIORMENTE', 'inscrito anteriormente']);
+    const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
+    const includeByInscrito = valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
+    if (!includeByInscrito) return;
 
-      const anverso = normalize(getField(rec, ['ANVERSO','Anverso','anverso'])||'');
-      const reverso = normalize(getField(rec, ['REVERSO','Reverso','reverso'])||'');
-      const combined = `${anverso} ${reverso}`;
+    const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
+    const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+    const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
 
-      let presentCount=0;
-      tokens.forEach(tok=>{
-        if(containsTokenExact(combined, tok)) presentCount++;
-      });
+    // Extraer frases entre comillas
+    const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
+    const combined = normalize(noQuotes);
 
-      if(tokens.length>0 && (presentCount/tokens.length) >= 0.75){
-        matches.push({rec, idx});
+    // Función que comprueba si un token coincide respetando frases entre comillas
+    let allTokensMatch = true;
+    tokens.forEach(tok => {
+      const normTok = normalize(tok);
+
+      // Ver si coincide exactamente con alguna frase entre comillas
+      const inQuotes = quotedPhrases.some(q => q === normTok);
+
+      if (inQuotes) {
+        // Solo coincidir si el token es exactamente la frase completa
+        if (!quotedPhrases.includes(normTok)) allTokensMatch = false;
+      } else {
+        // Buscar en texto normal
+        if (!containsTokenExact(combined, normTok)) allTokensMatch = false;
       }
     });
 
-    if(matches.length===0){
-      resultsEl.innerHTML='<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
-      countResults.textContent='0';
-      return;
+    if (allTokensMatch) {
+      matches.push({ rec, idx });
     }
+  });
 
-    countResults.textContent = String(matches.length);
-
-    matches.forEach(m=>{
-      const rec = m.rec;
-
-      const wrapper = document.createElement('div');
-      wrapper.className='result-item';
-      wrapper.style.cursor='pointer';
-
-      const chkWrap = document.createElement('div');
-      chkWrap.className='check';
-      const chk = document.createElement('input');
-      chk.type='checkbox';
-      chk.name='selectRec';
-      chk.dataset.index=m.idx;
-      chkWrap.appendChild(chk);
-
-      const content = document.createElement('div');
-      content.style.flex='1';
-      const title = document.createElement('h3');
-      title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
-      const p = document.createElement('p');
-      p.textContent = '';
-      content.appendChild(title);
-      content.appendChild(p);
-
-      wrapper.appendChild(chkWrap);
-      wrapper.appendChild(content);
-
-      wrapper.addEventListener('click', (e)=>{
-        if(e.target.tagName.toLowerCase() === 'input') return;
-        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=> inp.checked=false );
-        chk.checked = true;
-        openModalDetalle(rec);
-      });
-
-      chk.addEventListener('change', (e)=>{
-        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-        all.forEach(inp=>{ if(inp!==e.target) inp.checked=false; });
-        if(!e.target.checked) return;
-        openModalDetalle(rec);
-      });
-
-      resultsEl.appendChild(wrapper);
-    });
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
+    countResults.textContent = '0';
+    return;
   }
 
-  btnSearch.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e=>{
-    if(e.key==='Enter') doSearch();
+  countResults.textContent = String(matches.length);
+
+  matches.forEach(m => {
+    const rec = m.rec;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'result-item';
+    wrapper.style.cursor = 'pointer';
+
+    const chkWrap = document.createElement('div');
+    chkWrap.className = 'check';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.name = 'selectRec';
+    chk.dataset.index = m.idx;
+    chkWrap.appendChild(chk);
+
+    const content = document.createElement('div');
+    content.style.flex = '1';
+    const title = document.createElement('h3');
+    title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    const p = document.createElement('p');
+    p.textContent = '';
+    content.appendChild(title);
+    content.appendChild(p);
+
+    wrapper.appendChild(chkWrap);
+    wrapper.appendChild(content);
+
+    wrapper.addEventListener('click', e => {
+      if (e.target.tagName.toLowerCase() === 'input') return;
+      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+      all.forEach(inp => inp.checked = false);
+      chk.checked = true;
+      openModalDetalle(rec);
+    });
+
+    chk.addEventListener('change', e => {
+      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+      all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
+      if (!e.target.checked) return;
+      openModalDetalle(rec);
+    });
+
+    resultsEl.appendChild(wrapper);
   });
+}
+
+function recordMatchesSearch(rec, tokens) {
+  const anversoRaw = getField(rec, ['ANVERSO', 'Anverso', 'anverso']) || '';
+  const reversoRaw = getField(rec, ['REVERSO', 'Reverso', 'reverso']) || '';
+  const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
+
+  const { quotes: quotedPhrases, noQuotes } = extractQuotedPhrases(combinedRaw);
+  const combinedNorm = normalize(noQuotes);
+
+  return tokens.every(tok => {
+    const normTok = normalize(tok);
+
+    // Si el registro contiene una frase entre comillas…
+    if (quotedPhrases.includes(normTok)) {
+      // …solo coincide si el token es exactamente esa frase.
+      return true;
+    }
+
+    // Si el token coincide con una frase entre comillas PERO NO es exacto → no coincide
+    if (quotedPhrases.some(q => q.includes(normTok) || normTok.includes(q))) {
+      return false;
+    }
+
+    // Resto del texto: búsqueda normal por palabras
+    return containsTokenExact(combinedNorm, normTok);
+  });
+}
+
+  
+// --- Función auxiliar para extraer frases entre comillas ---
+function extractQuotedPhrases(text) {
+  const quotes = [...text.matchAll(/"([^"]+)"/g)].map(m => normalize(m[1]));
+  const noQuotes = text.replace(/"([^"]+)"/g, ''); 
+  return { quotes, noQuotes };
+}
+
+
+  btnSearch.addEventListener('click', doSearch);
+  
+  const msgDisabled = document.getElementById('msgDisabled');
+  
+  searchInput.addEventListener('keydown', e => {
+    if (searchInput.disabled) {
+      e.preventDefault(); // evita que escriba
+      
+      // Mostrar mensaje
+      msgDisabled.classList.add('show');
+  
+      // Ocultar mensaje después de 3 segundos
+      setTimeout(() => {
+        msgDisabled.classList.remove('show');
+      }, 3000);
+  
+    } else if (e.key === 'Enter') {
+      doSearch();
+    }
+  });
+
 
 });
 </script>
