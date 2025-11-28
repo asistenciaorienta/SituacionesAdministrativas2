@@ -486,11 +486,11 @@ function actualizarChecks(){
   actualizarChecks();
 
   // Normalizador exacto de tokens
-function containsTokenTolerant(text, token) {
-  const words = text.split(/\s+/).filter(Boolean);
+function containsTokenExact(text, token) {
+  const words = text.split(/\s+/);
   token = token.toLowerCase();
 
-  // --- Casos especiales autoriza / no autoriza ---
+  // Control especial: "autoriza" y "no autoriza"
   if (token === 'autoriza') {
     for (let i = 0; i < words.length; i++) {
       if (words[i] === 'autoriza') {
@@ -499,7 +499,6 @@ function containsTokenTolerant(text, token) {
     }
     return false;
   }
-
   if (token === 'no autoriza') {
     for (let i = 0; i < words.length - 1; i++) {
       if (words[i] === 'no' && words[i + 1] === 'autoriza') return true;
@@ -507,42 +506,36 @@ function containsTokenTolerant(text, token) {
     return false;
   }
 
-  // --- Coincidencias normales con tolerancia ---
+  return words.includes(token);
+}
+
+  
+function containsTokenTolerant(text, token) {
+  const words = text.split(/\s+/);
+  token = token.toLowerCase();
+
   for (const w of words) {
-    const wnorm = w.toLowerCase();
+    if (w.includes(token) || token.includes(w)) return true;
 
-    if (wnorm === token || wnorm.includes(token) || token.includes(wnorm))
-      return true;
-
-    const maxLen = Math.max(wnorm.length, token.length);
-
-    // Palabras cortas: tolerancia = 1  
-    // Palabras largas: 10%, mínimo 1
-    const umbral = (maxLen <= 4) ? 1 : Math.max(1, Math.ceil(maxLen * 0.10));
-
-    if (levenshtein(wnorm, token) <= umbral)
-      return true;
+    const maxLen = Math.max(w.length, token.length);
+    const threshold = Math.max(2, Math.ceil(maxLen * 0.10)); // 10% de tolerancia mínimo 2
+    if (levenshtein(w, token) <= threshold) return true;
   }
-
   return false;
 }
 
 
 
 
+
 function levenshtein(a, b) {
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
+  const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
+    Array.from({ length: b.length + 1 }, (__, j) => i === 0 ? j : j === 0 ? i : 0)
+  );
 
-  const matrix = [];
-
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      const cost = a[j - 1] === b[i - 1] ? 0 : 1;
-
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       matrix[i][j] = Math.min(
         matrix[i - 1][j] + 1,
         matrix[i][j - 1] + 1,
@@ -550,8 +543,10 @@ function levenshtein(a, b) {
       );
     }
   }
-  return matrix[b.length][a.length];
+
+  return matrix[a.length][b.length];
 }
+
 
 
 function palabraCoincide(palabra, texto) {
