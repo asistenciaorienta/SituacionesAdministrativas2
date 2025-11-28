@@ -509,22 +509,26 @@ function containsTokenExact(text, token) {
   return words.includes(token);
 }
 
-  
 function containsTokenTolerant(text, token) {
   const words = text.split(/\s+/);
   token = token.toLowerCase();
 
   for (const w of words) {
-    if (w.includes(token) || token.includes(w)) return true;
+    const word = w.toLowerCase();
 
-    const maxLen = Math.max(w.length, token.length);
-    const threshold = Math.max(2, Math.ceil(maxLen * 0.10)); // 10% de tolerancia mínimo 2
-    if (levenshtein(w, token) <= threshold) return true;
+    // Coincidencia exacta
+    if (word === token) return true;
+
+    // Tolerancia solo si la palabra tiene al menos 5 letras
+    if (token.length >= 5 && word.length >= 5) {
+      const maxLen = Math.max(word.length, token.length);
+      const threshold = Math.max(1, Math.ceil(maxLen * 0.10)); // 10% tolerancia mínima 1
+      if (levenshtein(word, token) <= threshold) return true;
+    }
   }
+
   return false;
 }
-
-
 
 
 
