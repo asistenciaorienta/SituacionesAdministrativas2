@@ -487,14 +487,14 @@ function actualizarChecks(){
 
   // Normalizador exacto de tokens
 function containsTokenExact(text, token) {
-  const words = text.split(/\s+/);    // texto ya normalizado
+  const words = text.split(/\s+/).filter(Boolean);
   token = token.toLowerCase();
 
-  // Control especial: "autoriza" y "no autoriza"
+  // --- Control especial "autoriza" y "no autoriza" ---
   if (token === 'autoriza') {
     for (let i = 0; i < words.length; i++) {
       if (words[i] === 'autoriza') {
-        if (i === 0 || words[i - 1] !== 'no') return true; // autoriza sin "no" delante
+        if (i === 0 || words[i - 1] !== 'no') return true;
       }
     }
     return false;
@@ -507,10 +507,70 @@ function containsTokenExact(text, token) {
     return false;
   }
 
-  // Búsqueda exacta en palabras
-  return words.includes(token);
+  // --- Coincidencias normales con tolerancia ---
+  for (const w of words) {
+    const wnorm = w.toLowerCase();
+
+    // 1) coincidencia directa / parcial
+    if (wnorm === token || wnorm.includes(token) || token.includes(wnorm))
+      return true;
+
+    // 2) tolerancia (Levenshtein)
+    const maxLen = Math.max(wnorm.length, token.length);
+    const umbral = Math.max(2, Math.ceil(maxLen * 0.10)); // mínimo 2 errores
+
+    if (levenshtein(wnorm, token) <= umbral)
+      return true;
+  }
+
+  return false;
 }
 
+
+function levenshtein(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = [];
+
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+
+function palabraCoincide(palabra, texto) {
+  const palabrasTexto = texto.toLowerCase().split(/\s+/);
+  palabra = palabra.toLowerCase();
+
+  for (const w of palabrasTexto) {
+
+    if (w.includes(palabra) || palabra.includes(w)) return true;
+
+    const maxLen = Math.max(w.length, palabra.length);
+    const umbral = Math.max(2, Math.ceil(maxLen * 0.10));  // 🔥 tolerancia mínima 2 errores
+
+    if (levenshtein(palabra, w) <= umbral) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+  
 // --- Función auxiliar para extraer frases entrecomilladas ---
 function extractQuotedPhrases(text) {
   // Devuelve { quotes: [..frases normalizadas..], normalizedText: texto normalizado entero }
