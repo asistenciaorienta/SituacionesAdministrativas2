@@ -486,11 +486,11 @@ function actualizarChecks(){
   actualizarChecks();
 
   // Normalizador exacto de tokens
-function containsTokenExact(text, token) {
+function containsTokenTolerant(text, token) {
   const words = text.split(/\s+/).filter(Boolean);
   token = token.toLowerCase();
 
-  // --- Control especial "autoriza" y "no autoriza" ---
+  // --- Casos especiales autoriza / no autoriza ---
   if (token === 'autoriza') {
     for (let i = 0; i < words.length; i++) {
       if (words[i] === 'autoriza') {
@@ -507,19 +507,17 @@ function containsTokenExact(text, token) {
     return false;
   }
 
-  // --- Coincidencias normales con tolerancia adaptativa ---
+  // --- Coincidencias normales con tolerancia ---
   for (const w of words) {
     const wnorm = w.toLowerCase();
 
-    // coincidencia directa / parcial
     if (wnorm === token || wnorm.includes(token) || token.includes(wnorm))
       return true;
 
-    // tolerancia (Levenshtein) con umbral adaptativo:
     const maxLen = Math.max(wnorm.length, token.length);
 
-    // regla: para palabras muy cortas (<=4) permitir como máximo 1 error,
-    // para palabras medianas/grandes usar 10% redondeado pero nunca menos de 1.
+    // Palabras cortas: tolerancia = 1  
+    // Palabras largas: 10%, mínimo 1
     const umbral = (maxLen <= 4) ? 1 : Math.max(1, Math.ceil(maxLen * 0.10));
 
     if (levenshtein(wnorm, token) <= umbral)
@@ -528,6 +526,7 @@ function containsTokenExact(text, token) {
 
   return false;
 }
+
 
 
 
@@ -597,49 +596,54 @@ function doSearch() {
     return;
   }
 
-  const tokens = tokenizeQuery(rawQuery); // tokens normalizados y sin stopwords
+  const tokens = tokenizeQuery(rawQuery);
   if (tokens.length === 0) {
     resultsEl.innerHTML = '<div class="small">Escribe una o varias palabras para buscar.</div>';
     countResults.textContent = '0';
     return;
   }
 
-  const queryNorm = normalize(rawQuery); // cadena normalizada completa (útil para buscar frases completas)
+  const queryNorm = normalize(rawQuery);
   const matches = [];
 
   db.forEach((rec, idx) => {
-    // filtro por inscripción (si aplica)
-    const valInscritoAnterior = getField(rec, ['¿Inscrito anteriormente?', 'Inscrito anteriormente', 'INSCRITO ANTERIORMENTE', 'inscrito anteriormente']);
+
+    // --- FILTRO DE INSCRITO ---
+    const valInscritoAnterior = getField(rec, [
+      '¿Inscrito anteriormente?', 'Inscrito anteriormente',
+      'INSCRITO ANTERIORMENTE', 'inscrito anteriormente'
+    ]);
     const valNorm = valInscritoAnterior ? String(valInscritoAnterior).trim().toUpperCase() : '';
     const includeByInscrito = valNorm === '' || (userInscritoAnswer && valNorm === userInscritoAnswer);
     if (!includeByInscrito) return;
 
+    // --- TEXTO DEL REGISTRO ---
     const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
     const reversoRaw = getField(rec, ['REVERSO','Reverso','reverso']) || '';
     const combinedRaw = `${anversoRaw} ${reversoRaw}`.trim();
 
-    // Extraer frases entrecomilladas y texto normalizado
-    const { quotes: quotedPhrases, normalizedText: combinedNorm } = extractQuotedPhrases(combinedRaw);
+    // Frases entrecomilladas normales + texto normalizado
+    const { quotes: quotedPhrases, normalizedText: combinedNorm } =
+      extractQuotedPhrases(combinedRaw);
 
-    // Regla especial: si el registro contiene frases entrecomilladas,
-    // y el usuario busca SOLO una parte de una de esas frases -> RECHAZAR.
-    // Pero si el usuario ha buscado la frase completa (query incluye la frase completa) -> permitir.
+
+    // === PRIORIDAD 1: BÚSQUEDA DE FRASE COMPLETA ===
+    if (combinedNorm.includes(queryNorm)) {
+      matches.push({ rec, idx });
+      return;
+    }
+
+    // === REGLA DE COMILLAS ===
     let rejectedBecausePartialQuoted = false;
+
     if (quotedPhrases.length > 0) {
       for (const qp of quotedPhrases) {
-        // qp es la frase entrecomillada normalizada, p.ej. "tarjeta verde"
-        // Si el usuario buscó exactamente la frase (como substring normalizado) => OK
-        if (queryNorm.includes(qp)) {
-          // usuario buscó la frase completa → no rechazar por esta frase
-          continue;
-        }
-        // Si el usuario incluye alguna palabra que forma parte de la frase entrecomillada
-        // pero no la frase completa, rechazamos el registro.
+        if (queryNorm.includes(qp)) continue;
+
         const qpWords = qp.split(/\s+/).filter(Boolean);
+
         for (const tok of tokens) {
           if (qpWords.includes(tok)) {
-            // el usuario busca una palabra que forma parte de una frase entrecomillada
-            // pero no buscó la frase entera (ya comprobado arriba), así que rechazamos.
             rejectedBecausePartialQuoted = true;
             break;
           }
@@ -647,22 +651,24 @@ function doSearch() {
         if (rejectedBecausePartialQuoted) break;
       }
     }
-    if (rejectedBecausePartialQuoted) return; // no incluir este registro
+    if (rejectedBecausePartialQuoted) return;
 
-    // Si pasamos las reglas de comillas, ahora comprobamos que todos los tokens estén presentes
-    // en el texto normalizado (búsqueda por palabras)
-    let allTokensFound = true;
+
+    // === PRIORIDAD 2: TOKEN-A-TOKEN CON TOLERANCIA ===
+    let tokenMatch = true;
     for (const tok of tokens) {
-      if (!containsTokenExact(combinedNorm, tok)) {
-        allTokensFound = false;
+      if (!containsTokenTolerant(combinedNorm, tok)) {
+        tokenMatch = false;
         break;
       }
     }
-    if (allTokensFound) {
+
+    if (tokenMatch) {
       matches.push({ rec, idx });
     }
   });
 
+  // === Mostrar resultados ===
   if (matches.length === 0) {
     resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
     countResults.textContent = '0';
@@ -709,13 +715,13 @@ function doSearch() {
     chk.addEventListener('change', e => {
       const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
       all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
-      if (!e.target.checked) return;
-      openModalDetalle(rec);
+      if (e.target.checked) openModalDetalle(rec);
     });
 
     resultsEl.appendChild(wrapper);
   });
 }
+
 
 
 function recordMatchesSearch(rec, tokens) {
