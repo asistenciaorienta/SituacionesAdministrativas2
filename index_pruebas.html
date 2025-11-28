@@ -255,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Utilidades ---
   function getField(obj, possibleNames){
+    if (!obj) return undefined; // proteger por si obj es null/undefined
     const keys = Object.keys(obj);
     for(const n of possibleNames){
       const normN = n.trim().toLowerCase();
@@ -264,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return undefined;
   }
-
 
   function normalize(s){
     if(!s) return '';
@@ -671,11 +671,15 @@ function doSearch() {
   let matches = [];
 
   // --- FASE 1: búsqueda estricta ---
-  matches = db.filter((rec, idx) => recordMatchesStrict(rec, tokens, queryNorm, idx));
-
+  matches = db
+    .map((rec, idx) => recordMatchesStrict(rec, tokens, queryNorm, idx))
+    .filter(Boolean); // eliminar false
+  
   // --- FASE 2: si no hay resultados, búsqueda tolerante ---
   if (matches.length === 0) {
-    matches = db.filter((rec, idx) => recordMatchesTolerant(rec, tokens, queryNorm, idx));
+    matches = db
+      .map((rec, idx) => recordMatchesTolerant(rec, tokens, queryNorm, idx))
+      .filter(Boolean); // eliminar false
   }
 
   // --- Mostrar resultados ---
