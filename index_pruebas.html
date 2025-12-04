@@ -658,8 +658,11 @@ function containsTokenTolerant(text, token) {
 
     const content = document.createElement('div');
     content.style.flex = '1';
-    const title = document.createElement('h3');
-    title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    const title = document.createElement('h4');
+    // ⬇⬇⬇ CAMBIO IMPORTANTE: usar innerHTML para permitir HTML del JSON
+    const mostrar = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    title.innerHTML = mostrar;
+    
     content.appendChild(title);
 
     wrapper.appendChild(chkWrap);
