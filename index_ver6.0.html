@@ -143,10 +143,20 @@ footer {
 input.enabled.flash {
   animation: inputFlash 0.4s ease-out;
 }
+.result-item h4 {
+  font-weight: normal;
+}
 
 </style>
 </head>
 <body>
+  <!-- Diseño e idea original de la Dirección Provincial de Granada, en concreto de:
+  Jefe de Servicio: Francisco Escabias García.
+  Diseñador: Valentín Jiménez Extremera.
+  Contenido: Elisabeth Huertas García y José Manuel Robles Chaves.
+  Testeo y verificación: Isabel Peláez Carmona, Silvia Gómez Martín, Inmaculada Ortega Avilés, Beatriz Girela Muñoz.
+  Aporte de información: Todas las oficinas SAE de la provincia de Granada y sus direcciones de ATE.
+  JSON actualizado a 04/12/2025 9:33 horas -->  
 <div class="container">
   <header>
     <img class="logo-izquierda" src="images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía">
@@ -635,45 +645,62 @@ function containsTokenTolerant(text, token) {
   }
 
   countResults.textContent = String(matches.length);
-  matches.forEach(m => {
+matches.forEach(m => {
     const rec = m.rec;
+
     const wrapper = document.createElement('div');
     wrapper.className = 'result-item';
     wrapper.style.cursor = 'pointer';
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center'; // centra verticalmente
 
+    // --- Checkbox ---
     const chkWrap = document.createElement('div');
     chkWrap.className = 'check';
+    chkWrap.style.display = 'flex';
+    chkWrap.style.alignItems = 'center';
+
     const chk = document.createElement('input');
     chk.type = 'checkbox';
     chk.name = 'selectRec';
     chk.dataset.index = m.idx;
     chkWrap.appendChild(chk);
 
+    // --- Contenido ---
     const content = document.createElement('div');
     content.style.flex = '1';
-    const title = document.createElement('h3');
-    title.textContent = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    content.style.display = 'flex';       // fuerza línea horizontal
+    content.style.alignItems = 'center';  // centra vertical
+    content.style.gap = '4px';            // opcional, separación entre elementos internos
+
+    const title = document.createElement('h4');
+    title.style.margin = '0';             // elimina márgenes que generan salto de línea
+    title.innerHTML = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+
     content.appendChild(title);
 
+    // --- Añadir al wrapper ---
     wrapper.appendChild(chkWrap);
     wrapper.appendChild(content);
 
+    // --- Eventos ---
     wrapper.addEventListener('click', e => {
-      if (e.target.tagName.toLowerCase() === 'input') return;
-      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-      all.forEach(inp => inp.checked = false);
-      chk.checked = true;
-      openModalDetalle(rec);
+        if (e.target.tagName.toLowerCase() === 'input') return;
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp => inp.checked = false);
+        chk.checked = true;
+        openModalDetalle(rec);
     });
 
     chk.addEventListener('change', e => {
-      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-      all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
-      if (e.target.checked) openModalDetalle(rec);
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
+        if (e.target.checked) openModalDetalle(rec);
     });
 
     resultsEl.appendChild(wrapper);
-  });
+});
+
 }
 
 
