@@ -143,6 +143,9 @@ footer {
 input.enabled.flash {
   animation: inputFlash 0.4s ease-out;
 }
+.result-item h4 {
+  font-weight: normal;
+}
 
 </style>
 </head>
@@ -659,9 +662,9 @@ function containsTokenTolerant(text, token) {
     const content = document.createElement('div');
     content.style.flex = '1';
     const title = document.createElement('h4');
+    
     // ⬇⬇⬇ CAMBIO IMPORTANTE: usar innerHTML para permitir HTML del JSON
-    const mostrar = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
-    title.innerHTML = mostrar;
+    title.innerHTML = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
     
     content.appendChild(title);
 
