@@ -645,48 +645,62 @@ function containsTokenTolerant(text, token) {
   }
 
   countResults.textContent = String(matches.length);
-  matches.forEach(m => {
+matches.forEach(m => {
     const rec = m.rec;
+
     const wrapper = document.createElement('div');
     wrapper.className = 'result-item';
     wrapper.style.cursor = 'pointer';
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center'; // centra verticalmente
 
+    // --- Checkbox ---
     const chkWrap = document.createElement('div');
     chkWrap.className = 'check';
+    chkWrap.style.display = 'flex';
+    chkWrap.style.alignItems = 'center';
+
     const chk = document.createElement('input');
     chk.type = 'checkbox';
     chk.name = 'selectRec';
     chk.dataset.index = m.idx;
     chkWrap.appendChild(chk);
 
+    // --- Contenido ---
     const content = document.createElement('div');
     content.style.flex = '1';
+    content.style.display = 'flex';       // fuerza línea horizontal
+    content.style.alignItems = 'center';  // centra vertical
+    content.style.gap = '4px';            // opcional, separación entre elementos internos
+
     const title = document.createElement('h4');
-    
-    // ⬇⬇⬇ CAMBIO IMPORTANTE: usar innerHTML para permitir HTML del JSON
+    title.style.margin = '0';             // elimina márgenes que generan salto de línea
     title.innerHTML = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
-    
+
     content.appendChild(title);
 
+    // --- Añadir al wrapper ---
     wrapper.appendChild(chkWrap);
     wrapper.appendChild(content);
 
+    // --- Eventos ---
     wrapper.addEventListener('click', e => {
-      if (e.target.tagName.toLowerCase() === 'input') return;
-      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-      all.forEach(inp => inp.checked = false);
-      chk.checked = true;
-      openModalDetalle(rec);
+        if (e.target.tagName.toLowerCase() === 'input') return;
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp => inp.checked = false);
+        chk.checked = true;
+        openModalDetalle(rec);
     });
 
     chk.addEventListener('change', e => {
-      const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
-      all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
-      if (e.target.checked) openModalDetalle(rec);
+        const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
+        all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
+        if (e.target.checked) openModalDetalle(rec);
     });
 
     resultsEl.appendChild(wrapper);
-  });
+});
+
 }
 
 
