@@ -623,6 +623,16 @@ function containsTokenTolerant(text, token) {
     countResults.textContent = '0';
     return;
   }
+  // --- Si hay un único resultado, abrir directamente el modal ---
+  if (matches.length === 1) {
+    countResults.textContent = '1';
+    const único = matches[0].rec;
+    // Abrimos modal
+    openModalDetalle(único);
+    // Limpiamos la lista (ya que no vamos a mostrar resultados)
+    resultsEl.innerHTML = '';
+    return; // Muy importante para que NO siga creando la lista
+  }
 
   countResults.textContent = String(matches.length);
   matches.forEach(m => {
