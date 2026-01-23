@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return undefined;
   }
 
-  // --- MODAL DETALLE ----------------------------------------------------------------------
+// --- MODAL DETALLE ----------------------------------------------------------------------
 function openModalDetalle(rec){
   // limpiar contenido previo
   modalDetalleContent.innerHTML = '';
@@ -292,6 +292,12 @@ function openModalDetalle(rec){
   function valueOf(names){
     const v = getField(rec, names);
     return (v === undefined || v === null) ? '' : String(v).trim();
+  }
+
+  // ✅ convierte **texto** a <strong>texto</strong>
+  function renderBoldMarkdown(text){
+    if(!text) return '';
+    return String(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   }
 
   // campos a mostrar
@@ -318,7 +324,9 @@ function openModalDetalle(rec){
 
       // valor en negrita (menos Observaciones)
       const valueElement = document.createElement(f.boldTitle ? 'span' : 'strong');
-      valueElement.textContent = val;
+
+      // ✅ aquí aplicamos opción 3: permitimos **...** en el JSON
+      valueElement.innerHTML = renderBoldMarkdown(val);
 
       row.appendChild(valueElement);
       modalDetalleContent.appendChild(row);
@@ -334,10 +342,9 @@ function openModalDetalle(rec){
     row.className = 'field';
 
     const title = document.createElement('span');
-    title.textContent = 'Documentación: ';
+    title.textContent = 'Documentación/enlace: ';
     row.appendChild(title);
 
-    // valor en negrita si no es Observaciones
     const valStrong = document.createElement('strong');
 
     // enlace si parece URL
@@ -346,10 +353,11 @@ function openModalDetalle(rec){
       a.href = docVal;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.textContent = 'Ver documento';
+      a.textContent = 'Acceder al documento / enlace';
       valStrong.appendChild(a);
     } else {
-      valStrong.textContent = docVal;
+      // (opcional) también permitir **...** aquí si algún día lo necesitas
+      valStrong.innerHTML = renderBoldMarkdown(docVal);
     }
 
     row.appendChild(valStrong);
@@ -366,6 +374,7 @@ function openModalDetalle(rec){
   modalDetalle.style.display = 'flex';
   modalDetalle.setAttribute('aria-hidden','false');
 }
+
 
 
 
