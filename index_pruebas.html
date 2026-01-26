@@ -217,6 +217,22 @@ input.enabled.flash {
       </div>
     </div>
   </div>
+  <div id="modalPreguntas" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <div class="modal-header-sae">
+        <div>Preguntas / Condicionantes</div>
+        <h3 id="modalPreguntasTitulo" style="margin:6px 0 0"></h3>
+      </div>
+  
+      <div class="modal-body-sae" id="modalPreguntasContent"></div>
+  
+      <div class="actions">
+        <button id="btnCancelarPreguntas" class="btn">Cancelar</button>
+        <button id="btnContinuarPreguntas" class="btn">Continuar</button>
+      </div>
+    </div>
+  </div>
+    
 </div>  
 
 </div>
@@ -249,7 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalDetalleTitulo = document.getElementById('modalDetalleTitulo');
   const modalDetalleContent = document.getElementById('modalDetalleContent');
   const btnVolverDetalle = document.getElementById('btnVolverDetalle');
-
+  
+  const modalPreguntas = document.getElementById('modalPreguntas');
+  const modalPreguntasTitulo = document.getElementById('modalPreguntasTitulo');
+  const modalPreguntasContent = document.getElementById('modalPreguntasContent');
+  const btnCancelarPreguntas = document.getElementById('btnCancelarPreguntas');
+  const btnContinuarPreguntas = document.getElementById('btnContinuarPreguntas');
+  
   const clearSearchInline = document.getElementById('clearSearchInline');
   if (clearSearchInline) {
     clearSearchInline.addEventListener('click', () => {
@@ -277,35 +299,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 // --- MODAL DETALLE ----------------------------------------------------------------------
-function openModalDetalle(rec){
+// ✅ convierte **texto** a <strong>texto</strong>
+function renderBoldMarkdown(text){
+  if(!text) return '';
+  return String(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+}
+
+// --- MODAL DETALLE (con sufijo) ----------------------------------------------------------------------
+function openModalDetalle(rec, suffix = ''){
   // limpiar contenido previo
   modalDetalleContent.innerHTML = '';
   modalDetalleTitulo.innerHTML = '';
-  
-  // ➜ Obtener el campo Mostrar del registro
-  const tituloMostrar = getField(rec, ['Mostrar', 'mostrar']) || '';
-  
-  // ➜ Asignarlo al título del modal
-  modalDetalleTitulo.textContent = ` ${tituloMostrar}`;  
 
-  // helper
+  // título del modal
+  const tituloMostrar = getField(rec, ['Mostrar', 'mostrar']) || '';
+  modalDetalleTitulo.textContent = ` ${tituloMostrar}`;
+
   function valueOf(names){
     const v = getField(rec, names);
     return (v === undefined || v === null) ? '' : String(v).trim();
   }
 
-  // ✅ convierte **texto** a <strong>texto</strong>
-  function renderBoldMarkdown(text){
-    if(!text) return '';
-    return String(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // helper: construye el nombre de columna con sufijo
+  function col(base){
+    return suffix ? `${base} ${suffix}` : base;
   }
 
-  // campos a mostrar
+  // campos a mostrar (según rama)
   const fields = [
-    { label: 'Código de inscripción en SILA', names: ['Código de inscripción en SILA'] },    
-    { label: 'Modalidad de inscripción', names: ['Modalidad de inscripción'] },
-    { label: 'Alcance de la Autorización', names: ['Alcance de la Autorización'] },
-    { label: 'Observaciones', names: ['Observaciones'], boldTitle: true }
+    { label: 'Código de inscripción en SILA', names: [ col('Código de inscripción en SILA') ] },
+    { label: 'Modalidad de inscripción',     names: [ col('Modalidad de inscripción') ] },
+    { label: 'Alcance de la Autorización',   names: [ col('Alcance de la Autorización') ] },
+    { label: 'Observaciones',                names: [ col('Observaciones') ], boldTitle: true }
   ];
 
   let anyField = false;
@@ -314,18 +339,15 @@ function openModalDetalle(rec){
     const val = valueOf(f.names);
     if(val){
       anyField = true;
+
       const row = document.createElement('div');
       row.className = 'field';
 
-      // título
       const strongTitle = document.createElement(f.boldTitle ? 'strong' : 'span');
       strongTitle.textContent = f.label + ': ';
       row.appendChild(strongTitle);
 
-      // valor en negrita (menos Observaciones)
       const valueElement = document.createElement(f.boldTitle ? 'span' : 'strong');
-
-      // ✅ aquí aplicamos opción 3: permitimos **...** en el JSON
       valueElement.innerHTML = renderBoldMarkdown(val);
 
       row.appendChild(valueElement);
@@ -333,8 +355,10 @@ function openModalDetalle(rec){
     }
   });
 
-  // Documentación
-  const docVal = valueOf(['Documentación','Documentacion','DOCUMENTACIÓN']);
+  // Documentación (según rama)
+  const docKey = col('Documentación');
+  const docVal = valueOf([docKey, docKey.replace('ó','o')]); // mini tolerancia
+
   if(docVal){
     anyField = true;
 
@@ -347,7 +371,6 @@ function openModalDetalle(rec){
 
     const valStrong = document.createElement('strong');
 
-    // enlace si parece URL
     if(/^https?:\/\//i.test(docVal) || docVal.includes('/') || /\.(pdf|docx?|xlsx?)$/i.test(docVal)) {
       const a = document.createElement('a');
       a.href = docVal;
@@ -356,7 +379,6 @@ function openModalDetalle(rec){
       a.textContent = 'Acceder al documento / enlace';
       valStrong.appendChild(a);
     } else {
-      // (opcional) también permitir **...** aquí si algún día lo necesitas
       valStrong.innerHTML = renderBoldMarkdown(docVal);
     }
 
@@ -374,9 +396,190 @@ function openModalDetalle(rec){
   modalDetalle.style.display = 'flex';
   modalDetalle.setAttribute('aria-hidden','false');
 }
+  
+function closeModalPreguntas(){
+  modalPreguntas.style.display = 'none';
+  modalPreguntas.setAttribute('aria-hidden','true');
+  modalPreguntasContent.innerHTML = '';
+}
 
+btnCancelarPreguntas.addEventListener('click', closeModalPreguntas);
 
+// Decide qué modal abrir
+function openRecord(rec){
+  const tipo = (getField(rec, ['Opciones_Pregunta','opciones_pregunta']) || '').trim().toLowerCase();
+  const p1 = (getField(rec, ['Pregunta1','pregunta1']) || '').trim();
 
+  // si no hay tipo o no hay pregunta, abrimos directamente rama A (normal)
+  if(!tipo || !p1){
+    openModalDetalle(rec, ''); // A
+    return;
+  }
+
+  openModalPreguntas(rec, tipo);
+}
+
+  function parseDateInputToDate(value){
+  // value esperado: "YYYY-MM-DD"
+  if(!value) return null;
+  const d = new Date(value + 'T00:00:00');
+  return isNaN(d.getTime()) ? null : d;
+}
+function addYears(date, years){
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() + years);
+  return d;
+}
+function addDays(date, days){
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+let _pregState = { rec:null, tipo:'', selectedBranch:null };
+
+function openModalPreguntas(rec, tipo){
+  _pregState = { rec, tipo, selectedBranch: null };
+
+  modalPreguntasContent.innerHTML = '';
+  modalPreguntasTitulo.textContent = (getField(rec, ['Mostrar','mostrar']) || '').trim();
+
+  const p1 = (getField(rec, ['Pregunta1']) || '').trim();
+  const p2 = (getField(rec, ['Pregunta2']) || '').trim();
+
+  // pinta pregunta 1
+  const q1 = document.createElement('div');
+  q1.className = 'field';
+  q1.innerHTML = `<strong>Pregunta 1:</strong> ${renderBoldMarkdown(p1)}`;
+  modalPreguntasContent.appendChild(q1);
+
+  // pinta pregunta 2 si existe
+  if(p2){
+    const q2 = document.createElement('div');
+    q2.className = 'field';
+    q2.innerHTML = `<strong>Pregunta 2:</strong> ${renderBoldMarkdown(p2)}`;
+    modalPreguntasContent.appendChild(q2);
+  }
+
+  // contenedor inputs / opciones
+  const box = document.createElement('div');
+  box.className = 'field';
+
+  if(tipo === 'abc'){
+    const oa = (getField(rec, ['Opción a','Opcion a']) || 'Opción A').trim();
+    const ob = (getField(rec, ['Opción b','Opcion b']) || 'Opción B').trim();
+    const oc = (getField(rec, ['Opción c','Opcion c']) || '').trim();
+
+    box.innerHTML = `
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <label style="display:flex;gap:8px;align-items:center">
+          <input type="radio" name="branchABC" value="a"> <strong>A</strong>: ${renderBoldMarkdown(oa)}
+        </label>
+        <label style="display:flex;gap:8px;align-items:center">
+          <input type="radio" name="branchABC" value="b"> <strong>B</strong>: ${renderBoldMarkdown(ob)}
+        </label>
+        ${oc ? `
+        <label style="display:flex;gap:8px;align-items:center">
+          <input type="radio" name="branchABC" value="c"> <strong>C</strong>: ${renderBoldMarkdown(oc)}
+        </label>` : ``}
+      </div>
+      <div class="small" style="margin-top:8px">Selecciona una opción para continuar.</div>
+    `;
+  }
+  else if(tipo === 'fecha'){
+    // 1 fecha, calculamos A/B/C con 30 y 180 días (según tu JSON)
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label><strong>Fecha:</strong> <input id="pregFecha1" type="date"></label>
+        <div class="small">Se calculará automáticamente si corresponde A/B/C (30 y 180 días).</div>
+      </div>
+    `;
+  }
+  else if(tipo === 'dosfechas'){
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label><strong>Fecha expedición (TIE):</strong> <input id="pregFechaExp" type="date"></label>
+        <label><strong>Fecha nacimiento:</strong> <input id="pregFechaNac" type="date"></label>
+        <div class="small">Se calculará automáticamente la rama A/B/C.</div>
+      </div>
+    `;
+  }
+  else {
+    box.innerHTML = `<div class="small">Tipo de pregunta no soportado: <strong>${tipo}</strong></div>`;
+  }
+
+  modalPreguntasContent.appendChild(box);
+
+  modalPreguntas.style.display = 'flex';
+  modalPreguntas.setAttribute('aria-hidden','false');
+}
+
+// continuar: decide rama y abre detalle con sufijo
+btnContinuarPreguntas.addEventListener('click', () => {
+  const rec = _pregState.rec;
+  const tipo = _pregState.tipo;
+  if(!rec) return;
+
+  let branch = null; // 'a' | 'b' | 'c'
+
+  if(tipo === 'abc'){
+    const checked = document.querySelector('input[name="branchABC"]:checked');
+    if(!checked){
+      alert('Selecciona una opción (A/B/C).');
+      return;
+    }
+    branch = checked.value;
+  }
+
+  if(tipo === 'fecha'){
+    const v = document.getElementById('pregFecha1')?.value || '';
+    const fecha = parseDateInputToDate(v);
+    if(!fecha){
+      alert('Introduce una fecha válida.');
+      return;
+    }
+    const hoy = new Date();
+    const plus30  = addDays(fecha, 30);
+    const plus180 = addDays(fecha, 180);
+
+    // A: ahora() > fecha + 180
+    if(hoy > plus180) branch = 'a';
+    // B: ahora() entre +30 y +180 (incluidos)
+    else if(hoy >= plus30 && hoy <= plus180) branch = 'b';
+    // C: ahora() < +30
+    else branch = 'c';
+  }
+
+  if(tipo === 'dosfechas'){
+    const expV = document.getElementById('pregFechaExp')?.value || '';
+    const nacV = document.getElementById('pregFechaNac')?.value || '';
+
+    const exp = parseDateInputToDate(expV);
+    const nac = parseDateInputToDate(nacV);
+
+    if(!exp || !nac){
+      alert('Introduce ambas fechas (expedición y nacimiento).');
+      return;
+    }
+
+    const hoy = new Date();
+    const date16 = addYears(nac, 16);
+    const date18 = addYears(nac, 18);
+
+    // A: (exp < nac+16) y (nac+16 <= hoy)
+    if(exp < date16 && date16 <= hoy) branch = 'a';
+    // B: exp >= nac+18
+    else if(exp >= date18) branch = 'b';
+    // C: resto
+    else branch = 'c';
+  }
+
+  // mapeo rama -> sufijo de columnas
+  const suffix = (branch === 'a') ? '' : (branch === 'b') ? 'OPCIONAL' : 'OPCIONAL2';
+
+  closeModalPreguntas();
+  openModalDetalle(rec, suffix);
+});
 
 
   function closeModalDetalle(){
@@ -647,7 +850,7 @@ function containsTokenTolerant(text, token) {
     countResults.textContent = '1';
     const único = matches[0].rec;
     // Abrimos modal
-    openModalDetalle(único);
+    openRecord(único);
     // Limpiamos la lista (ya que no vamos a mostrar resultados)
     resultsEl.innerHTML = '';
     return; // Muy importante para que NO siga creando la lista
@@ -698,13 +901,13 @@ matches.forEach(m => {
         const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
         all.forEach(inp => inp.checked = false);
         chk.checked = true;
-        openModalDetalle(rec);
+        openRecord(rec);
     });
 
     chk.addEventListener('change', e => {
         const all = Array.from(document.querySelectorAll('input[name="selectRec"]'));
         all.forEach(inp => { if (inp !== e.target) inp.checked = false; });
-        if (e.target.checked) openModalDetalle(rec);
+        if (e.target.checked) openRecord(rec);
     });
 
     resultsEl.appendChild(wrapper);
