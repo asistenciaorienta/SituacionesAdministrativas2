@@ -220,8 +220,8 @@ input.enabled.flash {
   <div id="modalPreguntas" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document">
       <div class="modal-header-sae">
-        <div>Preguntas / Condicionantes</div>
         <h3 id="modalPreguntasTitulo" style="margin:6px 0 0"></h3>
+        <div>Indica la información que se solicita</div>
       </div>
   
       <div class="modal-body-sae" id="modalPreguntasContent"></div>
@@ -450,7 +450,7 @@ function openModalPreguntas(rec, tipo){
   // pinta pregunta 1
   const q1 = document.createElement('div');
   q1.className = 'field';
-  q1.innerHTML = `<strong>Pregunta 1:</strong> ${renderBoldMarkdown(p1)}`;
+  q1.innerHTML = `Pregunta:<strong> ${renderBoldMarkdown(p1)}</strong>`;
   modalPreguntasContent.appendChild(q1);
 
   // pinta pregunta 2 si existe
