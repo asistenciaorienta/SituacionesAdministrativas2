@@ -221,6 +221,7 @@ input.enabled.flash {
     <div class="modal" role="document">
       <div class="modal-header-sae">
         <h3 id="modalPreguntasTitulo" style="margin:6px 0 0"></h3>
+        <hr>
         <div>Indica la información que se solicita</div>
       </div>
   
@@ -450,14 +451,14 @@ function openModalPreguntas(rec, tipo){
   // pinta pregunta 1
   const q1 = document.createElement('div');
   q1.className = 'field';
-  q1.innerHTML = `Pregunta:<strong> ${renderBoldMarkdown(p1)}</strong>`;
+  q1.innerHTML = `<strong> ${renderBoldMarkdown(p1)}</strong>`; //  q1.innerHTML = `Pregunta:<strong> ${renderBoldMarkdown(p1)}</strong>`;
   modalPreguntasContent.appendChild(q1);
 
   // pinta pregunta 2 si existe
   if(p2){
     const q2 = document.createElement('div');
     q2.className = 'field';
-    q2.innerHTML = `<strong>Pregunta 2:</strong> ${renderBoldMarkdown(p2)}`;
+    q2.innerHTML =  `<strong> ${renderBoldMarkdown(p2)}</strong>`; //    q2.innerHTML = `<strong>Pregunta 2:</strong> ${renderBoldMarkdown(p2)}`;
     modalPreguntasContent.appendChild(q2);
   }
 
