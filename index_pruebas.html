@@ -249,6 +249,29 @@ input.enabled.flash {
     </div>
   </footer>
 <script>
+
+// === LOG de búsquedas a Google Sheets (Apps Script Web App) ===
+const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzS5A3_lD5AypqmZAnrtqU_ytrggl36oaEFZY_lhNDa5enVAallzdKtAzrUh6LHiVDO/exec';
+
+function logBusquedaToSheets(busqueda){
+  const payload = {
+    busqueda: busqueda,
+    fecha_hora: new Date().toISOString()
+  };
+
+  // Importante: en Apps Script a veces hay CORS; con no-cors enviamos sin leer respuesta
+  fetch(REPORT_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(() => {
+    // No bloqueamos la app si falla el log (sin red, endpoint caído, etc.)
+  });
+}
+
+  
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Elementos ---
@@ -686,6 +709,7 @@ function doSearch() {
     countResults.textContent = '0';
     return;
   }
+  logBusquedaToSheets(rawQuery);
 
   // --- Normalización ---
   function normalize(s) {
