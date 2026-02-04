@@ -515,15 +515,15 @@ function openModalPreguntas(rec, tipo){
     box.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px">
         <label><strong>Fecha:</strong> <input id="pregFecha1" type="date"></label>
-        <div class="small">Se calculará automáticamente si corresponde A/B/C (30 y 180 días).</div>
+        <div class="small">Se calculará automáticamente si corresponde A/B/C.</div>
       </div>
     `;
   }
   else if(tipo === 'dosfechas'){
     box.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px">
-        <label><strong>Fecha expedición (TIE):</strong> <input id="pregFechaExp" type="date"></label>
-        <label><strong>Fecha nacimiento:</strong> <input id="pregFechaNac" type="date"></label>
+        <label><strong>Fecha: </strong> <input id="pregFecha1" type="date"></label>
+        <label><strong>Fecha: </strong> <input id="pregFecha2" type="date"></label>
         <div class="small">Se calculará automáticamente la rama A/B/C.</div>
       </div>
     `;
