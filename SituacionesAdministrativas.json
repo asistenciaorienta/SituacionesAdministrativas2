@@ -1721,7 +1721,7 @@
     "Opciones_Pregunta": "dosfechas",
     "Opción a": "hoy >= fecha2 + 16 anos y fecha1 < fecha2 + 18 anos",
     "Opción b": "hoy >= fecha2 + 16 anos y fecha1 >= fecha2 + 18 anos",
-    "Opción c": "hoy < fecha2 + 16 anos"
+    "Opción c": "hoy < fecha2 + 16 anos",
     "Mostrar": "AUTORIZACION (Resolución o TIE). RESIDENCIA TEMPORAL / REAGRUPAC FAMILIAR/  AUTORIZA A TRABAJAR. ",
     "Tipo de documento": "TIE",
     "¿Que pide SILA?": "* Fecha de caducidad (lo informa el documento)\n\nFecha solicitud renovación automática",
