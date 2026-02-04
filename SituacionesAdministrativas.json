@@ -1719,7 +1719,7 @@
     "Pregunta1": "Indique la Fecha de **Expedición** de la TIE.",
     "Pregunta2": "Indique la **Fecha de nacimiento** de la persona usuaria.",
     "Opciones_Pregunta": "dosfechas",
-    "Opción a": "hoy >= fecha2 + 16 anos y fecha1 < fecha2 + 18 anos",
+    "Opción a": "hoy >= fecha2 + 16 anos y fecha1 < fecha2 + 16 anos",
     "Opción b": "hoy >= fecha2 + 16 anos y fecha1 >= fecha2 + 18 anos",
     "Opción c": "hoy < fecha2 + 16 anos",
     "Mostrar": "AUTORIZACION (Resolución o TIE). RESIDENCIA TEMPORAL / REAGRUPAC FAMILIAR/  AUTORIZA A TRABAJAR. ",
