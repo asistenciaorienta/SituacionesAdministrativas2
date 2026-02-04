@@ -629,6 +629,75 @@ function openModalPreguntas(rec, tipo){
   modalPreguntas.style.display = 'flex';
   modalPreguntas.setAttribute('aria-hidden','false');
 }
+// continuar: decide rama y abre detalle con sufijo
+btnContinuarPreguntas.addEventListener('click', () => {
+  const rec = _pregState.rec;
+  const tipo = _pregState.tipo;
+  if(!rec) return;
+
+  let branch = null; // 'a' | 'b' | 'c'
+
+  if(tipo === 'abc'){
+    const checked = document.querySelector('input[name="branchABC"]:checked');
+    if(!checked){
+      alert('Selecciona una opción (A/B/C).');
+      return;
+    }
+    branch = checked.value;
+  }
+  else if(tipo === 'fecha'){
+    const v = document.getElementById('pregFecha1')?.value || '';
+    const fecha = parseDateInputToDate(v);
+    if(!fecha){
+      alert('Introduce una fecha válida.');
+      return;
+    }
+
+    const hoy = new Date();
+    const plus30  = addDays(fecha, 30);
+    const plus180 = addDays(fecha, 180);
+
+    if(hoy > plus180) branch = 'a';
+    else if(hoy >= plus30 && hoy <= plus180) branch = 'b';
+    else branch = 'c';
+  }
+  else if(tipo === 'dosfechas'){
+    const v1 = document.getElementById('pregFecha1')?.value || '';
+    const v2 = document.getElementById('pregFecha2')?.value || '';
+
+    const d1 = parseDateInputToDate(v1);
+    const d2 = parseDateInputToDate(v2);
+
+    if(!d1 || !d2){
+      alert('Introduce ambas fechas.');
+      return;
+    }
+
+    const ruleA = (getField(rec, ['Opción a','Opcion a']) || '').trim();
+    const ruleB = (getField(rec, ['Opción b','Opcion b']) || '').trim();
+    const ruleC = (getField(rec, ['Opción c','Opcion c']) || '').trim();
+
+    const okA = evalRule(ruleA, d1, d2);
+    const okB = evalRule(ruleB, d1, d2);
+    const okC = ruleC ? evalRule(ruleC, d1, d2) : false;
+
+    if(okA === true) branch = 'a';
+    else if(okB === true) branch = 'b';
+    else if(okC === true) branch = 'c';
+    else {
+      alert('No se ha podido determinar A/B/C con las reglas de Opción a/b/c. Revisa el formato de las reglas.');
+      return;
+    }
+  } else {
+    alert('Tipo de pregunta no soportado: ' + tipo);
+    return;
+  }
+
+  const suffix = (branch === 'a') ? '' : (branch === 'b') ? 'OPCIONAL' : 'OPCIONAL2';
+
+  closeModalPreguntas();
+  openModalDetalle(rec, suffix);
+});
 
 
 
