@@ -1280,7 +1280,7 @@
     "Fecha de la última actualización": "28/11/2025"
   },
   {
-    "ANVERSO": "Autorización de Residencia Temporal Reagrupación familiar con restricciones.  ",
+    "ANVERSO": "Autorización de Residencia Temporal ión familiar con restricciones.  ",
     "REVERSO": "",
     "Condicionantes": "",
     "Código de inscripción en SILA": "R3",
@@ -1306,7 +1306,7 @@
     "Opción a": "",
     "Opción b": "",
     "Opción c": "",
-    "Mostrar": "AUTORIZACION (Resolución o TIE) de Residencia Temporal Reagrupación familiar con restricciones.",
+    "Mostrar": "AUTORIZACION (Resolución o TIE) de Residencia Temporal ión familiar con restricciones.",
     "Tipo de documento": "",
     "¿Que pide SILA?": "",
     "Fecha de la última actualización": "28/11/2025"
@@ -1664,7 +1664,7 @@
     "Fecha de la última actualización": ""
   },
   {
-    "ANVERSO": "RESIDENCIA TEMPORAL REAGRUPAC FAMILIAR",
+    "ANVERSO": "RESIDENCIA TEMPORAL  FAMILIAR",
     "REVERSO": "",
     "Condicionantes": "",
     "Código de inscripción en SILA": "R7",
@@ -1690,13 +1690,13 @@
     "Opción a": "",
     "Opción b": "",
     "Opción c": "",
-    "Mostrar": "AUTORIZACION (Resolución o TIE) . RESIDENCIA TEMPORAL REAGRUPAC FAMILIAR. ",
+    "Mostrar": "AUTORIZACION (Resolución o TIE) . RESIDENCIA TEMPORAL  FAMILIAR. ",
     "Tipo de documento": "TIE",
     "¿Que pide SILA?": "* Fecha de caducidad (lo informa el documento)\n\nFecha solicitud renovación automática",
     "Fecha de la última actualización": "28/11/2025"
   },
   {
-    "ANVERSO": "RESIDENCIA TEMPORAL REAGRUPAC FAMILIAR AUTORIZA A TRABAJAR",
+    "ANVERSO": "RESIDENCIA TEMPORAL  FAMILIAR AUTORIZA A TRABAJAR",
     "REVERSO": "",
     "Condicionantes": "Se ha de incorporar fecha expedicion tarjeta y fecha nacimiento. Si el reagrupado alcanza la edad laboral esta autorizado a trabajar aunque la tarjeta ponga \"no autoriza a trabajar\".\n\n<16 años, no procede Inscripción al no alcanzar mayoría de edad laboral.\n>16 años, R7\n\nSi se emite después de los 18 (solo se emite en circustancias muy concretas), va a un R3, No autoriza a trabajar",
     "Código de inscripción en SILA": "R7",
@@ -1721,7 +1721,7 @@
     "Opciones_Pregunta": "dosfechas",
     "Opción a": "fecha1 < fecha2 + 16 anos y fecha2 + 16 anos >= hoy",
     "Opción b": "fecha1 >= fecha2 + 18 anos",
-    "Opción c": "hoy > fecha2 + 16 anos",
+    "Opción c": "hoy < fecha2 + 16 anos",
     "Mostrar": "AUTORIZACION (Resolución o TIE). RESIDENCIA TEMPORAL / REAGRUPAC FAMILIAR/  AUTORIZA A TRABAJAR. ",
     "Tipo de documento": "TIE",
     "¿Que pide SILA?": "* Fecha de caducidad (lo informa el documento)\n\nFecha solicitud renovación automática",
