@@ -251,12 +251,14 @@ input.enabled.flash {
 <script>
 
 // === LOG de búsquedas a Google Sheets (Apps Script Web App) ===
-const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxVja4QJFzSFYylSjWsYoxjA2xY21JnP9Haz6cCPTIYfRFGJi37rLB8SuK2Ch_4V85Q/exec';
+const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyeY-1yE4zo6Yq55PLcsOsKMDgdQ9pqX115liHiTjzkjk6nGDKwDlIufzkvxuLwbIdT/exec';
 
-function logBusquedaToSheets(busqueda, numResultados){
+function logBusquedaToSheets(busqueda, numResultados, cobraPrestacion, inscritoAnteriormente){
   const payload = {
     busqueda: busqueda,
     num_resultados: Number.isFinite(numResultados) ? numResultados : null,
+    cobra_prestacion: cobraPrestacion,            // 'si' | 'no'
+    inscrito_anteriormente: inscritoAnteriormente, // 'si' | 'no'
     fecha_hora: new Date().toISOString()
   };
 
@@ -269,7 +271,18 @@ function logBusquedaToSheets(busqueda, numResultados){
   }).catch(() => {});
 }
 
+function getContextoChecksSiNo(){
+  // Devuelve { cobra: 'si'|'no', inscrito: 'si'|'no' }
+  // Priorizamos chkNada como estado “limpio”
+  if (chkNada.checked){
+    return { cobra: 'no', inscrito: 'no' };
+  }
 
+  const cobra = chkPrestacion.checked ? 'si' : 'no';
+  const inscrito = chkInscrito.checked ? 'si' : 'no';
+
+  return { cobra, inscrito };
+}
   
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -1010,11 +1023,12 @@ function containsTokenTolerant(text, token) {
       .filter(Boolean);
   }
 
+  const ctx = getContextoChecksSiNo();
   // --- Mostrar resultados ---
   if (matches.length === 0) {
     resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
     countResults.textContent = '0';
-    logBusquedaToSheets(rawQuery, 0);
+    logBusquedaToSheets(rawQuery, 0, ctx.cobra, ctx.inscrito);
     return;
   }
   // --- Si hay un único resultado, abrir directamente el modal ---
@@ -1025,12 +1039,12 @@ function containsTokenTolerant(text, token) {
     openRecord(único);
     // Limpiamos la lista (ya que no vamos a mostrar resultados)
     resultsEl.innerHTML = '';
-    logBusquedaToSheets(rawQuery, 1);
+    logBusquedaToSheets(rawQuery, 0, ctx.cobra, ctx.inscrito);
     return; // Muy importante para que NO siga creando la lista
   }
 
   countResults.textContent = String(matches.length);
-  logBusquedaToSheets(rawQuery, matches.length);
+  logBusquedaToSheets(rawQuery, matches.length, ctx.cobra, ctx.inscrito);
   
 matches.forEach(m => {
     const rec = m.rec;
