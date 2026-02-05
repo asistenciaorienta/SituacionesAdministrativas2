@@ -972,6 +972,7 @@ function containsTokenTolerant(text, token) {
     openRecord(único);
     // Limpiamos la lista (ya que no vamos a mostrar resultados)
     resultsEl.innerHTML = '';
+    logBusquedaToSheets(rawQuery, 1);
     return; // Muy importante para que NO siga creando la lista
   }
 
