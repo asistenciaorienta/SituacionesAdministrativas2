@@ -239,7 +239,7 @@ input.enabled.flash {
 </div>
   <footer>
     <div class="footer-logo">
-      <div class="logo-text"><b>Versión pruebas 04-02-2026 — Dirección Provincial de Granada</b> </div>
+      <div class="logo-text"><b>Versión 6.25 — Dirección Provincial de Granada</b> </div>
     </div>
     <div class="footer-datos">
       <b>Apoyo durante la fase de testeo, para la resolución de dudas y la recogida de incidencias:</b><br>
@@ -251,25 +251,24 @@ input.enabled.flash {
 <script>
 
 // === LOG de búsquedas a Google Sheets (Apps Script Web App) ===
-const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxYthZT9DWLy-ME1qn-7Cp4ZQpQuvAoUt7LYmc0S5UjYLJBfYBoX8qE8rBLzQqGYqdc/exec';
+const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxVja4QJFzSFYylSjWsYoxjA2xY21JnP9Haz6cCPTIYfRFGJi37rLB8SuK2Ch_4V85Q/exec';
 
-function logBusquedaToSheets(busqueda){
+function logBusquedaToSheets(busqueda, numResultados){
   const payload = {
     busqueda: busqueda,
+    num_resultados: Number.isFinite(numResultados) ? numResultados : null,
     fecha_hora: new Date().toISOString()
   };
 
-  // Importante: en Apps Script a veces hay CORS; con no-cors enviamos sin leer respuesta
   fetch(REPORT_ENDPOINT, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
     keepalive: true
-  }).catch(() => {
-    // No bloqueamos la app si falla el log (sin red, endpoint caído, etc.)
-  });
+  }).catch(() => {});
 }
+
 
   
 document.addEventListener('DOMContentLoaded', () => {
@@ -553,29 +552,33 @@ function openModalPreguntas(rec, tipo){
   const p1 = (getField(rec, ['Pregunta1']) || '').trim();
   const p2 = (getField(rec, ['Pregunta2']) || '').trim();
 
-  // pinta pregunta 1
-  const q1 = document.createElement('div');
-  q1.className = 'field';
-  q1.innerHTML = `<strong> ${renderBoldMarkdown(p1)}</strong>`; //  q1.innerHTML = `Pregunta:<strong> ${renderBoldMarkdown(p1)}</strong>`;
-  modalPreguntasContent.appendChild(q1);
-
-  // pinta pregunta 2 si existe
-  if(p2){
-    const q2 = document.createElement('div');
-    q2.className = 'field';
-    q2.innerHTML =  `<strong> ${renderBoldMarkdown(p2)}</strong>`; //    q2.innerHTML = `<strong>Pregunta 2:</strong> ${renderBoldMarkdown(p2)}`;
-    modalPreguntasContent.appendChild(q2);
+  // helpers de render
+  function addQuestion(text){
+    if(!text) return;
+    const q = document.createElement('div');
+    q.className = 'field';
+    q.innerHTML = `<strong>${renderBoldMarkdown(text)}</strong>`;
+    modalPreguntasContent.appendChild(q);
   }
 
-  // contenedor inputs / opciones
-  const box = document.createElement('div');
-  box.className = 'field';
+  function addDateInput(id, labelText){
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label><strong>${labelText}</strong> <input id="${id}" type="date"></label>
+      </div>
+    `;
+    modalPreguntasContent.appendChild(wrap);
+  }
 
-  if(tipo === 'abc'){
+  function addABCRadios(){
     const oa = (getField(rec, ['Opción a','Opcion a']) || 'Opción A').trim();
     const ob = (getField(rec, ['Opción b','Opcion b']) || 'Opción B').trim();
     const oc = (getField(rec, ['Opción c','Opcion c']) || '').trim();
 
+    const box = document.createElement('div');
+    box.className = 'field';
     box.innerHTML = `
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <label style="display:flex;gap:8px;align-items:center">
@@ -591,33 +594,40 @@ function openModalPreguntas(rec, tipo){
       </div>
       <div class="small" style="margin-top:8px">Selecciona una opción para continuar.</div>
     `;
-  }
-  else if(tipo === 'fecha'){
-    // 1 fecha, calculamos A/B/C con 30 y 180 días (según tu JSON)
-    box.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <label><strong>Fecha:</strong> <input id="pregFecha1" type="date"></label>
-      </div>
-    `;
-  }
-  else if(tipo === 'dosfechas'){
-    box.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <label><strong>Fecha: </strong> <input id="pregFecha1" type="date"></label>
-        <label><strong>Fecha: </strong> <input id="pregFecha2" type="date"></label>
-      </div>
-    `;
-  }
-  else {
-    box.innerHTML = `<div class="small">Tipo de pregunta no soportado: <strong>${tipo}</strong></div>`;
+    modalPreguntasContent.appendChild(box);
   }
 
-  modalPreguntasContent.appendChild(box);
+  // --- Construcción del modal según tipo ---
+  if(tipo === 'fecha'){
+    // Si hay pregunta, la ponemos y luego el input
+    addQuestion(p1 || 'Introduce la fecha:');
+    addDateInput('pregFecha1', 'Fecha:');
+  }
+  else if(tipo === 'dosfechas'){
+    // Pregunta 1 -> Fecha1
+    addQuestion(p1 || 'Introduce la fecha 1:');
+    addDateInput('pregFecha1', 'Fecha 1:');
+
+    // Pregunta 2 -> Fecha2 (si no existe, ponemos genérico)
+    addQuestion(p2 || 'Introduce la fecha 2:');
+    addDateInput('pregFecha2', 'Fecha 2:');
+  }
+  else if(tipo === 'abc'){
+    // Aquí mantenemos tu comportamiento: preguntas arriba + radios
+    if(p1) addQuestion(p1);
+    if(p2) addQuestion(p2);
+    addABCRadios();
+  }
+  else {
+    const box = document.createElement('div');
+    box.className = 'field';
+    box.innerHTML = `<div class="small">Tipo de pregunta no soportado: <strong>${tipo}</strong></div>`;
+    modalPreguntasContent.appendChild(box);
+  }
 
   modalPreguntas.style.display = 'flex';
   modalPreguntas.setAttribute('aria-hidden','false');
 }
-
 // continuar: decide rama y abre detalle con sufijo
 btnContinuarPreguntas.addEventListener('click', () => {
   const rec = _pregState.rec;
@@ -634,66 +644,60 @@ btnContinuarPreguntas.addEventListener('click', () => {
     }
     branch = checked.value;
   }
-
-  if(tipo === 'fecha'){
+  else if(tipo === 'fecha'){
     const v = document.getElementById('pregFecha1')?.value || '';
     const fecha = parseDateInputToDate(v);
     if(!fecha){
       alert('Introduce una fecha válida.');
       return;
     }
+
     const hoy = new Date();
     const plus30  = addDays(fecha, 30);
     const plus180 = addDays(fecha, 180);
 
-    // A: ahora() > fecha + 180
     if(hoy > plus180) branch = 'a';
-    // B: ahora() entre +30 y +180 (incluidos)
     else if(hoy >= plus30 && hoy <= plus180) branch = 'b';
-    // C: ahora() < +30
     else branch = 'c';
   }
+  else if(tipo === 'dosfechas'){
+    const v1 = document.getElementById('pregFecha1')?.value || '';
+    const v2 = document.getElementById('pregFecha2')?.value || '';
 
-if(tipo === 'dosfechas'){
-  const v1 = document.getElementById('pregFecha1')?.value || '';
-  const v2 = document.getElementById('pregFecha2')?.value || '';
+    const d1 = parseDateInputToDate(v1);
+    const d2 = parseDateInputToDate(v2);
 
-  const d1 = parseDateInputToDate(v1);
-  const d2 = parseDateInputToDate(v2);
+    if(!d1 || !d2){
+      alert('Introduce ambas fechas.');
+      return;
+    }
 
-  if(!d1 || !d2){
-    alert('Introduce ambas fechas.');
+    const ruleA = (getField(rec, ['Opción a','Opcion a']) || '').trim();
+    const ruleB = (getField(rec, ['Opción b','Opcion b']) || '').trim();
+    const ruleC = (getField(rec, ['Opción c','Opcion c']) || '').trim();
+
+    const okA = evalRule(ruleA, d1, d2);
+    const okB = evalRule(ruleB, d1, d2);
+    const okC = ruleC ? evalRule(ruleC, d1, d2) : false;
+
+    if(okA === true) branch = 'a';
+    else if(okB === true) branch = 'b';
+    else if(okC === true) branch = 'c';
+    else {
+      alert('No se ha podido determinar A/B/C con las reglas de Opción a/b/c. Revisa el formato de las reglas.');
+      return;
+    }
+  } else {
+    alert('Tipo de pregunta no soportado: ' + tipo);
     return;
   }
 
-  // Reglas vienen del JSON en Opción a/b/c
-  const ruleA = (getField(rec, ['Opción a','Opcion a']) || '').trim();
-  const ruleB = (getField(rec, ['Opción b','Opcion b']) || '').trim();
-  const ruleC = (getField(rec, ['Opción c','Opcion c']) || '').trim();
-
-  // Evaluamos en orden A -> B -> C
-  const okA = evalRule(ruleA, d1, d2);
-  const okB = evalRule(ruleB, d1, d2);
-  const okC = ruleC ? evalRule(ruleC, d1, d2) : false;
-
-  if(okA === true) branch = 'a';
-  else if(okB === true) branch = 'b';
-  else if(okC === true) branch = 'c';
-  else {
-    // No ha encajado ninguna regla o no se han podido interpretar
-    alert('No se ha podido determinar A/B/C con las reglas de Opción a/b/c. Revisa el formato de las reglas.');
-    return;
-  }
-}
-
-
-
-  // mapeo rama -> sufijo de columnas
   const suffix = (branch === 'a') ? '' : (branch === 'b') ? 'OPCIONAL' : 'OPCIONAL2';
 
   closeModalPreguntas();
   openModalDetalle(rec, suffix);
 });
+
 
 
   function closeModalDetalle(){
@@ -799,7 +803,6 @@ function doSearch() {
     countResults.textContent = '0';
     return;
   }
-  logBusquedaToSheets(rawQuery);
 
   // --- Normalización ---
   function normalize(s) {
@@ -958,6 +961,7 @@ function containsTokenTolerant(text, token) {
   if (matches.length === 0) {
     resultsEl.innerHTML = '<div class="small">No se han encontrado registros con el filtro aplicado.</div>';
     countResults.textContent = '0';
+    logBusquedaToSheets(rawQuery, 0);
     return;
   }
   // --- Si hay un único resultado, abrir directamente el modal ---
@@ -968,10 +972,13 @@ function containsTokenTolerant(text, token) {
     openRecord(único);
     // Limpiamos la lista (ya que no vamos a mostrar resultados)
     resultsEl.innerHTML = '';
+    logBusquedaToSheets(rawQuery, 1);
     return; // Muy importante para que NO siga creando la lista
   }
 
   countResults.textContent = String(matches.length);
+  logBusquedaToSheets(rawQuery, matches.length);
+  
 matches.forEach(m => {
     const rec = m.rec;
 
