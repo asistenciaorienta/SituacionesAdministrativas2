@@ -377,7 +377,7 @@ function openModalDetalle(rec, suffix = ''){
 
   // título del modal
   const tituloMostrar = getField(rec, ['Mostrar', 'mostrar']) || '';
-  modalDetalleTitulo.textContent = ` ${tituloMostrar}`;
+  modalDetalleTitulo.innerHTML = renderBoldMarkdown(tituloMostrar);
 
   function valueOf(names){
     const v = getField(rec, names);
@@ -588,7 +588,7 @@ function openModalPreguntas(rec, tipo){
   _pregState = { rec, tipo, selectedBranch: null };
 
   modalPreguntasContent.innerHTML = '';
-  modalPreguntasTitulo.textContent = (getField(rec, ['Mostrar','mostrar']) || '').trim();
+  modalPreguntasTitulo.innerHTML = renderBoldMarkdown((getField(rec, ['Mostrar','mostrar']) || '').trim());
 
   const p1 = (getField(rec, ['Pregunta1']) || '').trim();
   const p2 = (getField(rec, ['Pregunta2']) || '').trim();
@@ -1062,7 +1062,8 @@ matches.forEach(m => {
 
     const title = document.createElement('h4');
     title.style.margin = '0';             // elimina márgenes que generan salto de línea
-    title.innerHTML = getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar';
+    title.innerHTML = renderBoldMarkdown(getField(rec, ['Mostrar', 'mostrar']) || 'Registro sin campo Mostrar');
+
 
     content.appendChild(title);
 
@@ -1090,8 +1091,6 @@ matches.forEach(m => {
 
 }
 
-
-
   btnSearch.addEventListener('click', doSearch);
   
   const msgDisabled = document.getElementById('msgDisabled');
@@ -1112,11 +1111,7 @@ matches.forEach(m => {
       doSearch();
     }
   });
-
-
 });
 </script>
-
-
 </body>
 </html>
