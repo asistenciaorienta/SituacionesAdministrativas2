@@ -321,6 +321,47 @@ document.addEventListener('DOMContentLoaded', () => {
     return undefined;
   }
 
+function normalizeYesNo(v){
+  // devuelve: 'si' | 'no' | ''  (vacío o no interpretable)
+  if (v === undefined || v === null) return '';
+  const s = String(v).trim().toLowerCase()
+    .normalize('NFD').replace(/\p{Diacritic}/gu,''); // quita tildes
+
+  if (!s) return '';
+  if (s === 'si' || s === 'sí' || s === 's') return 'si';
+  if (s === 'no' || s === 'n') return 'no';
+  return '';
+}
+
+function recordPassesSilaFilters(rec){
+  const cobra = normalizeYesNo(getField(rec, ['¿Cobra prestación?', 'Cobra prestación', '¿Cobra prestacion?']));
+  const inscr = normalizeYesNo(getField(rec, ['¿Inscrito anteriormente?', '¿Inscrito anteriormente', 'Inscrito anteriormente?']));
+
+  // 1) Si marca "Ninguna de las anteriores":
+  //    cobra vacío o 'no' AND inscr vacío o 'no'
+  if (chkNada.checked){
+    const okCobra = (cobra === '' || cobra === 'no');
+    const okInscr = (inscr === '' || inscr === 'no');
+    return okCobra && okInscr;
+  }
+
+  // 2) Si marca "Cobra prestación o subsidio":
+  //    SOLO registros con cobra='si' (ignora inscrito)
+  if (chkPrestacion.checked){
+    return cobra === 'si';
+  }
+
+  // 3) Si NO marca prestación:
+  //    depende de chkInscrito
+  if (chkInscrito.checked){
+    return inscr === 'si';
+  } else {
+    return (inscr === 'no' || inscr === '');
+  }
+}
+
+
+  
 // --- MODAL DETALLE ----------------------------------------------------------------------
 // ✅ convierte **texto** a <strong>texto</strong>
 function renderBoldMarkdown(text){
@@ -814,6 +855,7 @@ function doSearch() {
       .toLowerCase()
       .trim();
   }
+  
 
   // --- Tokenización ---
   const STOPWORDS = new Set(['a','la','el','los','las','de','del','y','o','en','por','para','con','sin','que','un','una','al','se','su','sus']);
@@ -912,6 +954,8 @@ function containsTokenTolerant(text, token) {
   }
   const queryNorm = normalize(rawQuery);
 
+
+  
   // --- Función central de coincidencia ---
   function recordMatches(rec, tokens, queryNorm, tolerant=false) {
     const anversoRaw = getField(rec, ['ANVERSO','Anverso','anverso']) || '';
@@ -949,12 +993,21 @@ function containsTokenTolerant(text, token) {
     return true;
   }
 
+  // --- Filtro SILA (según checks) ---
+  const dbFiltrada = db
+    .map((rec, idx) => ({ rec, idx }))
+    .filter(x => recordPassesSilaFilters(x.rec));
+  
   // --- Fase 1: búsqueda estricta ---
-  let matches = db.map((rec, idx) => recordMatches(rec, tokens, queryNorm, false) ? {rec, idx} : null).filter(Boolean);
-
+  let matches = dbFiltrada
+    .map(x => recordMatches(x.rec, tokens, queryNorm, false) ? x : null)
+    .filter(Boolean);
+  
   // --- Fase 2: búsqueda tolerante ---
   if (matches.length === 0) {
-    matches = db.map((rec, idx) => recordMatches(rec, tokens, queryNorm, true) ? {rec, idx} : null).filter(Boolean);
+    matches = dbFiltrada
+      .map(x => recordMatches(x.rec, tokens, queryNorm, true) ? x : null)
+      .filter(Boolean);
   }
 
   // --- Mostrar resultados ---
