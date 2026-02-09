@@ -368,7 +368,7 @@ function recordPassesSilaFilters(rec){
   
   if (chkInscrito.checked){
     const okCobra = (cobra === '' || cobra === 'no');
-    const okInscr = (inscr === 'si');
+    const okInscr = (inscr === 'si'|| inscr === '');
     return okCobra && okInscr;
   } else {
     const okCobra = (cobra === '' || cobra === 'no');
