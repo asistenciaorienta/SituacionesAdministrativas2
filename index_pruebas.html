@@ -363,14 +363,15 @@ function recordPassesSilaFilters(rec){
   if (chkPrestacion.checked){
     return cobra === 'si';
   }
-
+  else
   // 3) Si NO marca prestación:
   //    depende de chkInscrito
   if (chkInscrito.checked){
     return (inscr === 'si' || inscr === '' || cobra === 'no');
   } else {
     return (inscr === 'no' || inscr === '' || cobra === 'no');
-  }
+  }    
+    }
 }
 
 
