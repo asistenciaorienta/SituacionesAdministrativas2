@@ -361,13 +361,19 @@ function recordPassesSilaFilters(rec){
   // 2) Si marca "Cobra prestación o subsidio":
   //    SOLO registros con cobra='si' (ignora inscrito)
   if (chkPrestacion.checked){
-    return cobra === 'si';
+    const okCobra = (cobra === 'si');
+    const okInscr = (inscr === '' || inscr === 'no');
+    return okCobra && okInscr;
   }
   
   if (chkInscrito.checked){
-    return (inscr === 'si');
+    const okCobra = (cobra === '' || cobra === 'no');
+    const okInscr = (inscr === 'si');
+    return okCobra && okInscr;
   } else {
-    return (inscr === 'no' || inscr === '');
+    const okCobra = (cobra === '' || cobra === 'no');
+    const okInscr = (inscr === '' || inscr === 'no');
+    return okCobra && okInscr;
   }   
 }
 
