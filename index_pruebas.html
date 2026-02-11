@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ASIM-SAE — Aplicación de soporte para la inscripción de migrantes</title>
+<title>ASIM-SAE — Aplicación de soporte para la inscripción de migrantes en SILA</title>
 <style>
 :root{
   --sae-green:#007A33;
@@ -162,7 +162,7 @@ input.enabled.flash {
     <img class="logo-izquierda" src="images/SAE_Junta_de_Andalucia_Documentacion.png" alt="Logo Junta de Andalucía">
     <div class="titulo-header">
       <h1>ASIM-SAE</h1>
-      <h2>Aplicación de soporte para la inscripción de migrantes</h2>
+      <h2>Aplicación de soporte para la inscripción de migrantes en SILA</h2>
     </div>
     <img class="logo-derecha" src="images/Logo_SILA_Migrantes2_corto.png" alt="Logo proyecto">
   </header>
@@ -271,25 +271,27 @@ function logBusquedaToSheets(busqueda, numResultados, cobraPrestacion, inscritoA
   }).catch(() => {});
 }
 
-function getContextoChecksSiNo(){
-  // Devuelve { cobra: 'si'|'no', inscrito: 'si'|'no' }
-  // Priorizamos chkNada como estado “limpio”
-  if (chkNada.checked){
-    return { cobra: 'no', inscrito: 'no' };
-  }
-
-  const cobra = chkPrestacion.checked ? 'si' : 'no';
-  const inscrito = chkInscrito.checked ? 'si' : 'no';
-
-  return { cobra, inscrito };
-}
-  
+ 
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Elementos ---
   const chkInscrito = document.getElementById('chkInscrito');
   const chkPrestacion = document.getElementById('chkPrestacion');
   const chkNada = document.getElementById('chkNada');
+  
+  function getContextoChecksSiNo(){    //----------------------------------ver si esto funciona aquí, antes estaba antesd el document.addEventListener('DOMContentLoaded', () => {
+    // Devuelve { cobra: 'si'|'no', inscrito: 'si'|'no' }
+    // Priorizamos chkNada como estado “limpio”
+    if (chkNada.checked){
+      return { cobra: 'no', inscrito: 'no' };
+    }
+  
+    const cobra = chkPrestacion.checked ? 'si' : 'no';
+    const inscrito = chkInscrito.checked ? 'si' : 'no';
+  
+    return { cobra, inscrito };
+  }
+  
   const estadoChecks = document.getElementById('inscritoEstado');
 
   const searchInput = document.getElementById('searchInput');
@@ -1063,7 +1065,7 @@ function containsTokenTolerant(text, token) {
     openRecord(único);
     // Limpiamos la lista (ya que no vamos a mostrar resultados)
     resultsEl.innerHTML = '';
-    logBusquedaToSheets(rawQuery, 0, ctx.cobra, ctx.inscrito);
+    logBusquedaToSheets(rawQuery, 1, ctx.cobra, ctx.inscrito);
     return; // Muy importante para que NO siga creando la lista
   }
 
